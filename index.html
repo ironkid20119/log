@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>poly's logmaRNGame</title>
     <style>
+        /* existing styles preserved, with additions */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -115,6 +116,7 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
+            touch-action: manipulation; /* prevent double-tap zoom on mobile */
         }
 
         .roll-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
@@ -181,12 +183,24 @@
             cursor: pointer;
             transition: all 0.3s;
             padding: 10px;
+            position: relative;
         }
 
         .inventory-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
         .inventory-slot.empty { opacity: 0.3; cursor: default; }
         .inventory-slot.empty:hover { transform: none; border-color: rgba(255,255,255,0.1); }
         .slot-value { font-size: 1.3em; font-weight: bold; }
+
+        /* bulk delete checkbox */
+        .delete-checkbox {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            z-index: 5;
+        }
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .stat-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #00d4ff; }
@@ -460,6 +474,9 @@
         .luck-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; font-size: 0.85em !important; padding: 8px 18px !important; margin-top: 8px; }
         .luck-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(34,197,94,0.4); }
         .luck-boost-display { font-size: 0.8em; color: #22c55e; margin-top: 4px; min-height: 1.2em; }
+        .secret-luck-btn { background: linear-gradient(135deg, #bb88ff 0%, #9f67ff 100%); color: white; font-size: 0.85em !important; padding: 8px 18px !important; margin-top: 8px; }
+        .secret-luck-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(187,136,255,0.4); }
+        .secret-luck-boost-display { font-size: 0.8em; color: #bb88ff; margin-top: 4px; min-height: 1.2em; }
         .merge-mode-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 0.85em !important; padding: 8px 16px !important; }
         .merge-mode-btn.active { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 0 15px rgba(239,68,68,0.5); }
         .enchant-slot.selected-for-merge { border-color: #f59e0b !important; box-shadow: 0 0 20px rgba(245,158,11,0.6) !important; }
@@ -475,6 +492,23 @@
         .do-merge-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 8px 20px; font-size: 0.95em; }
         .do-merge-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .inventory-slot.epilepsy-inv { border-color: rgba(255,0,0,0.4) !important; background: rgba(50,0,0,0.2) !important; }
+
+        /* bulk delete controls */
+        .bulk-delete-bar {
+            background: rgba(255,87,108,0.1);
+            border: 1px solid #f5576c;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .bulk-delete-btn { background: #f5576c; color: white; padding: 6px 16px; font-size: 0.9em; }
+        .threshold-input { width: 100px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #f5576c; color: white; border-radius: 4px; }
+        .threshold-input::placeholder { color: #aaa; }
+        .exclude-secrets-label { display: flex; align-items: center; gap: 5px; font-size: 0.85em; color: #bb88ff; }
     </style>
 </head>
 <body>
@@ -498,6 +532,8 @@
         <div style="text-align:center;">
             <button class="luck-btn" id="luckBtn" onclick="clickLuckButton()">please increase my luck for the next roll!</button>
             <div class="luck-boost-display" id="luckBoostDisplay"></div>
+            <button class="secret-luck-btn" id="secretLuckBtn" onclick="clickSecretLuckButton()">increase my secret luck for the next roll please!</button>
+            <div class="secret-luck-boost-display" id="secretLuckBoostDisplay"></div>
         </div>
     </div>
 
@@ -534,10 +570,22 @@
             <button class="sort-btn" onclick="sortInventory('value-asc')">Sort: Lowest First</button>
             <button class="sort-btn" onclick="sortInventory('newest')">Sort: Newest First</button>
             <button class="sort-btn" onclick="sortInventory('oldest')">Sort: Oldest First</button>
+            <button class="sort-btn" onclick="toggleBulkDeleteMode()" id="bulkDeleteModeBtn">🗑️ Bulk Delete: OFF</button>
             <div class="pagination">
                 <button class="page-btn" onclick="changePage(-1)" id="prevBtn">◀</button>
                 <span class="page-info">Page <span id="currentPage">1</span> / 6</span>
                 <button class="page-btn" onclick="changePage(1)" id="nextBtn">▶</button>
+            </div>
+        </div>
+        <!-- bulk delete bar -->
+        <div id="bulkDeleteBar" class="bulk-delete-bar" style="display:none;">
+            <button class="bulk-delete-btn" onclick="deleteSelectedInventory()">Delete Selected</button>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <input type="number" id="thresholdInput" class="threshold-input" placeholder="Threshold" value="0" step="any">
+                <button class="bulk-delete-btn" onclick="deleteUnderThreshold()">Delete ≤ Threshold</button>
+                <label class="exclude-secrets-label">
+                    <input type="checkbox" id="excludeSecretsCheckbox"> Exclude secrets
+                </label>
             </div>
         </div>
         <div class="inventory-grid" id="inventoryGrid"></div>
@@ -565,11 +613,15 @@
             <button class="sort-btn" onclick="sortEnchants('tier-asc')">Sort: Lowest Tier</button>
             <button class="sort-btn" onclick="sortEnchants('type')">Sort: By Type</button>
             <button class="sort-btn" onclick="sortEnchants('newest')">Sort: Newest First</button>
+            <button class="sort-btn" onclick="toggleBulkDeleteEnchantMode()" id="bulkDeleteEnchantModeBtn">🗑️ Bulk Delete Ench: OFF</button>
             <div class="pagination">
                 <button class="page-btn" onclick="changeEnchantPage(-1)" id="prevEnchantBtn">◀</button>
                 <span class="page-info">Page <span id="currentEnchantPage">1</span> / 3</span>
                 <button class="page-btn" onclick="changeEnchantPage(1)" id="nextEnchantBtn">▶</button>
             </div>
+        </div>
+        <div id="bulkDeleteEnchantBar" class="bulk-delete-bar" style="display:none;">
+            <button class="bulk-delete-btn" onclick="deleteSelectedEnchants()">Delete Selected Enchants</button>
         </div>
         <div class="inventory-grid" id="enchantGrid"></div>
     </div>
@@ -796,6 +848,15 @@
                             <div class="enchant-item-rarity">Rarity: 1/12,725,284,173.51 (0.0000000079%)</div>
                         </div>
                     </div>
+                    <!-- new nihilism curse -->
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#000000;color:#ff4444;border:2px solid #444;">N</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">nilihilism</div>
+                            <div class="enchant-item-effect">-1e303 luck, +1000 enchant luck, +10 secret luck, -7.5s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/582,715,271,825 (1.716e-10%)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -876,6 +937,15 @@
                             <div class="enchant-item-name">Bomber</div>
                             <div class="enchant-item-effect">+5000x luck, +99.99s roll time, -100x enchant luck</div>
                             <div class="enchant-item-rarity">Rarity: 1/6,942,069,420 (0.0000000144%) — requires joke enchants ON</div>
+                        </div>
+                    </div>
+                    <!-- new horse enchant -->
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:transparent;border:none;font-size:1.5em;">🐎</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">h o r s e</div>
+                            <div class="enchant-item-effect">+0.05 luck, +0.05 rollspeed, -0.05 enchant luck, +0.025 secret luck. If both merged orbs have it, result is not locked!</div>
+                            <div class="enchant-item-rarity">Rarity: 1/6969.69 (0.0143%) — requires joke enchants ON</div>
                         </div>
                     </div>
                 </div>
@@ -1028,8 +1098,13 @@ let gameState = {
     jokeEnchantsEnabled: false,
     brickCount: 0,
     luckButtonClicks: 0,
+    secretLuckButtonClicks: 0,
     mergeSelection: [],   // array of up to 2 orb ids selected for merge
     mergeModeActive: false,
+    bulkDeleteMode: false,
+    bulkDeleteEnchantMode: false,
+    selectedInventoryIndices: [],
+    selectedEnchantIndices: [],
     stats: {
         totalRolls: 0,
         acceptedRanks: 0,
@@ -1044,7 +1119,7 @@ let gameState = {
 };
 
 // ============================================================
-// ENCHANT DEFINITIONS
+// ENCHANT DEFINITIONS (updated with horse and nihilism)
 // ============================================================
 const ENCHANTS = {
     // --- Luck ---
@@ -1102,6 +1177,11 @@ const ENCHANTS = {
         effects: { luck: -100000000, cloner: 50, speed: -20, lighter: 1.5 },
         display: 'A', color: 'avarice', textColor: '#fff', isAvarice: true
     },
+    nihilism: {
+        name: 'nilihilism', type: 'curse', tier: 7, rarity: 1/582715271825,
+        effects: { luck: -1e303, lighter: 1000, speed: -7.5, secretLuck: 10 },
+        display: 'N', color: '#000000', textColor: '#ff4444'
+    },
 
     // --- All-in-One ---
     synergy: {
@@ -1143,6 +1223,12 @@ const ENCHANTS = {
         effects: { brick: 1, luck: 5, speed: 1, lighter: 1.5, secretLuck: 5 },
         display: '🧱', color: 'transparent', textColor: '#ffffff', noBorder: true,
         jokeOnly: true
+    },
+    horse: {
+        name: 'h o r s e', type: 'joke', tier: 4, rarity: 1/6969.69,
+        effects: { luck: 0.05, speed: 0.05, lighter: -0.05, secretLuck: 0.025 },
+        display: '🐎', color: 'transparent', textColor: '#ffffff', noBorder: true,
+        jokeOnly: true
     }
 };
 
@@ -1167,7 +1253,7 @@ const SECRET_NUMBERS_RAW = [
 const SECRET_NUMBERS = [...SECRET_NUMBERS_RAW].sort((a, b) => a.rarity - b.rarity);
 
 // ============================================================
-// AVARICE SVG
+// AVARICE SVG (unchanged)
 // ============================================================
 function getAvariceSVG(size) {
     const cx = size / 2;
@@ -1209,7 +1295,7 @@ function getAvariceSVG(size) {
 }
 
 // ============================================================
-// ENCHANT STAT HELPERS
+// ENCHANT STAT HELPERS (updated secret luck)
 // ============================================================
 
 // Returns brick count only from the currently equipped orb
@@ -1304,9 +1390,19 @@ function getSpeedConfig() {
 }
 
 function getSecretLuckMultiplier() {
-    // Hidden: bricks in equipped orb only
-    const bricks = getEquippedBrickCount();
-    return 1 + bricks * 5;
+    let mult = 1;
+    if (!gameState.equippedOrb) return mult;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.effects && e.effects.secretLuck != null) {
+            mult += e.effects.secretLuck;
+        }
+    });
+    return Math.max(0.1, mult); // prevent negative
+}
+
+function getSecretLuckButtonBoost() {
+    if (gameState.secretLuckButtonClicks <= 0) return 1;
+    return 1 + Math.pow(Math.log10(gameState.secretLuckButtonClicks), 0.8);
 }
 
 function getRollDuration() {
@@ -1316,7 +1412,7 @@ function getRollDuration() {
 }
 
 // ============================================================
-// LUCK BUTTON
+// LUCK BUTTONS
 // ============================================================
 function getButtonLuckBoost() {
     if (gameState.luckButtonClicks <= 0) return 1;
@@ -1331,8 +1427,15 @@ function clickLuckButton() {
         `Luck boost: ×${boost.toFixed(3)} (click ${gameState.luckButtonClicks})`;
 }
 
+function clickSecretLuckButton() {
+    gameState.secretLuckButtonClicks++;
+    const boost = getSecretLuckButtonBoost();
+    document.getElementById('secretLuckBoostDisplay').textContent =
+        `Secret luck boost: ×${boost.toFixed(3)} (click ${gameState.secretLuckButtonClicks})`;
+}
+
 // ============================================================
-// SLOT GENERATION
+// SLOT GENERATION (fixed: logRNG unaffected by luck, enchant on rawFloor >=1000)
 // ============================================================
 
 function generateRank(luckMult) {
@@ -1344,9 +1447,11 @@ function generateRank(luckMult) {
 
 function checkSecretNumber() {
     const roll = Math.random();
-    const secretLuck = getSecretLuckMultiplier();
+    const baseSecretLuck = getSecretLuckMultiplier();
+    const buttonBoost = getSecretLuckButtonBoost();
+    const totalSecretLuck = baseSecretLuck * buttonBoost;
     for (const s of SECRET_NUMBERS) {
-        if (roll < s.rarity * secretLuck) return s;
+        if (roll < s.rarity * totalSecretLuck) return s;
     }
     return null;
 }
@@ -1393,10 +1498,10 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
         }
     }
 
-    // Normal slot: log_10(floor(random^-1.5) * luck)
-    const logValue = Number(Math.log10(rawFloor * luckMult).toFixed(2));
+    // Normal slot: log10(floor) WITHOUT luck multiplier (as requested)
+    const logValue = Number(Math.log10(rawFloor).toFixed(2));
 
-    const enchant = (logValue >= 3) ? rollEnchant(enchantLuckMult) : null;
+    const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
 
     return {
         value: logValue,
@@ -1407,7 +1512,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
 }
 
 // ============================================================
-// RARITY CLASS
+// RARITY CLASS (unchanged)
 // ============================================================
 function getRarityClass(v) {
     if (v < 0)  return 'rarity-neg';
@@ -1423,7 +1528,7 @@ function getRarityClass(v) {
 }
 
 // ============================================================
-// ENCHANT DISPLAY HELPERS
+// ENCHANT DISPLAY HELPERS (unchanged except horse)
 // ============================================================
 
 function getEnchantDisplay(enchant) {
@@ -1492,7 +1597,7 @@ function orbEnchantsHTML(orb) {
 }
 
 // ============================================================
-// ORB MANAGEMENT
+// ORB MANAGEMENT (unchanged)
 // ============================================================
 
 function createEnchantOrb() {
@@ -1571,7 +1676,7 @@ function unequipOrb() {
 }
 
 // ============================================================
-// ACTIVE EFFECTS BAR
+// ACTIVE EFFECTS BAR (unchanged)
 // ============================================================
 function updateActiveEffectsBar() {
     const bar = document.getElementById('activeEffectsBar');
@@ -1622,7 +1727,7 @@ function updateActiveEffectsBar() {
 }
 
 // ============================================================
-// PERFORM ROLL
+// PERFORM ROLL (reset secret luck button clicks)
 // ============================================================
 function performRoll() {
     if (gameState.isRolling) return;
@@ -1641,9 +1746,11 @@ function performRoll() {
     const bulkRolls = getBulkRolls();
     const rollDuration = getRollDuration();
 
-    // Reset luck button clicks
+    // Reset luck buttons
     gameState.luckButtonClicks = 0;
+    gameState.secretLuckButtonClicks = 0;
     document.getElementById('luckBoostDisplay').textContent = '';
+    document.getElementById('secretLuckBoostDisplay').textContent = '';
 
     // Calculate total track slots and acceptable zone
     const totalSlots = Math.max(20, Math.floor(bulkRolls * 12.5));
@@ -1666,7 +1773,7 @@ function performRoll() {
 
     gameState.stats.totalRolls++;
 
-    // Render squares
+    // Render squares (identical to original)
     slots.forEach((slot, idx) => {
         const isAcceptable = (idx >= acceptStart && idx <= acceptEnd);
         const isCenter = (idx === centerAcceptable);
@@ -1720,7 +1827,7 @@ function performRoll() {
         return;
     }
 
-    // Animate scroll
+    // Animate scroll (identical to original)
     setTimeout(() => {
         const targetSquare = rollTrack.children[centerAcceptable];
         if (!targetSquare) { finishRoll(); return; }
@@ -1765,7 +1872,7 @@ function finishRoll() {
 }
 
 // ============================================================
-// PENDING PANEL
+// PENDING PANEL (unchanged)
 // ============================================================
 function renderPendingPanel() {
     const panel = document.getElementById('pendingPanel');
@@ -1793,7 +1900,7 @@ function renderPendingPanel() {
 }
 
 // ============================================================
-// ACCEPT ROLL
+// ACCEPT ROLL (fixed glitch: now properly adds enchants)
 // ============================================================
 function acceptRoll() {
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
@@ -1858,7 +1965,7 @@ function acceptRoll() {
 }
 
 // ============================================================
-// RENDER INVENTORY
+// RENDER INVENTORY (with bulk delete checkboxes)
 // ============================================================
 function renderInventory() {
     const grid = document.getElementById('inventoryGrid');
@@ -1879,7 +1986,33 @@ function renderInventory() {
                 const rarityClass = getRarityClass(item.value);
                 slot.innerHTML = `<div class="slot-value ${rarityClass}">${item.value}</div>`;
             }
-            slot.onclick = () => openDeleteModal(actualIndex);
+
+            if (gameState.bulkDeleteMode) {
+                // Add checkbox
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'delete-checkbox';
+                cb.checked = gameState.selectedInventoryIndices.includes(actualIndex);
+                cb.addEventListener('click', (e) => e.stopPropagation());
+                cb.addEventListener('change', (e) => {
+                    if (cb.checked) {
+                        if (!gameState.selectedInventoryIndices.includes(actualIndex)) {
+                            gameState.selectedInventoryIndices.push(actualIndex);
+                        }
+                    } else {
+                        gameState.selectedInventoryIndices = gameState.selectedInventoryIndices.filter(idx => idx !== actualIndex);
+                    }
+                });
+                slot.appendChild(cb);
+                slot.onclick = (e) => {
+                    if (e.target !== cb) {
+                        cb.checked = !cb.checked;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                };
+            } else {
+                slot.onclick = () => openDeleteModal(actualIndex);
+            }
         } else {
             slot.classList.add('empty');
             slot.innerHTML = '<div style="opacity:0.3;">Empty</div>';
@@ -1916,7 +2049,7 @@ function sortInventory(method) {
 }
 
 // ============================================================
-// RENDER ENCHANT INVENTORY
+// RENDER ENCHANT INVENTORY (with bulk delete checkboxes)
 // ============================================================
 function renderEnchantInventory() {
     const grid = document.getElementById('enchantGrid');
@@ -1942,23 +2075,48 @@ function renderEnchantInventory() {
             const lockedBadge = isLocked ? '<div class="locked-badge">🔒 MERGED</div>' : '';
             const mergeBadge = isSelectedForMerge ? '<div class="equipped-badge" style="background:#f59e0b;color:#000;">SELECTED</div>' : '';
 
-            slot.innerHTML = `
-                ${equippedBadge}${lockedBadge}${mergeBadge}
-                <div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>
-                ${orbEnchantsHTML(orb)}
-                <button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>
-            `;
+            let enchantsHTML = orbEnchantsHTML(orb);
 
-            if (gameState.mergeModeActive) {
-                if (!isLocked) {
-                    slot.onclick = () => { event.stopPropagation(); selectForMerge(orb.id); };
-                    slot.title = isSelectedForMerge ? 'Click to deselect' : 'Click to select for merge';
-                } else {
-                    slot.style.cursor = 'not-allowed';
-                    slot.title = 'Merged orbs cannot be merged again';
-                }
+            if (gameState.bulkDeleteEnchantMode) {
+                // checkbox for bulk delete
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.className = 'delete-checkbox';
+                cb.checked = gameState.selectedEnchantIndices.includes(actualIndex);
+                cb.addEventListener('click', (e) => e.stopPropagation());
+                cb.addEventListener('change', (e) => {
+                    if (cb.checked) {
+                        if (!gameState.selectedEnchantIndices.includes(actualIndex)) {
+                            gameState.selectedEnchantIndices.push(actualIndex);
+                        }
+                    } else {
+                        gameState.selectedEnchantIndices = gameState.selectedEnchantIndices.filter(idx => idx !== actualIndex);
+                    }
+                });
+                slot.innerHTML = '';
+                slot.appendChild(cb);
+                const contentDiv = document.createElement('div');
+                contentDiv.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>`;
+                slot.appendChild(contentDiv);
+                slot.onclick = (e) => {
+                    if (e.target !== cb && !e.target.classList.contains('delete-orb-btn')) {
+                        cb.checked = !cb.checked;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                };
             } else {
-                slot.onclick = () => toggleEquipOrb(actualIndex);
+                slot.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>`;
+                if (gameState.mergeModeActive) {
+                    if (!isLocked) {
+                        slot.onclick = () => { event.stopPropagation(); selectForMerge(orb.id); };
+                        slot.title = isSelectedForMerge ? 'Click to deselect' : 'Click to select for merge';
+                    } else {
+                        slot.style.cursor = 'not-allowed';
+                        slot.title = 'Merged orbs cannot be merged again';
+                    }
+                } else {
+                    slot.onclick = () => toggleEquipOrb(actualIndex);
+                }
             }
         } else {
             slot.classList.add('empty');
@@ -2031,7 +2189,7 @@ function renderEquippedEnchants() {
 }
 
 // ============================================================
-// MODAL
+// MODAL (unchanged)
 // ============================================================
 function openDeleteModal(index) {
     gameState.deleteIndex = index;
@@ -2081,7 +2239,7 @@ function confirmDelete() {
 }
 
 // ============================================================
-// STATS
+// STATS (unchanged)
 // ============================================================
 function updateStats() {
     document.getElementById('totalRolls').textContent = gameState.stats.totalRolls;
@@ -2099,7 +2257,7 @@ function updateStats() {
 }
 
 // ============================================================
-// ENCHANT INDEX TOGGLE
+// ENCHANT INDEX TOGGLE (unchanged)
 // ============================================================
 function toggleEnchantType(type) {
     const content = document.getElementById(`${type}-content`);
@@ -2122,7 +2280,7 @@ function toggleJokeEnchants(enabled) {
 }
 
 // ============================================================
-// SAVE / LOAD
+// SAVE / LOAD (unchanged, but added new state)
 // ============================================================
 function saveGame() {
     try {
@@ -2144,6 +2302,8 @@ function loadGame() {
             gameState.jokeEnchantsEnabled = d.jokeEnchantsEnabled || false;
             gameState.brickCount = d.brickCount || 0;
             gameState.luckButtonClicks = 0; // always reset on load
+            gameState.secretLuckButtonClicks = 0;
+            // bulk delete state not saved
         }
     } catch(e) { /* parse error, start fresh */ }
 
@@ -2151,6 +2311,10 @@ function loadGame() {
     gameState.pendingRolls = [];
     gameState.mergeSelection = [];
     gameState.mergeModeActive = false;
+    gameState.bulkDeleteMode = false;
+    gameState.bulkDeleteEnchantMode = false;
+    gameState.selectedInventoryIndices = [];
+    gameState.selectedEnchantIndices = [];
     gameState.isRolling = false;
     gameState.deleteIndex = null;
     gameState.deleteEnchantIndex = null;
@@ -2179,7 +2343,7 @@ function loadGame() {
 }
 
 // ============================================================
-// MERGE LOGIC
+// MERGE LOGIC (updated for horse special unlock)
 // ============================================================
 function toggleMergeMode() {
     gameState.mergeModeActive = !gameState.mergeModeActive;
@@ -2311,13 +2475,23 @@ function performMerge() {
     const { item, index } = findMergeCostItem();
     if (!item) return;
 
+    // Check for horse special: if both orbs have the horse enchant, result not locked
+    const horseKey = 'e_h_o_r_s_e'; // from addEnchantToOrb for "h o r s e"
+    let hasHorseBoth = true;
+    const orb1 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[0]);
+    const orb2 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[1]);
+    if (!orb1 || !orb2) return;
+    if (!orb1.enchants[horseKey] || !orb2.enchants[horseKey]) {
+        hasHorseBoth = false;
+    }
+
     // Build merged orb
     const mergedEnchants = buildMergedEnchants();
     const newOrb = {
         id: Date.now() + Math.random(),
         enchants: mergedEnchants,
         timestamp: Date.now(),
-        locked: true   // can never be selected for merge again
+        locked: !hasHorseBoth   // if both have horse, not locked
     };
 
     // Remove source orbs (by id)
@@ -2355,6 +2529,87 @@ function performMerge() {
     renderMergePanel();
     updateStats();
     updateActiveEffectsBar();
+}
+
+// ============================================================
+// BULK DELETE FUNCTIONS
+// ============================================================
+function toggleBulkDeleteMode() {
+    gameState.bulkDeleteMode = !gameState.bulkDeleteMode;
+    if (!gameState.bulkDeleteMode) {
+        gameState.selectedInventoryIndices = [];
+    }
+    document.getElementById('bulkDeleteBar').style.display = gameState.bulkDeleteMode ? 'flex' : 'none';
+    document.getElementById('bulkDeleteModeBtn').textContent = '🗑️ Bulk Delete: ' + (gameState.bulkDeleteMode ? 'ON' : 'OFF');
+    renderInventory();
+}
+
+function toggleBulkDeleteEnchantMode() {
+    gameState.bulkDeleteEnchantMode = !gameState.bulkDeleteEnchantMode;
+    if (!gameState.bulkDeleteEnchantMode) {
+        gameState.selectedEnchantIndices = [];
+    }
+    document.getElementById('bulkDeleteEnchantBar').style.display = gameState.bulkDeleteEnchantMode ? 'flex' : 'none';
+    document.getElementById('bulkDeleteEnchantModeBtn').textContent = '🗑️ Bulk Delete Ench: ' + (gameState.bulkDeleteEnchantMode ? 'ON' : 'OFF');
+    renderEnchantInventory();
+}
+
+function deleteSelectedInventory() {
+    if (gameState.selectedInventoryIndices.length === 0) return;
+    // Sort descending so splicing doesn't shift indices
+    const toDelete = [...gameState.selectedInventoryIndices].sort((a,b) => b - a);
+    for (let idx of toDelete) {
+        gameState.inventory.splice(idx, 1);
+    }
+    gameState.selectedInventoryIndices = [];
+    gameState.stats.acceptedRanks = gameState.inventory.length;
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+        : null;
+    renderInventory();
+    updateStats();
+    saveGame();
+}
+
+function deleteUnderThreshold() {
+    const threshold = parseFloat(document.getElementById('thresholdInput').value);
+    if (isNaN(threshold)) return;
+    const excludeSecrets = document.getElementById('excludeSecretsCheckbox').checked;
+    const newInventory = [];
+    for (let i = 0; i < gameState.inventory.length; i++) {
+        const item = gameState.inventory[i];
+        if (item.value <= threshold && !(excludeSecrets && item.isEpilepsy)) {
+            continue; // delete
+        }
+        newInventory.push(item);
+    }
+    gameState.inventory = newInventory;
+    gameState.selectedInventoryIndices = [];
+    gameState.stats.acceptedRanks = gameState.inventory.length;
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+        : null;
+    renderInventory();
+    updateStats();
+    saveGame();
+}
+
+function deleteSelectedEnchants() {
+    if (gameState.selectedEnchantIndices.length === 0) return;
+    const toDelete = [...gameState.selectedEnchantIndices].sort((a,b) => b - a);
+    for (let idx of toDelete) {
+        const orb = gameState.enchantOrbs[idx];
+        if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
+            gameState.equippedOrb = null;
+        }
+        gameState.enchantOrbs.splice(idx, 1);
+    }
+    gameState.selectedEnchantIndices = [];
+    renderEnchantInventory();
+    updateActiveEffectsBar();
+    saveGame();
 }
 
 // ============================================================

@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>poly's logmaRNGame</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,34 +15,29 @@
             padding: 20px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
             color: #00d4ff;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            text-shadow: 0 0 20px rgba(0,212,255,0.5);
             font-size: 2.5em;
         }
 
         .game-section {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .roll-container {
-            text-align: center;
-        }
+        .roll-container { text-align: center; }
 
         .roll-display {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0,0,0,0.3);
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
@@ -62,8 +53,8 @@
 
         .roll-square {
             min-width: 120px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
+            height: 110px;
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
@@ -75,9 +66,14 @@
             position: relative;
         }
 
-        .roll-square.active {
+        .roll-square.acceptable {
+            border-color: rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.07);
+        }
+
+        .roll-square.center-acceptable {
             border-color: #00d4ff;
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0,212,255,0.6);
             transform: scale(1.1);
         }
 
@@ -94,24 +90,14 @@
             font-size: 0.7em;
             font-weight: bold;
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255,255,255,0.5);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
 
-        .enchant-indicator.shake-animation {
-            animation: shake 0.2s infinite;
-        }
-
-        .rank-name {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .rank-value {
-            font-size: 0.9em;
-            opacity: 0.7;
-        }
+        .rank-name { font-size: 1.5em; font-weight: bold; margin-bottom: 8px; }
+        .rank-value { font-size: 0.9em; opacity: 0.7; }
+        .rank-secret { font-size: 0.7em; opacity: 0.6; color: #bb88ff; margin-top: 3px; }
 
         .controls {
             display: flex;
@@ -131,35 +117,35 @@
             font-weight: 600;
         }
 
-        .roll-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .roll-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .roll-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+
+        .accept-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .accept-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(245,87,108,0.4); }
+
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Pending enchants panel */
+        .pending-panel {
+            background: rgba(255,215,0,0.08);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin: 10px 0;
+            display: none;
+        }
+        .pending-panel.visible { display: block; }
+        .pending-panel h4 { color: #ffd700; margin-bottom: 8px; font-size: 0.9em; }
+        .pending-panel-orbs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        /* Bulk info label */
+        .bulk-info {
+            font-size: 0.85em;
+            color: rgba(0,212,255,0.7);
+            margin-bottom: 8px;
         }
 
-        .roll-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .accept-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .accept-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .inventory-section h2, .stats-section h2 {
-            margin-bottom: 15px;
-            color: #00d4ff;
-        }
+        .inventory-section h2, .stats-section h2 { margin-bottom: 15px; color: #00d4ff; }
 
         .inventory-controls {
             display: flex;
@@ -169,45 +155,13 @@
             align-items: center;
         }
 
-        .sort-btn {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 0.9em;
-        }
+        .sort-btn { padding: 8px 16px; background: rgba(255,255,255,0.1); color: white; font-size: 0.9em; }
+        .sort-btn:hover { background: rgba(255,255,255,0.2); }
 
-        .sort-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .pagination {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-left: auto;
-        }
-
-        .page-btn {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 0.9em;
-            min-width: 40px;
-        }
-
-        .page-btn:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .page-btn.active {
-            background: #00d4ff;
-            color: #1a1a2e;
-        }
-
-        .page-info {
-            color: #00d4ff;
-            font-weight: 600;
-        }
+        .pagination { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+        .page-btn { padding: 8px 16px; background: rgba(255,255,255,0.1); color: white; font-size: 0.9em; min-width: 40px; }
+        .page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+        .page-info { color: #00d4ff; font-weight: 600; }
 
         .inventory-grid {
             display: grid;
@@ -217,80 +171,39 @@
 
         .inventory-slot {
             aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0,0,0,0.3);
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255,255,255,0.1);
             cursor: pointer;
             transition: all 0.3s;
             padding: 10px;
         }
 
-        .inventory-slot:hover {
-            border-color: rgba(255, 87, 108, 0.5);
-            transform: scale(1.05);
-        }
+        .inventory-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
+        .inventory-slot.empty { opacity: 0.3; cursor: default; }
+        .inventory-slot.empty:hover { transform: none; border-color: rgba(255,255,255,0.1); }
+        .slot-value { font-size: 1.3em; font-weight: bold; }
 
-        .inventory-slot.empty {
-            opacity: 0.3;
-            cursor: default;
-        }
-
-        .inventory-slot.empty:hover {
-            transform: none;
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .slot-value {
-            font-size: 1.3em;
-            font-weight: bold;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #00d4ff;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #00d4ff;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #00d4ff; }
+        .stat-label { font-size: 0.9em; opacity: 0.7; margin-bottom: 5px; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4ff; }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-
-        .modal.show {
-            display: flex;
-        }
-
+        .modal.show { display: flex; }
         .modal-content {
             background: #1a1a2e;
             padding: 30px;
@@ -299,1386 +212,2159 @@
             text-align: center;
             max-width: 400px;
         }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .confirm-btn {
-            background: #f5576c;
-            color: white;
-            padding: 10px 25px;
-        }
-
-        .cancel-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            padding: 10px 25px;
-        }
+        .modal-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .confirm-btn { background: #f5576c; color: white; padding: 10px 25px; }
+        .cancel-btn { background: rgba(255,255,255,0.1); color: white; padding: 10px 25px; }
 
         /* Rarity colors */
-        .rarity-0 { color: #aaa; } /* 0-1 */
-        .rarity-1 { color: #5dff5d; } /* 1-2 */
-        .rarity-2 { color: #5dbaff; } /* 2-3 */
-        .rarity-3 { color: #bd5dff; } /* 3-4 */
-        .rarity-4 { color: #ff5d5d; } /* 4-5 */
-        .rarity-5 { color: #ffd700; } /* 5-6 */
-        .rarity-6 { color: #ff1493; } /* 6-7 */
-        .rarity-7 { color: #00ffff; } /* 7-8 */
-        .rarity-8 { color: #fff; text-shadow: 0 0 10px #fff; } /* 8+ */
+        .rarity-neg { color: #ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.5); }
+        .rarity-0 { color: #aaa; }
+        .rarity-1 { color: #5dff5d; }
+        .rarity-2 { color: #5dbaff; }
+        .rarity-3 { color: #bd5dff; }
+        .rarity-4 { color: #ff5d5d; }
+        .rarity-5 { color: #ffd700; }
+        .rarity-6 { color: #ff1493; }
+        .rarity-7 { color: #00ffff; }
+        .rarity-8 { color: #fff; text-shadow: 0 0 10px #fff; }
+
+        .roll-square.secret-slot { border-color: rgba(187,136,255,0.5) !important; background: rgba(100,0,150,0.2) !important; }
+        .roll-square.secret-slot.acceptable { border-color: rgba(187,136,255,0.8) !important; }
+        .roll-square.secret-slot.center-acceptable { border-color: #bb88ff !important; box-shadow: 0 0 20px rgba(187,136,255,0.6) !important; }
+
+        /* Secret mystery box */
+        .secret-mystery-box {
+            width: 100%; height: 100%;
+            background: #000;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 0; left: 0;
+        }
+        .secret-mystery-q {
+            font-size: 2em; font-weight: 900;
+            background: linear-gradient(90deg, #ff0000, #ff7700, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbowMove 1s linear infinite;
+            user-select: none;
+        }
+        @keyframes rainbowMove {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
 
         /* Enchant styling */
         .enchant-orb {
-            width: 60px;
-            height: 60px;
+            width: 60px; height: 60px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: white;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2em; font-weight: bold; color: white;
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
             margin: 0 auto;
+            overflow: hidden;
         }
 
         .enchant-slot {
             aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0,0,0,0.3);
             border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer;
-            transition: all 0.3s;
-            padding: 10px;
-            position: relative;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            border: 2px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: all 0.3s;
+            padding: 10px; position: relative;
         }
-
-        .enchant-slot:hover {
-            border-color: rgba(255, 87, 108, 0.5);
-            transform: scale(1.05);
-        }
-
-        .enchant-slot.equipped {
-            border-color: #00d4ff;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-        }
-
-        .enchant-slot.empty {
-            opacity: 0.3;
-            cursor: default;
-        }
-
-        .enchant-slot.empty:hover {
-            transform: none;
-            border-color: rgba(255, 255, 255, 0.1);
-        }
+        .enchant-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
+        .enchant-slot.equipped { border-color: #00d4ff; box-shadow: 0 0 15px rgba(0,212,255,0.4); }
+        .enchant-slot.empty { opacity: 0.3; cursor: default; }
+        .enchant-slot.empty:hover { transform: none; border-color: rgba(255,255,255,0.1); }
 
         .equipped-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #00d4ff;
-            color: #1a1a2e;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.65em;
-            font-weight: bold;
+            position: absolute; top: 5px; right: 5px;
+            background: #00d4ff; color: #1a1a2e;
+            padding: 2px 6px; border-radius: 3px;
+            font-size: 0.65em; font-weight: bold;
         }
 
-        .equipped-enchants-section {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .equipped-enchants-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 10px;
-            max-width: 200px;
-        }
+        .equipped-enchants-section { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        .equipped-enchants-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; max-width: 200px; }
 
         .equipped-slot {
             aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0,0,0,0.3);
             border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid rgba(0, 212, 255, 0.3);
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            border: 2px solid rgba(0,212,255,0.3);
+            padding: 10px; cursor: pointer; transition: all 0.3s;
         }
+        .equipped-slot:hover { border-color: rgba(0,212,255,0.6); transform: scale(1.05); }
+        .equipped-slot.empty { opacity: 0.3; border-style: dashed; cursor: default; }
+        .equipped-slot.empty:hover { transform: none; }
 
-        .equipped-slot:hover {
-            border-color: rgba(0, 212, 255, 0.6);
-            transform: scale(1.05);
-        }
-
-        .equipped-slot.empty {
-            opacity: 0.3;
-            border-style: dashed;
-            cursor: default;
-        }
-
-        .equipped-slot.empty:hover {
-            transform: none;
-        }
-
-        .orb-enchants-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-            margin-top: 8px;
-        }
+        .orb-enchants-display { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 8px; }
 
         .mini-enchant-orb {
-            width: 35px;
-            height: 35px;
+            width: 35px; height: 35px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            font-weight: bold;
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8em; font-weight: bold; color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
 
-        .shake-animation {
-            animation: shake 0.2s infinite;
-        }
-
+        .shake-animation { animation: shake 0.2s infinite; }
         @keyframes shake {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-5px, -5px); }
-            20% { transform: translate(5px, 5px); }
-            30% { transform: translate(-5px, 5px); }
-            40% { transform: translate(5px, -5px); }
-            50% { transform: translate(-5px, 0); }
-            60% { transform: translate(5px, 0); }
-            70% { transform: translate(0, -5px); }
-            80% { transform: translate(0, 5px); }
-            90% { transform: translate(-5px, -5px); }
+            0%,100% { transform: translate(0,0); }
+            10% { transform: translate(-5px,-5px); }
+            20% { transform: translate(5px,5px); }
+            30% { transform: translate(-5px,5px); }
+            40% { transform: translate(5px,-5px); }
+            50% { transform: translate(-5px,0); }
+            60% { transform: translate(5px,0); }
+            70% { transform: translate(0,-5px); }
+            80% { transform: translate(0,5px); }
+            90% { transform: translate(-5px,-5px); }
         }
 
         .delete-orb-btn {
-            padding: 6px 12px;
-            background: #f5576c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85em;
-            margin-top: 8px;
+            padding: 6px 12px; background: #f5576c; color: white;
+            border: none; border-radius: 5px; cursor: pointer;
+            font-size: 0.85em; margin-top: 8px;
         }
+        .delete-orb-btn:hover { background: #e04555; }
 
-        .delete-orb-btn:hover {
-            background: #e04555;
-        }
-
-        .enchant-name {
-            font-size: 0.8em;
-            margin-top: 8px;
-            text-align: center;
-        }
-
-        .enchant-index {
-            margin-top: 15px;
-        }
+        .enchant-index { }
 
         .enchant-type-section {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px; border-radius: 8px; margin-bottom: 15px;
         }
 
         .enchant-type-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
+            display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; user-select: none;
         }
+        .enchant-type-header h3 { margin: 0; color: #00d4ff; font-size: 1.1em; }
 
-        .enchant-type-header h3 {
-            margin: 0;
-            color: #00d4ff;
-            font-size: 1.1em;
-        }
-
-        .enchant-type-content {
-            margin-top: 10px;
-            display: none;
-        }
-
-        .enchant-type-content.open {
-            display: block;
-        }
+        .enchant-type-content { margin-top: 10px; display: none; }
+        .enchant-type-content.open { display: block; }
 
         .enchant-item {
             padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            margin: 5px 0;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            margin: 5px 0; border-radius: 5px;
+            display: flex; align-items: center; gap: 10px;
         }
 
-        .enchant-item .enchant-orb {
-            width: 40px;
-            height: 40px;
-            font-size: 0.9em;
+        .enchant-item .enchant-orb { width: 40px; height: 40px; font-size: 0.9em; flex-shrink: 0; }
+        .enchant-item-info { flex-grow: 1; }
+        .enchant-item-name { font-weight: bold; color: #00d4ff; }
+        .enchant-item-effect { font-size: 0.85em; opacity: 0.8; }
+        .enchant-item-rarity { font-size: 0.75em; opacity: 0.6; }
+
+        /* Joke enchant toggle switch */
+        .joke-toggle-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px; background: rgba(255,255,100,0.06);
+            border-radius: 8px; margin-bottom: 10px;
+            border: 1px solid rgba(255,255,100,0.2);
+        }
+        .joke-toggle-label { font-size: 0.9em; color: #ffd700; }
+        .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 24px; transition: 0.3s;
+        }
+        .toggle-slider:before {
+            position: absolute; content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            border-radius: 50%; transition: 0.3s;
+        }
+        input:checked + .toggle-slider { background-color: #ffd700; }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+        /* Secret number section */
+        .secret-section .enchant-type-header h3 { color: #bb88ff; }
+        .secret-item {
+            padding: 8px;
+            background: rgba(100,0,150,0.15);
+            margin: 5px 0; border-radius: 5px;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(187,136,255,0.2);
+        }
+        .secret-value-badge {
+            min-width: 60px; height: 40px;
+            background: rgba(100,0,150,0.4);
+            border: 2px solid rgba(187,136,255,0.5);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #bb88ff; font-size: 0.85em;
             flex-shrink: 0;
         }
+        .secret-item-info { flex-grow: 1; }
+        .secret-item-value { font-weight: bold; color: #ff4444; }
+        .secret-item-rarity { font-size: 0.8em; color: #bb88ff; }
+        .secret-item-note { font-size: 0.75em; opacity: 0.6; }
 
-        .enchant-item-info {
-            flex-grow: 1;
+        .active-effects-bar {
+            background: rgba(0,212,255,0.07);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.7);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-
-        .enchant-item-name {
-            font-weight: bold;
+        .active-effect-tag {
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            padding: 3px 8px;
             color: #00d4ff;
         }
+        .active-effect-tag.bad { color: #ff4444; }
 
-        .enchant-item-effect {
-            font-size: 0.85em;
-            opacity: 0.8;
+        @keyframes epilepsyColor {
+            0%   { color: #8b0000; }
+            20%  { color: #0000cc; }
+            40%  { color: #ffffff; }
+            60%  { color: #00ffff; }
+            80%  { color: #ff0000; }
+            100% { color: #8b0000; }
         }
-
-        .enchant-item-rarity {
-            font-size: 0.75em;
-            opacity: 0.6;
+        @keyframes epilepsyShake {
+            0%   { transform: rotate(0deg); }
+            33%  { transform: rotate(12.5deg); }
+            66%  { transform: rotate(-12.5deg); }
+            100% { transform: rotate(0deg); }
         }
+        .epilepsy-text {
+            animation: epilepsyColor 0.1s steps(1) infinite, epilepsyShake 0.025s linear infinite;
+            font-weight: 900; font-size: 0.72em;
+            display: inline-block; white-space: nowrap;
+        }
+        .roll-square.epilepsy-slot { border-color: rgba(255,0,0,0.5) !important; background: rgba(50,0,0,0.4) !important; }
+        .roll-square.epilepsy-slot.center-acceptable { box-shadow: 0 0 20px rgba(255,0,0,0.6) !important; }
+        .luck-btn { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; font-size: 0.85em !important; padding: 8px 18px !important; margin-top: 8px; }
+        .luck-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(34,197,94,0.4); }
+        .luck-boost-display { font-size: 0.8em; color: #22c55e; margin-top: 4px; min-height: 1.2em; }
+        .merge-mode-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 0.85em !important; padding: 8px 16px !important; }
+        .merge-mode-btn.active { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+        .enchant-slot.selected-for-merge { border-color: #f59e0b !important; box-shadow: 0 0 20px rgba(245,158,11,0.6) !important; }
+        .enchant-slot.locked { border-color: rgba(255,255,255,0.3); opacity: 0.75; }
+        .locked-badge { position: absolute; top: 5px; left: 5px; background: #374151; color: #9ca3af; padding: 2px 6px; border-radius: 3px; font-size: 0.6em; font-weight: bold; }
+        .merge-panel { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; display: none; }
+        .merge-panel.visible { display: block; }
+        .merge-panel h4 { color: #f59e0b; margin-bottom: 10px; }
+        .merge-orbs-preview { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .merge-orb-preview { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; min-width: 120px; text-align: center; }
+        .merge-cost-info { font-size: 0.85em; color: #d1d5db; margin-bottom: 8px; }
+        .merge-cost-info.no-cost { color: #ef4444; }
+        .do-merge-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 8px 20px; font-size: 0.95em; }
+        .do-merge-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .inventory-slot.epilepsy-inv { border-color: rgba(255,0,0,0.4) !important; background: rgba(50,0,0,0.2) !important; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>poly's logmaRNGame</h1>
+<div class="container">
+    <h1>poly's logmaRNGame</h1>
 
-        <div class="game-section roll-container">
-            <div class="roll-display" id="rollDisplay">
-                <div class="roll-track" id="rollTrack">
-                    <!-- Roll squares will be generated here -->
-                </div>
-            </div>
-            <div class="controls">
-                <button class="roll-btn" id="rollBtn">Roll</button>
-                <button class="accept-btn" id="acceptBtn" disabled>Accept</button>
-            </div>
+    <div class="game-section roll-container">
+        <div id="activeEffectsBar" class="active-effects-bar" style="display:none;"></div>
+        <div id="bulkInfoLabel" class="bulk-info" style="display:none;"></div>
+        <div class="roll-display" id="rollDisplay">
+            <div class="roll-track" id="rollTrack"></div>
         </div>
-
-        <div class="game-section stats-section">
-            <h2>Statistics</h2>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-label">Total Rolls</div>
-                    <div class="stat-value" id="totalRolls">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Accepted Ranks</div>
-                    <div class="stat-value" id="acceptedRanks">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Highest Rank</div>
-                    <div class="stat-value" id="highestRank">-</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Average Rank</div>
-                    <div class="stat-value" id="avgRank">-</div>
-                </div>
-            </div>
+        <div class="pending-panel" id="pendingPanel">
+            <h4>⏳ Pending Enchants — press Accept to collect:</h4>
+            <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
         </div>
-
-        <div class="game-section inventory-section">
-            <h2>Inventory (60 Slots)</h2>
-            <div class="inventory-controls">
-                <button class="sort-btn" onclick="sortInventory('value-desc')">Sort: Highest First</button>
-                <button class="sort-btn" onclick="sortInventory('value-asc')">Sort: Lowest First</button>
-                <button class="sort-btn" onclick="sortInventory('newest')">Sort: Newest First</button>
-                <button class="sort-btn" onclick="sortInventory('oldest')">Sort: Oldest First</button>
-                <div class="pagination">
-                    <button class="page-btn" onclick="changePage(-1)" id="prevBtn">◀</button>
-                    <span class="page-info">Page <span id="currentPage">1</span> / 6</span>
-                    <button class="page-btn" onclick="changePage(1)" id="nextBtn">▶</button>
-                </div>
-            </div>
-            <div class="inventory-grid" id="inventoryGrid">
-                <!-- Inventory slots will be generated here -->
-            </div>
+        <div class="controls">
+            <button class="roll-btn" id="rollBtn">Roll</button>
+            <button class="accept-btn" id="acceptBtn" disabled>Accept</button>
         </div>
-
-        <div class="game-section inventory-section">
-            <h2>Equipped Enchant Orb (1 Slot)</h2>
-            <div class="equipped-enchants-section">
-                <div class="equipped-enchants-grid" id="equippedGrid">
-                    <!-- Equipped enchants will be generated here -->
-                </div>
-            </div>
+        <div style="text-align:center;">
+            <button class="luck-btn" id="luckBtn" onclick="clickLuckButton()">please increase my luck for the next roll!</button>
+            <div class="luck-boost-display" id="luckBoostDisplay"></div>
         </div>
+    </div>
 
-        <div class="game-section inventory-section">
-            <h2>Enchant Orb Inventory (30 Slots) - Click to Equip/Unequip</h2>
-            <div class="inventory-controls">
-                <button class="sort-btn" onclick="sortEnchants('tier-desc')">Sort: Highest Tier</button>
-                <button class="sort-btn" onclick="sortEnchants('tier-asc')">Sort: Lowest Tier</button>
-                <button class="sort-btn" onclick="sortEnchants('type')">Sort: By Type</button>
-                <button class="sort-btn" onclick="sortEnchants('newest')">Sort: Newest First</button>
-                <div class="pagination">
-                    <button class="page-btn" onclick="changeEnchantPage(-1)" id="prevEnchantBtn">◀</button>
-                    <span class="page-info">Page <span id="currentEnchantPage">1</span> / 3</span>
-                    <button class="page-btn" onclick="changeEnchantPage(1)" id="nextEnchantBtn">▶</button>
-                </div>
+    <div class="game-section stats-section">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-label">Total Rolls</div>
+                <div class="stat-value" id="totalRolls">0</div>
             </div>
-            <div class="inventory-grid" id="enchantGrid">
-                <!-- Enchant slots will be generated here -->
+            <div class="stat-box">
+                <div class="stat-label">Accepted Ranks</div>
+                <div class="stat-value" id="acceptedRanks">0</div>
             </div>
-        </div>
-
-        <div class="game-section">
-            <h2>Enchant Index</h2>
-            <div class="enchant-index">
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('luck')">
-                        <h3>🍀 Luck Enchants</h3>
-                        <span id="luck-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="luck-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #4ade80;">I</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Luck I</div>
-                                <div class="enchant-item-effect">+0.5x luck multiplier</div>
-                                <div class="enchant-item-rarity">Rarity: 1/5 (20%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #22c55e;">II</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Luck II</div>
-                                <div class="enchant-item-effect">+2.5x luck multiplier</div>
-                                <div class="enchant-item-rarity">Rarity: 1/20 (5%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #16a34a;">III</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Luck III</div>
-                                <div class="enchant-item-effect">+3.33x luck multiplier</div>
-                                <div class="enchant-item-rarity">Rarity: 1/75 (1.33%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #15803d;">IV</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Craziness</div>
-                                <div class="enchant-item-effect">+25x luck multiplier</div>
-                                <div class="enchant-item-rarity">Rarity: 1/125,000 (0.0008%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('speed')">
-                        <h3>⚡ Speed Enchants</h3>
-                        <span id="speed-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="speed-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #60a5fa;">I</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Speed I</div>
-                                <div class="enchant-item-effect">-0.1s roll speed reduction</div>
-                                <div class="enchant-item-rarity">Rarity: 1/10 (10%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #3b82f6;">II</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Speed II</div>
-                                <div class="enchant-item-effect">-0.25s roll speed reduction</div>
-                                <div class="enchant-item-rarity">Rarity: 1/25 (4%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #2563eb;">III</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Blitz</div>
-                                <div class="enchant-item-effect">-0.5s roll speed reduction</div>
-                                <div class="enchant-item-rarity">Rarity: 1/100 (1%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #1e40af;">IV</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">KUGELBLITZ</div>
-                                <div class="enchant-item-effect">Instant rolls (no animation)</div>
-                                <div class="enchant-item-rarity">Rarity: 1/10,000 (0.01%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('lighter')">
-                        <h3>✨ Lighter Enchants</h3>
-                        <span id="lighter-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="lighter-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #a78bfa;">I</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Lighter I</div>
-                                <div class="enchant-item-effect">+0.5x enchant luck</div>
-                                <div class="enchant-item-rarity">Rarity: 1/100 (1%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #8b5cf6;">II</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Lighter II</div>
-                                <div class="enchant-item-effect">+1.25x enchant luck</div>
-                                <div class="enchant-item-rarity">Rarity: 1/2,500 (0.04%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #7c3aed;">III</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Magician</div>
-                                <div class="enchant-item-effect">+4x enchant luck</div>
-                                <div class="enchant-item-rarity">Rarity: 1/172,565 (0.00058%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #6d28d9;">IV</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Unnatural</div>
-                                <div class="enchant-item-effect">+10x enchant luck</div>
-                                <div class="enchant-item-rarity">Rarity: 1/91,625,715 (0.0000011%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('cloner')">
-                        <h3>📋 Cloner Enchants</h3>
-                        <span id="cloner-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="cloner-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #fb923c;">I</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Cloner I</div>
-                                <div class="enchant-item-effect">+1 bulk roll</div>
-                                <div class="enchant-item-rarity">Rarity: 1/75 (1.33%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #f97316;">II</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Cloner II</div>
-                                <div class="enchant-item-effect">+2 bulk rolls</div>
-                                <div class="enchant-item-rarity">Rarity: 1/250 (0.4%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #ea580c;">III</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Duplication</div>
-                                <div class="enchant-item-effect">+4 bulk rolls</div>
-                                <div class="enchant-item-rarity">Rarity: 1/50,000 (0.002%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #c2410c;">IV</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Replica</div>
-                                <div class="enchant-item-effect">+10 bulk rolls</div>
-                                <div class="enchant-item-rarity">Rarity: 1/7,500,000 (0.000013%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('curse')">
-                        <h3>💀 Curse Enchants</h3>
-                        <span id="curse-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="curse-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #ffffff; color: #000000;">G</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Greed</div>
-                                <div class="enchant-item-effect">-2.5x luck, +3 bulk rolls, +0.7s roll speed</div>
-                                <div class="enchant-item-rarity">Rarity: 1/57 (1.75%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: linear-gradient(135deg, #ec4899 0%, #f97316 100%); color: #3b82f6;">↓</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Sloth</div>
-                                <div class="enchant-item-effect">+5x luck, -2.5s roll speed, +5 bulk rolls</div>
-                                <div class="enchant-item-rarity">Rarity: 1/163 (0.61%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: linear-gradient(135deg, #374151 0%, #000000 100%); color: #22c55e;">!</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Stress</div>
-                                <div class="enchant-item-effect">+7.5x luck, +7 bulk rolls, -12.5s roll speed</div>
-                                <div class="enchant-item-rarity">Rarity: 1/614 (0.16%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb shake-animation" style="background: #ffffff; color: #000000; font-size: 0.6em;">HELP</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Insanity</div>
-                                <div class="enchant-item-effect">-1000x luck, +10 bulk rolls, +1.5x enchant luck, -1.5s roll speed</div>
-                                <div class="enchant-item-rarity">Rarity: 1/1,725 (0.058%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #4c1d95; color: #a78bfa;">H</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Heresy</div>
-                                <div class="enchant-item-effect">-10,000,000x luck, +15 bulk rolls, -3s roll speed, +15x enchant luck</div>
-                                <div class="enchant-item-rarity">Rarity: 1/273,627,171.6 (0.00000037%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- New All-in-One Enchants Section -->
-                <div class="enchant-type-section">
-                    <div class="enchant-type-header" onclick="toggleEnchantType('allinone')">
-                        <h3>🔮 All-in-One Enchants</h3>
-                        <span id="allinone-toggle">▼</span>
-                    </div>
-                    <div class="enchant-type-content" id="allinone-content">
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #FFD700;">Σ</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Synergy</div>
-                                <div class="enchant-item-effect">Combines all Tier 1 normal enchants (Luck I, Speed I, Lighter I, Cloner I)</div>
-                                <div class="enchant-item-rarity">Rarity: 1/50,000 (0.002%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #C0C0C0;">C</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Convergence</div>
-                                <div class="enchant-item-effect">Combines all Tier 2 normal enchants (Luck II, Speed II, Lighter II, Cloner II)</div>
-                                <div class="enchant-item-rarity">Rarity: 1/1,000,000 (0.0001%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #CD7F32;">Ω</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">Combination</div>
-                                <div class="enchant-item-effect">Combines all Tier 3 normal enchants (Luck III, Blitz, Magician, Duplication)</div>
-                                <div class="enchant-item-rarity">Rarity: 1/727,180,000 (1.375e-7%)</div>
-                            </div>
-                        </div>
-                        <div class="enchant-item">
-                            <div class="enchant-orb" style="background: #8A2BE2;">∞</div>
-                            <div class="enchant-item-info">
-                                <div class="enchant-item-name">MULTITUDE</div>
-                                <div class="enchant-item-effect">Combines all Tier 4 normal enchants (Craziness, KUGELBLITZ, Unnatural, Replica)</div>
-                                <div class="enchant-item-rarity">Rarity: 1/18,136,725,800 (5.51e-9%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-box">
+                <div class="stat-label">Highest Rank</div>
+                <div class="stat-value" id="highestRank">-</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Average Rank</div>
+                <div class="stat-value" id="avgRank">-</div>
+            </div>
+            <div class="stat-box" id="brickStatBox" style="display:none;">
+                <div class="stat-label">🧱 Bricks (does nothing)</div>
+                <div class="stat-value" id="brickCount">0</div>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="deleteModal">
-        <div class="modal-content">
-            <h2>Delete Rank?</h2>
-            <p>Are you sure you want to delete rank <span id="deleteRankValue"></span>?</p>
-            <div class="modal-buttons">
-                <button class="confirm-btn" onclick="confirmDelete()">Delete</button>
-                <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+    <div class="game-section inventory-section">
+        <h2>Inventory (60 Slots)</h2>
+        <div class="inventory-controls">
+            <button class="sort-btn" onclick="sortInventory('value-desc')">Sort: Highest First</button>
+            <button class="sort-btn" onclick="sortInventory('value-asc')">Sort: Lowest First</button>
+            <button class="sort-btn" onclick="sortInventory('newest')">Sort: Newest First</button>
+            <button class="sort-btn" onclick="sortInventory('oldest')">Sort: Oldest First</button>
+            <div class="pagination">
+                <button class="page-btn" onclick="changePage(-1)" id="prevBtn">◀</button>
+                <span class="page-info">Page <span id="currentPage">1</span> / 6</span>
+                <button class="page-btn" onclick="changePage(1)" id="nextBtn">▶</button>
             </div>
+        </div>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+    </div>
+
+    <div class="game-section inventory-section">
+        <h2>Equipped Enchant Orb (1 Slot)</h2>
+        <div class="equipped-enchants-section">
+            <div class="equipped-enchants-grid" id="equippedGrid"></div>
         </div>
     </div>
 
-    <script>
-        // Game state
-        let gameState = {
-            inventory: [],
-            enchantOrbs: [],
-            equippedOrb: null,
-            stats: {
-                totalRolls: 0,
-                acceptedRanks: 0,
-                highestRank: null,
-                totalValue: 0
-            },
-            currentRoll: null,
-            isRolling: false,
-            deleteIndex: null,
-            currentPage: 1,
-            currentEnchantPage: 1
-        };
+    <div class="game-section inventory-section">
+        <h2>Enchant Orb Inventory (30 Slots) — Click to Equip/Unequip</h2>
+        <div class="merge-panel" id="mergePanel">
+            <h4>🔀 Merge Orbs</h4>
+            <div class="merge-orbs-preview" id="mergeOrbsPreview"></div>
+            <div class="merge-cost-info" id="mergeCostInfo"></div>
+            <button class="do-merge-btn" id="doMergeBtn" onclick="performMerge()" disabled>Merge!</button>
+            <button class="cancel-btn" onclick="cancelMerge()" style="margin-left:10px;">Cancel</button>
+        </div>
+        <div class="inventory-controls">
+            <button class="merge-mode-btn" id="mergeModeBtn" onclick="toggleMergeMode()">🔀 Merge Mode: OFF</button>
+            <button class="sort-btn" onclick="sortEnchants('tier-desc')">Sort: Highest Tier</button>
+            <button class="sort-btn" onclick="sortEnchants('tier-asc')">Sort: Lowest Tier</button>
+            <button class="sort-btn" onclick="sortEnchants('type')">Sort: By Type</button>
+            <button class="sort-btn" onclick="sortEnchants('newest')">Sort: Newest First</button>
+            <div class="pagination">
+                <button class="page-btn" onclick="changeEnchantPage(-1)" id="prevEnchantBtn">◀</button>
+                <span class="page-info">Page <span id="currentEnchantPage">1</span> / 3</span>
+                <button class="page-btn" onclick="changeEnchantPage(1)" id="nextEnchantBtn">▶</button>
+            </div>
+        </div>
+        <div class="inventory-grid" id="enchantGrid"></div>
+    </div>
 
-        const MAX_INVENTORY = 60;
-        const MAX_ENCHANTS = 30;
-        const MAX_EQUIPPED_ENCHANTS = 1;
-        const ITEMS_PER_PAGE = 10;
-        const TOTAL_PAGES = 6;
-        const ENCHANTS_PER_PAGE = 10;
-        const TOTAL_ENCHANT_PAGES = 3;
+    <div class="game-section">
+        <h2>Enchant Index</h2>
+        <div class="enchant-index">
 
-        // Enchant definitions (including all-in-one)
-        const ENCHANTS = {
-            // Luck enchants
-            luck1: { name: 'Luck I', type: 'luck', tier: 1, rarity: 1/5, effect: 0.5, color: '#4ade80' },
-            luck2: { name: 'Luck II', type: 'luck', tier: 2, rarity: 1/20, effect: 2.5, color: '#22c55e' },
-            luck3: { name: 'Luck III', type: 'luck', tier: 3, rarity: 1/75, effect: 3.33, color: '#16a34a' },
-            craziness: { name: 'Craziness', type: 'luck', tier: 4, rarity: 1/125000, effect: 25, color: '#15803d' },
-            
-            // Speed enchants
-            speed1: { name: 'Speed I', type: 'speed', tier: 1, rarity: 1/10, effect: 0.1, color: '#60a5fa' },
-            speed2: { name: 'Speed II', type: 'speed', tier: 2, rarity: 1/25, effect: 0.25, color: '#3b82f6' },
-            blitz: { name: 'Blitz', type: 'speed', tier: 3, rarity: 1/100, effect: 0.5, color: '#2563eb' },
-            kugelblitz: { name: 'KUGELBLITZ', type: 'speed', tier: 4, rarity: 1/10000, effect: 'instant', color: '#1e40af' },
-            
-            // Lighter enchants
-            lighter1: { name: 'Lighter I', type: 'lighter', tier: 1, rarity: 1/100, effect: 0.5, color: '#a78bfa' },
-            lighter2: { name: 'Lighter II', type: 'lighter', tier: 2, rarity: 1/2500, effect: 1.25, color: '#8b5cf6' },
-            magician: { name: 'Magician', type: 'lighter', tier: 3, rarity: 1/172565, effect: 4, color: '#7c3aed' },
-            unnatural: { name: 'Unnatural', type: 'lighter', tier: 4, rarity: 1/91625715, effect: 10, color: '#6d28d9' },
-            
-            // Cloner enchants
-            cloner1: { name: 'Cloner I', type: 'cloner', tier: 1, rarity: 1/75, effect: 1, color: '#fb923c' },
-            cloner2: { name: 'Cloner II', type: 'cloner', tier: 2, rarity: 1/250, effect: 2, color: '#f97316' },
-            duplication: { name: 'Duplication', type: 'cloner', tier: 3, rarity: 1/50000, effect: 4, color: '#ea580c' },
-            replica: { name: 'Replica', type: 'cloner', tier: 4, rarity: 1/7500000, effect: 10, color: '#c2410c' },
-            
-            // Curse enchants
-            greed: { name: 'Greed', type: 'curse', tier: 1, rarity: 1/57, 
-                     effects: { luck: -2.5, cloner: 3, speed: 0.7 }, 
-                     display: 'G', color: '#ffffff', textColor: '#000000' },
-            sloth: { name: 'Sloth', type: 'curse', tier: 2, rarity: 1/163, 
-                     effects: { luck: 5, speed: -2.5, cloner: 5 }, 
-                     display: '↓', color: 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)', textColor: '#3b82f6' },
-            stress: { name: 'Stress', type: 'curse', tier: 3, rarity: 1/614, 
-                      effects: { luck: 7.5, cloner: 7, speed: -12.5 }, 
-                      display: '!', color: 'linear-gradient(135deg, #374151 0%, #000000 100%)', textColor: '#22c55e' },
-            insanity: { name: 'Insanity', type: 'curse', tier: 4, rarity: 1/1725, 
-                        effects: { luck: -1000, cloner: 10, lighter: 1.5, speed: -1.5 }, 
-                        display: 'HELP', color: '#ffffff', textColor: '#000000', shake: true },
-            heresy: { name: 'Heresy', type: 'curse', tier: 5, rarity: 1/273627171.6, 
-                      effects: { luck: -10000000, cloner: 15, speed: -3, lighter: 15 }, 
-                      display: 'H', color: '#4c1d95', textColor: '#a78bfa' },
+            <!-- Luck -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('luck')">
+                    <h3>🍀 Luck Enchants</h3><span id="luck-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="luck-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#4ade80;">I</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Luck I</div>
+                            <div class="enchant-item-effect">+0.5x luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/5 (20%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#22c55e;">II</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Luck II</div>
+                            <div class="enchant-item-effect">+2.5x luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/20 (5%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#16a34a;">III</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Luck III</div>
+                            <div class="enchant-item-effect">+3.33x luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/75 (1.33%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#15803d;">IV</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Craziness</div>
+                            <div class="enchant-item-effect">+25x luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/125,000 (0.0008%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            // All-in-One enchants (no curses)
-            synergy: { 
-                name: 'Synergy', type: 'allinone', tier: 1, rarity: 1/50000,
-                effects: { luck: 0.5, speed: 0.1, lighter: 0.5, cloner: 1 },
-                display: 'Σ', color: '#FFD700', textColor: '#000000'
-            },
-            convergence: { 
-                name: 'Convergence', type: 'allinone', tier: 2, rarity: 1/1000000,
-                effects: { luck: 2.5, speed: 0.25, lighter: 1.25, cloner: 2 },
-                display: 'C', color: '#C0C0C0', textColor: '#000000'
-            },
-            combination: { 
-                name: 'Combination', type: 'allinone', tier: 3, rarity: 1/727180000,
-                effects: { luck: 3.33, speed: 0.5, lighter: 4, cloner: 4 },
-                display: 'Ω', color: '#CD7F32', textColor: '#000000'
-            },
-            multitude: { 
-                name: 'MULTITUDE', type: 'allinone', tier: 4, rarity: 1/18136725800,
-                effects: { luck: 25, speed: 'instant', lighter: 10, cloner: 10 },
-                display: '∞', color: '#8A2BE2', textColor: '#FFFFFF'
-            }
-        };
+            <!-- Speed -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('speed')">
+                    <h3>⚡ Speed Enchants</h3><span id="speed-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="speed-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#60a5fa;">I</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Speed I</div>
+                            <div class="enchant-item-effect">-0.1s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/10 (10%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#3b82f6;">II</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Speed II</div>
+                            <div class="enchant-item-effect">-0.25s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/25 (4%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#2563eb;">III</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Blitz</div>
+                            <div class="enchant-item-effect">-0.5s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/100 (1%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#1e40af;">IV</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">KUGELBLITZ</div>
+                            <div class="enchant-item-effect">Instant rolls (no animation)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/10,000 (0.01%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // RNG Formula
-        function generateRank() {
-            const random = Math.random();
-            const floorValue = Math.floor(random ** -1.5);
-            const result = Math.log10(floorValue);
+            <!-- Lighter -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('lighter')">
+                    <h3>✨ Lighter Enchants</h3><span id="lighter-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="lighter-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#a78bfa;">I</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Lighter I</div>
+                            <div class="enchant-item-effect">+0.5x enchant luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/100 (1%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#8b5cf6;">II</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Lighter II</div>
+                            <div class="enchant-item-effect">+1.25x enchant luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/2,500 (0.04%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#7c3aed;">III</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Magician</div>
+                            <div class="enchant-item-effect">+4x enchant luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/172,565 (0.00058%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#6d28d9;">IV</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Unnatural</div>
+                            <div class="enchant-item-effect">+10x enchant luck multiplier</div>
+                            <div class="enchant-item-rarity">Rarity: 1/91,625,715 (0.0000011%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cloner -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('cloner')">
+                    <h3>📋 Cloner Enchants</h3><span id="cloner-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="cloner-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#fb923c;">I</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Cloner I</div>
+                            <div class="enchant-item-effect">+1 bulk roll slot</div>
+                            <div class="enchant-item-rarity">Rarity: 1/75 (1.33%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#f97316;">II</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Cloner II</div>
+                            <div class="enchant-item-effect">+2 bulk roll slots</div>
+                            <div class="enchant-item-rarity">Rarity: 1/250 (0.4%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#ea580c;">III</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Duplication</div>
+                            <div class="enchant-item-effect">+4 bulk roll slots</div>
+                            <div class="enchant-item-rarity">Rarity: 1/50,000 (0.002%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#c2410c;">IV</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Replica</div>
+                            <div class="enchant-item-effect">+10 bulk roll slots</div>
+                            <div class="enchant-item-rarity">Rarity: 1/7,500,000 (0.000013%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Curse -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('curse')">
+                    <h3>💀 Curse Enchants</h3><span id="curse-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="curse-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#ffffff;color:#000000;">G</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Greed</div>
+                            <div class="enchant-item-effect">-2.5x luck, +3 bulk rolls, -0.7s roll time (faster but greedier)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/57 (1.75%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#ec4899 0%,#f97316 100%);color:#3b82f6;">↓</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Sloth</div>
+                            <div class="enchant-item-effect">+5x luck, +2.5s roll time, +5 bulk rolls</div>
+                            <div class="enchant-item-rarity">Rarity: 1/163 (0.61%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#374151 0%,#000000 100%);color:#22c55e;">!</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Stress</div>
+                            <div class="enchant-item-effect">+7.5x luck, +7 bulk rolls, +12.5s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/614 (0.16%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb shake-animation" style="background:#ffffff;color:#000000;font-size:0.6em;">HELP</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Insanity</div>
+                            <div class="enchant-item-effect">-1000x luck, +10 bulk rolls, +1.5x enchant luck, +1.5s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/1,725 (0.058%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#4c1d95;color:#a78bfa;">H</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Heresy</div>
+                            <div class="enchant-item-effect">-10,000,000x luck, +15 bulk rolls, +3s roll time, +15x enchant luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/273,627,171.6 (0.00000037%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="overflow:hidden;padding:0;background:transparent;" id="avariceIndexOrb"></div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Avarice</div>
+                            <div class="enchant-item-effect">+50 bulk rolls, -100,000,000x luck, +20s roll time, +1.5x enchant luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/12,725,284,173.51 (0.0000000079%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All-in-One -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('allinone')">
+                    <h3>🔮 All-in-One Enchants</h3><span id="allinone-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="allinone-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#FFD700;color:#000;">Σ</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Synergy</div>
+                            <div class="enchant-item-effect">Combines all Tier 1 normal enchants (Luck I, Speed I, Lighter I, Cloner I)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/50,000 (0.002%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#C0C0C0;color:#000;">C</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Convergence</div>
+                            <div class="enchant-item-effect">Combines all Tier 2 normal enchants (Luck II, Speed II, Lighter II, Cloner II)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/1,000,000 (0.0001%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#CD7F32;color:#000;">Ω</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Combination</div>
+                            <div class="enchant-item-effect">Combines all Tier 3 normal enchants (Luck III, Blitz, Magician, Duplication)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/727,180,000 (1.375e-7%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#8A2BE2;">∞</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">MULTITUDE</div>
+                            <div class="enchant-item-effect">Combines all Tier 4 normal enchants (Craziness, KUGELBLITZ, Unnatural, Replica)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/18,136,725,800 (5.51e-9%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Joke Enchants -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('joke')">
+                    <h3>😂 Joke Enchants</h3><span id="joke-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="joke-content">
+                    <div class="joke-toggle-row">
+                        <span class="joke-toggle-label">Enable Joke Enchants in rolls:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="jokeToggleSwitch" onchange="toggleJokeEnchants(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span id="jokeToggleStatus" style="font-size:0.85em;color:#aaa;">OFF</span>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:transparent;border:none;box-shadow:none;font-size:1.5em;">🧱</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Brick</div>
+                            <div class="enchant-item-effect">+1 Brick (does absolutely nothing!)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/222 (0.45%) — requires joke enchants ON</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#ffd700;color:#ffd700;">　</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Air</div>
+                            <div class="enchant-item-effect">Does absolutely nothing.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/500 (0.2%) — requires joke enchants ON</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#9e9e9e 0%,#000000 100%);">💥</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Bomber</div>
+                            <div class="enchant-item-effect">+5000x luck, +99.99s roll time, -100x enchant luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/6,942,069,420 (0.0000000144%) — requires joke enchants ON</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secret Numbers -->
+            <div class="enchant-type-section secret-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('secrets')">
+                    <h3>🔒 Secret Numbers</h3><span id="secrets-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="secrets-content">
+                    <p style="font-size:0.85em;opacity:0.7;margin-bottom:10px;">
+                        Secret numbers can replace any slot in the roll track. They always replace that one slot when triggered. If the raw RNG floor for that slot was ≥ 1000, the secret number slot can also carry an enchant.
+                    </p>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-0.69</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -0.69</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/690 (0.145%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-2.8</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -2.8</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/1,000 (0.1%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-3.5</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -3.5</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/3,500 (0.0286%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-8</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -8</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/8,888 (0.01125%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-1.75</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -1.75</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/9,999 (0.01%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-0.25</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -0.25</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/12,500 (0.008%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-1000</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -1000</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/20,000 (0.005%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-31.4</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -31.4</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/31,415 (0.00318%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-1.23</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -1.23</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/50,000 (0.002%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-7</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -7</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/77,777 (0.001286%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-101</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -101</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/101,000 (0.00099%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item" style="border-color:rgba(255,0,0,0.3);background:rgba(50,0,0,0.2);">
+                        <div class="secret-value-badge" style="border-color:rgba(255,0,0,0.5);min-width:80px;"><span class="epilepsy-text" style="font-size:0.6em;">!! EPILEPSY !!</span></div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value"><span class="epilepsy-text">!! EPILEPSY !!</span></div>
+                            <div class="secret-item-rarity">Chance per slot: 1/1,234,567 (0.000081%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /enchant-index -->
+    </div>
+</div><!-- /container -->
+
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <h2>Delete?</h2>
+        <p>Are you sure you want to delete <span id="deleteRankValue"></span>?</p>
+        <div class="modal-buttons">
+            <button class="confirm-btn" onclick="confirmDelete()">Delete</button>
+            <button class="cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const MAX_INVENTORY = 60;
+const MAX_ENCHANTS = 30;
+const ITEMS_PER_PAGE = 10;
+const TOTAL_PAGES = 6;
+const ENCHANTS_PER_PAGE = 10;
+const TOTAL_ENCHANT_PAGES = 3;
+const BASE_ROLL_DURATION = 1750;
+const MIN_ROLL_DURATION = 100;
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let gameState = {
+    inventory: [],
+    enchantOrbs: [],
+    equippedOrb: null,
+    pendingRolls: [],
+    jokeEnchantsEnabled: false,
+    brickCount: 0,
+    luckButtonClicks: 0,
+    mergeSelection: [],   // array of up to 2 orb ids selected for merge
+    mergeModeActive: false,
+    stats: {
+        totalRolls: 0,
+        acceptedRanks: 0,
+        highestRank: null,
+        totalValue: 0
+    },
+    isRolling: false,
+    deleteIndex: null,
+    deleteEnchantIndex: null,
+    currentPage: 1,
+    currentEnchantPage: 1
+};
+
+// ============================================================
+// ENCHANT DEFINITIONS
+// ============================================================
+const ENCHANTS = {
+    // --- Luck ---
+    luck1:       { name: 'Luck I',     type: 'luck',    tier: 1, rarity: 1/5,           effect: 0.5,      color: '#4ade80' },
+    luck2:       { name: 'Luck II',    type: 'luck',    tier: 2, rarity: 1/20,          effect: 2.5,      color: '#22c55e' },
+    luck3:       { name: 'Luck III',   type: 'luck',    tier: 3, rarity: 1/75,          effect: 3.33,     color: '#16a34a' },
+    craziness:   { name: 'Craziness',  type: 'luck',    tier: 4, rarity: 1/125000,      effect: 25,       color: '#15803d' },
+
+    // --- Speed ---
+    speed1:      { name: 'Speed I',    type: 'speed',   tier: 1, rarity: 1/10,          effect: 0.1,      color: '#60a5fa' },
+    speed2:      { name: 'Speed II',   type: 'speed',   tier: 2, rarity: 1/25,          effect: 0.25,     color: '#3b82f6' },
+    blitz:       { name: 'Blitz',      type: 'speed',   tier: 3, rarity: 1/100,         effect: 0.5,      color: '#2563eb' },
+    kugelblitz:  { name: 'KUGELBLITZ', type: 'speed',   tier: 4, rarity: 1/10000,       effect: 'instant',color: '#1e40af' },
+
+    // --- Lighter ---
+    lighter1:    { name: 'Lighter I',  type: 'lighter', tier: 1, rarity: 1/100,         effect: 0.5,      color: '#a78bfa' },
+    lighter2:    { name: 'Lighter II', type: 'lighter', tier: 2, rarity: 1/2500,        effect: 1.25,     color: '#8b5cf6' },
+    magician:    { name: 'Magician',   type: 'lighter', tier: 3, rarity: 1/172565,      effect: 4,        color: '#7c3aed' },
+    unnatural:   { name: 'Unnatural',  type: 'lighter', tier: 4, rarity: 1/91625715,    effect: 10,       color: '#6d28d9' },
+
+    // --- Cloner ---
+    cloner1:     { name: 'Cloner I',   type: 'cloner',  tier: 1, rarity: 1/75,          effect: 1,        color: '#fb923c' },
+    cloner2:     { name: 'Cloner II',  type: 'cloner',  tier: 2, rarity: 1/250,         effect: 2,        color: '#f97316' },
+    duplication: { name: 'Duplication',type: 'cloner',  tier: 3, rarity: 1/50000,       effect: 4,        color: '#ea580c' },
+    replica:     { name: 'Replica',    type: 'cloner',  tier: 4, rarity: 1/7500000,     effect: 10,       color: '#c2410c' },
+
+    // --- Curses ---
+    greed: {
+        name: 'Greed', type: 'curse', tier: 1, rarity: 1/57,
+        effects: { luck: -2.5, cloner: 3, speed: 0.7 },
+        display: 'G', color: '#ffffff', textColor: '#000000'
+    },
+    sloth: {
+        name: 'Sloth', type: 'curse', tier: 2, rarity: 1/163,
+        effects: { luck: 5, speed: -2.5, cloner: 5 },
+        display: '↓', color: 'linear-gradient(135deg,#ec4899 0%,#f97316 100%)', textColor: '#3b82f6'
+    },
+    stress: {
+        name: 'Stress', type: 'curse', tier: 3, rarity: 1/614,
+        effects: { luck: 7.5, cloner: 7, speed: -12.5 },
+        display: '!', color: 'linear-gradient(135deg,#374151 0%,#000000 100%)', textColor: '#22c55e'
+    },
+    insanity: {
+        name: 'Insanity', type: 'curse', tier: 4, rarity: 1/1725,
+        effects: { luck: -1000, cloner: 10, lighter: 1.5, speed: -1.5 },
+        display: 'HELP', color: '#ffffff', textColor: '#000000', shake: true
+    },
+    heresy: {
+        name: 'Heresy', type: 'curse', tier: 5, rarity: 1/273627171.6,
+        effects: { luck: -10000000, cloner: 15, speed: -3, lighter: 15 },
+        display: 'H', color: '#4c1d95', textColor: '#a78bfa'
+    },
+    avarice: {
+        name: 'Avarice', type: 'curse', tier: 6, rarity: 1/12725284173.51,
+        effects: { luck: -100000000, cloner: 50, speed: -20, lighter: 1.5 },
+        display: 'A', color: 'avarice', textColor: '#fff', isAvarice: true
+    },
+
+    // --- All-in-One ---
+    synergy: {
+        name: 'Synergy', type: 'allinone', tier: 1, rarity: 1/50000,
+        effects: { luck: 0.5, speed: 0.1, lighter: 0.5, cloner: 1 },
+        display: 'Σ', color: '#FFD700', textColor: '#000000'
+    },
+    convergence: {
+        name: 'Convergence', type: 'allinone', tier: 2, rarity: 1/1000000,
+        effects: { luck: 2.5, speed: 0.25, lighter: 1.25, cloner: 2 },
+        display: 'C', color: '#C0C0C0', textColor: '#000000'
+    },
+    combination: {
+        name: 'Combination', type: 'allinone', tier: 3, rarity: 1/727180000,
+        effects: { luck: 3.33, speed: 0.5, lighter: 4, cloner: 4 },
+        display: 'Ω', color: '#CD7F32', textColor: '#000000'
+    },
+    multitude: {
+        name: 'MULTITUDE', type: 'allinone', tier: 4, rarity: 1/18136725800,
+        effects: { luck: 25, speed: 'instant', lighter: 10, cloner: 10 },
+        display: '∞', color: '#8A2BE2', textColor: '#ffffff'
+    },
+
+    // --- Joke Enchants (only active when jokeEnchantsEnabled) ---
+    air: {
+        name: 'Air', type: 'joke', tier: 1, rarity: 1/500,
+        effects: {},
+        display: '', color: '#ffd700', textColor: '#ffd700',
+        jokeOnly: true
+    },
+    bomber: {
+        name: 'Bomber', type: 'joke', tier: 2, rarity: 1/6942069420,
+        effects: { luck: 5000, speed: -99.99, lighter: -100 },
+        display: '💥', color: 'linear-gradient(135deg,#9e9e9e 0%,#000000 100%)', textColor: '#ffffff',
+        jokeOnly: true
+    },
+    brick: {
+        name: 'Brick', type: 'joke', tier: 3, rarity: 1/222,
+        effects: { brick: 1, luck: 5, speed: 1, lighter: 1.5, secretLuck: 5 },
+        display: '🧱', color: 'transparent', textColor: '#ffffff', noBorder: true,
+        jokeOnly: true
+    }
+};
+
+// ============================================================
+// SECRET NUMBERS (sorted rarest-first so rarest wins on lucky rolls)
+// ============================================================
+const SECRET_NUMBERS_RAW = [
+    { logValue: -0.69,  rarity: 1/690,     display: '-0.69' },
+    { logValue: -2.8,   rarity: 1/1000,    display: '-2.8'  },
+    { logValue: -3.5,   rarity: 1/3500,    display: '-3.5'  },
+    { logValue: -8,     rarity: 1/8888,    display: '-8'    },
+    { logValue: -1.75,  rarity: 1/9999,    display: '-1.75' },
+    { logValue: -0.25,  rarity: 1/12500,   display: '-0.25' },
+    { logValue: -1000,  rarity: 1/20000,   display: '-1000' },
+    { logValue: -31.4,  rarity: 1/31415,   display: '-31.4' },
+    { logValue: -1.23,  rarity: 1/50000,   display: '-1.23' },
+    { logValue: -7,     rarity: 1/77777,   display: '-7'    },
+    { logValue: -101,   rarity: 1/101000,  display: '-101'  },
+    { logValue: -9999,  rarity: 1/1234567, display: 'EPILEPSY', isEpilepsy: true }
+];
+// Sort ascending by rarity value (rarest first = smallest fraction value first)
+const SECRET_NUMBERS = [...SECRET_NUMBERS_RAW].sort((a, b) => a.rarity - b.rarity);
+
+// ============================================================
+// AVARICE SVG
+// ============================================================
+function getAvariceSVG(size) {
+    const cx = size / 2;
+    const cy = size / 2;
+    const vRadius = size * 0.31;
+    const vFontSize = Math.max(4, size * 0.185);
+    const aFontSize = Math.max(5, size * 0.24);
+    const uid = 'av_' + Math.random().toString(36).substr(2, 9);
+
+    let vTexts = '';
+    for (let i = 0; i < 6; i++) {
+        const angle = i * 60;
+        vTexts += `<text x="${cx}" y="${cy - vRadius}"
+            text-anchor="middle" dominant-baseline="auto"
+            font-size="${vFontSize}" font-weight="bold"
+            fill="url(#${uid}_vg)"
+            transform="rotate(${angle} ${cx} ${cy})">V</text>`;
+    }
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <defs>
+            <linearGradient id="${uid}_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="50%" stop-color="#eab308"/>
+                <stop offset="100%" stop-color="#9ca3af"/>
+            </linearGradient>
+            <linearGradient id="${uid}_vg" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#000000"/>
+                <stop offset="100%" stop-color="#ffffff"/>
+            </linearGradient>
+        </defs>
+        <circle cx="${cx}" cy="${cy}" r="${size/2}" fill="url(#${uid}_bg)"/>
+        ${vTexts}
+        <text x="${cx}" y="${cy + aFontSize * 0.38}"
+            text-anchor="middle" dominant-baseline="middle"
+            font-size="${aFontSize}" font-weight="bold"
+            fill="url(#${uid}_vg)">A</text>
+    </svg>`;
+}
+
+// ============================================================
+// ENCHANT STAT HELPERS
+// ============================================================
+
+// Returns brick count only from the currently equipped orb
+function getEquippedBrickCount() {
+    if (!gameState.equippedOrb || !gameState.equippedOrb.enchants.brick) return 0;
+    return gameState.equippedOrb.enchants.brick.count || 0;
+}
+
+function getLuckMultiplier() {
+    let luck = 1;
+    const bricks = getEquippedBrickCount();
+    if (!gameState.equippedOrb) return Math.max(1, luck + bricks * 5);
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.type === 'luck') {
+            luck += e.effect;
+        } else if (e.type === 'allinone' && e.effects && e.effects.luck != null) {
+            luck += e.effects.luck;
+        } else if (e.type === 'curse' && e.effects && e.effects.luck != null) {
+            luck += e.effects.luck;
+        } else if (e.type === 'joke' && e.effects && e.effects.luck != null && e.name !== 'Brick') {
+            luck += e.effects.luck;
+        }
+    });
+    // Brick hidden bonus (equipped orb only)
+    luck += bricks * 5;
+    return Math.max(1, luck);
+}
+
+function getEnchantLuckMultiplier() {
+    let mult = 1;
+    const bricks = getEquippedBrickCount();
+    if (!gameState.equippedOrb) return mult + bricks * 1.5;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.type === 'lighter') {
+            mult += e.effect;
+        } else if (e.type === 'allinone' && e.effects && e.effects.lighter != null) {
+            mult += e.effects.lighter;
+        } else if (e.type === 'curse' && e.effects && e.effects.lighter != null) {
+            mult += e.effects.lighter;
+        } else if (e.type === 'joke' && e.effects && e.effects.lighter != null && e.name !== 'Brick') {
+            mult += e.effects.lighter;
+        }
+    });
+    // Brick hidden bonus (equipped orb only)
+    mult += bricks * 1.5;
+    return mult;
+}
+
+function getBulkRolls() {
+    let total = 1;
+    if (!gameState.equippedOrb) return total;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.type === 'cloner') {
+            total += e.effect;
+        } else if (e.type === 'allinone' && e.effects && e.effects.cloner != null) {
+            total += e.effects.cloner;
+        } else if (e.type === 'curse' && e.effects && e.effects.cloner != null) {
+            total += e.effects.cloner;
+        } else if (e.type === 'joke' && e.effects && e.effects.cloner != null) {
+            total += e.effects.cloner;
+        }
+    });
+    return Math.max(1, Math.round(total));
+}
+
+// Returns { savedSeconds: number, isInstant: boolean }
+// savedSeconds: positive = roll is FASTER, negative = roll is SLOWER
+function getSpeedConfig() {
+    let savedSeconds = 0;
+    let isInstant = false;
+    const bricks = getEquippedBrickCount();
+    if (!gameState.equippedOrb) {
+        savedSeconds += bricks * 1;
+        return { savedSeconds, isInstant };
+    }
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.type === 'speed') {
+            if (e.effect === 'instant') isInstant = true;
+            else savedSeconds += e.effect;
+        } else if (e.type === 'allinone' && e.effects && e.effects.speed != null) {
+            if (e.effects.speed === 'instant') isInstant = true;
+            else savedSeconds += e.effects.speed;
+        } else if (e.type === 'curse' && e.effects && e.effects.speed != null) {
+            savedSeconds += e.effects.speed;
+        } else if (e.type === 'joke' && e.effects && e.effects.speed != null && e.name !== 'Brick') {
+            savedSeconds += e.effects.speed;
+        }
+    });
+    // Brick hidden bonus: +1s saved per brick (equipped orb only)
+    savedSeconds += bricks * 1;
+    return { savedSeconds, isInstant };
+}
+
+function getSecretLuckMultiplier() {
+    // Hidden: bricks in equipped orb only
+    const bricks = getEquippedBrickCount();
+    return 1 + bricks * 5;
+}
+
+function getRollDuration() {
+    const { savedSeconds, isInstant } = getSpeedConfig();
+    if (isInstant) return 0;
+    return Math.max(MIN_ROLL_DURATION, BASE_ROLL_DURATION - Math.round(savedSeconds * 1000));
+}
+
+// ============================================================
+// LUCK BUTTON
+// ============================================================
+function getButtonLuckBoost() {
+    if (gameState.luckButtonClicks <= 0) return 1;
+    // min +1x means the additive bonus is at least 1, so total multiplier is at least 2x
+    return 1 + Math.max(1, Math.pow(Math.log(gameState.luckButtonClicks) / Math.log(5), 0.75));
+}
+
+function clickLuckButton() {
+    gameState.luckButtonClicks++;
+    const boost = getButtonLuckBoost();
+    document.getElementById('luckBoostDisplay').textContent =
+        `Luck boost: ×${boost.toFixed(3)} (click ${gameState.luckButtonClicks})`;
+}
+
+// ============================================================
+// SLOT GENERATION
+// ============================================================
+
+function generateRank(luckMult) {
+    const random = Math.random();
+    const rawFloor = Math.floor(Math.pow(random, -1.5));
+    const logValue = Number(Math.log10(rawFloor * luckMult).toFixed(2));
+    return { logValue, rawFloor };
+}
+
+function checkSecretNumber() {
+    const roll = Math.random();
+    const secretLuck = getSecretLuckMultiplier();
+    for (const s of SECRET_NUMBERS) {
+        if (roll < s.rarity * secretLuck) return s;
+    }
+    return null;
+}
+
+function rollEnchant(enchantLuckMult) {
+    if (enchantLuckMult <= 0) return null;
+    const roll = Math.random();
+    // Collect eligible enchants
+    const eligible = Object.entries(ENCHANTS)
+        .filter(([key, e]) => {
+            if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
+            return true;
+        })
+        .map(([key, e]) => ({ key, ...e }))
+        .sort((a, b) => a.rarity - b.rarity); // rarest first
+
+    for (const e of eligible) {
+        const threshold = e.rarity * enchantLuckMult;
+        if (roll < threshold) {
+            return { ...e };
+        }
+    }
+    return null;
+}
+
+// Generate one slot (secrets only eligible if isAcceptableSlot is true)
+function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
+    const random = Math.random();
+    const rawFloor = Math.floor(Math.pow(random, -1.5));
+
+    // Check secret number ONLY for acceptable (bulk roll) slots
+    if (isAcceptableSlot) {
+        const secret = checkSecretNumber();
+        if (secret) {
+            const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
             return {
-                name: Number(result.toFixed(2)),
-                floor: floorValue
+                value: secret.logValue,
+                rawFloor,
+                isSecret: true,
+                isEpilepsy: !!secret.isEpilepsy,
+                secretDisplay: secret.display,
+                enchant
             };
         }
+    }
 
-        // Roll for enchant (now includes all-in-one)
-        function rollEnchant() {
-            const enchantKeys = Object.keys(ENCHANTS);
-            const roll = Math.random();
-            
-            // Sort enchants by rarity (rarest first) to check properly
-            const sortedEnchants = enchantKeys.map(key => ({
-                key,
-                ...ENCHANTS[key]
-            })).sort((a, b) => a.rarity - b.rarity);
-            
-            for (const enchant of sortedEnchants) {
-                if (roll < enchant.rarity) {
-                    // Return full enchant object with all properties
-                    return {
-                        id: enchant.key,
-                        name: enchant.name,
-                        type: enchant.type,
-                        tier: enchant.tier,
-                        effect: enchant.effect,
-                        effects: enchant.effects, // For multi-effect enchants
-                        color: enchant.color,
-                        textColor: enchant.textColor,
-                        display: enchant.display,
-                        shake: enchant.shake
-                    };
-                }
-            }
-            return null;
+    // Normal slot: log_10(floor(random^-1.5) * luck)
+    const logValue = Number(Math.log10(rawFloor * luckMult).toFixed(2));
+
+    const enchant = (logValue >= 3) ? rollEnchant(enchantLuckMult) : null;
+
+    return {
+        value: logValue,
+        rawFloor,
+        isSecret: false,
+        enchant
+    };
+}
+
+// ============================================================
+// RARITY CLASS
+// ============================================================
+function getRarityClass(v) {
+    if (v < 0)  return 'rarity-neg';
+    if (v >= 8) return 'rarity-8';
+    if (v >= 7) return 'rarity-7';
+    if (v >= 6) return 'rarity-6';
+    if (v >= 5) return 'rarity-5';
+    if (v >= 4) return 'rarity-4';
+    if (v >= 3) return 'rarity-3';
+    if (v >= 2) return 'rarity-2';
+    if (v >= 1) return 'rarity-1';
+    return 'rarity-0';
+}
+
+// ============================================================
+// ENCHANT DISPLAY HELPERS
+// ============================================================
+
+function getEnchantDisplay(enchant) {
+    if (enchant.display !== undefined && enchant.display !== null) return enchant.display;
+    const numerals = ['I','II','III','IV','V','VI'];
+    return numerals[(enchant.tier || 1) - 1] || String(enchant.tier);
+}
+
+// Returns HTML string for an enchant circle of given size (px)
+function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
+    if (!enchant) return '';
+
+    if (enchant.isAvarice) {
+        const shakeAttr = enchant.shake ? ' class="shake-animation"' : '';
+        return `<div${shakeAttr} style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;" title="${titleAttr || enchant.name}">
+            ${getAvariceSVG(size - 4)}
+        </div>`;
+    }
+
+    // Brick shows count if stacked
+    if (enchant.name === 'Brick' && enchant.count && enchant.count > 1) {
+        return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;" title="${titleAttr || enchant.name} ×${enchant.count}">
+            <span style="font-size:${size * 0.55}px;line-height:1;">🧱</span>
+            <span style="font-size:${Math.max(7, size * 0.28)}px;color:#ffd700;font-weight:bold;">×${enchant.count}</span>
+        </div>`;
+    }
+
+    const displayText = getEnchantDisplay(enchant);
+    const textColor = enchant.textColor || 'white';
+    const fontSize = (displayText === 'HELP') ? `${size * 0.25}px`
+                   : (displayText && displayText.length > 2) ? `${size * 0.28}px`
+                   : `${size * 0.36}px`;
+    const shakeClass = enchant.shake ? ' shake-animation' : '';
+    const borderStyle = enchant.noBorder ? 'none' : '2px solid rgba(255,255,255,0.3)';
+
+    let bgStyle;
+    if (!enchant.color || enchant.color === 'transparent') {
+        bgStyle = 'background: transparent;';
+    } else if (enchant.color.includes('gradient') || enchant.color.includes('linear')) {
+        bgStyle = `background: ${enchant.color};`;
+    } else {
+        bgStyle = `background-color: ${enchant.color};`;
+    }
+
+    return `<div class="${extraClass}${shakeClass}" 
+        style="${bgStyle} color:${textColor}; font-size:${fontSize}; font-weight:bold;
+               width:${size}px; height:${size}px; border-radius:50%;
+               display:flex; align-items:center; justify-content:center;
+               border:${borderStyle}; box-shadow: 0 0 10px rgba(0,0,0,0.5); overflow:hidden;"
+        title="${titleAttr || enchant.name}">
+        ${displayText}
+    </div>`;
+}
+
+// Orb enchants display (mini orbs row)
+function orbEnchantsHTML(orb) {
+    const enchantTypes = Object.keys(orb.enchants);
+    if (enchantTypes.length === 0) return '<span style="opacity:0.5;font-size:0.8em;">Empty orb</span>';
+    let html = '<div class="orb-enchants-display">';
+    enchantTypes.forEach(t => {
+        const e = orb.enchants[t];
+        html += enchantOrbHTML(e, 35, '', e.name);
+    });
+    html += '</div>';
+    return html;
+}
+
+// ============================================================
+// ORB MANAGEMENT
+// ============================================================
+
+function createEnchantOrb() {
+    return { id: Date.now() + Math.random(), enchants: {}, timestamp: Date.now() };
+}
+
+function addEnchantToOrb(orb, enchant) {
+    const type = enchant.type;
+
+    // Brick stacks by count using its own key
+    if (enchant.name === 'Brick') {
+        if (!orb.enchants.brick) {
+            orb.enchants.brick = { ...enchant, count: 1 };
+        } else {
+            orb.enchants.brick.count = (orb.enchants.brick.count || 1) + 1;
+        }
+        return true;
+    }
+
+    if (type === 'allinone') {
+        // Allinone replaces individual luck/speed/lighter/cloner
+        ['luck','speed','lighter','cloner'].forEach(t => delete orb.enchants[t]);
+        if (!orb.enchants.allinone || enchant.tier > orb.enchants.allinone.tier) {
+            orb.enchants.allinone = enchant;
+            return true;
+        }
+        return false;
+    }
+
+    // If allinone exists, it covers luck/speed/lighter/cloner
+    if (['luck','speed','lighter','cloner'].includes(type) && orb.enchants.allinone) {
+        return false;
+    }
+
+    // luck/speed/lighter/cloner: one per type (higher tier wins)
+    if (['luck','speed','lighter','cloner'].includes(type)) {
+        if (!orb.enchants[type] || enchant.tier > orb.enchants[type].tier) {
+            orb.enchants[type] = enchant;
+            return true;
+        }
+        return false;
+    }
+
+    // curse and joke: keyed by enchant name so multiple different ones can coexist
+    // e.g. greed + sloth + stress all in same orb — none of the same name
+    const slotKey = 'e_' + enchant.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    if (!orb.enchants[slotKey]) {
+        orb.enchants[slotKey] = enchant;
+        return true;
+    }
+    // Same name already exists — replace only if higher tier
+    if (enchant.tier > orb.enchants[slotKey].tier) {
+        orb.enchants[slotKey] = enchant;
+        return true;
+    }
+    return false;
+}
+
+function toggleEquipOrb(index) {
+    const orb = gameState.enchantOrbs[index];
+    if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
+        gameState.equippedOrb = null;
+    } else {
+        gameState.equippedOrb = orb;
+    }
+    saveGame();
+    renderEnchantInventory();
+    updateActiveEffectsBar();
+}
+
+function unequipOrb() {
+    gameState.equippedOrb = null;
+    saveGame();
+    renderEnchantInventory();
+    updateActiveEffectsBar();
+}
+
+// ============================================================
+// ACTIVE EFFECTS BAR
+// ============================================================
+function updateActiveEffectsBar() {
+    const bar = document.getElementById('activeEffectsBar');
+    const bulkLabel = document.getElementById('bulkInfoLabel');
+    if (!gameState.equippedOrb || Object.keys(gameState.equippedOrb.enchants).length === 0) {
+        bar.style.display = 'none';
+        bulkLabel.style.display = 'none';
+        return;
+    }
+    const luck = getLuckMultiplier();
+    const enchantLuck = getEnchantLuckMultiplier();
+    const bulk = getBulkRolls();
+    const { savedSeconds, isInstant } = getSpeedConfig();
+    const duration = getRollDuration();
+
+    let tags = '';
+    const luckClass = luck >= 1 ? 'active-effect-tag' : 'active-effect-tag bad';
+    tags += `<span class="${luckClass}">⚡ Luck: ${luck >= 0 ? '+':''}${luck.toFixed(2)}x</span>`;
+
+    if (isInstant) {
+        tags += `<span class="active-effect-tag">⚡ Speed: INSTANT</span>`;
+    } else {
+        const speedClass = duration <= BASE_ROLL_DURATION ? 'active-effect-tag' : 'active-effect-tag bad';
+        tags += `<span class="${speedClass}">⏱ Roll time: ${(duration/1000).toFixed(2)}s</span>`;
+    }
+
+    const elClass = enchantLuck >= 1 ? 'active-effect-tag' : 'active-effect-tag bad';
+    tags += `<span class="${elClass}">✨ Enchant luck: ${enchantLuck >= 0 ? '+':''}${enchantLuck.toFixed(2)}x</span>`;
+
+    if (bulk > 1) {
+        tags += `<span class="active-effect-tag">📋 Bulk rolls: ${bulk}</span>`;
+    }
+
+    if (gameState.brickCount > 0) {
+        tags += `<span class="active-effect-tag">🧱 Bricks: ${gameState.brickCount}</span>`;
+    }
+
+    bar.innerHTML = tags;
+    bar.style.display = 'flex';
+
+    if (bulk > 1) {
+        const totalSlots = Math.max(20, Math.floor(bulk * 12.5));
+        bulkLabel.textContent = `Bulk: ${bulk} acceptable slot${bulk > 1 ? 's' : ''} | Total track: ${totalSlots} slots`;
+        bulkLabel.style.display = 'block';
+    } else {
+        bulkLabel.style.display = 'none';
+    }
+}
+
+// ============================================================
+// PERFORM ROLL
+// ============================================================
+function performRoll() {
+    if (gameState.isRolling) return;
+
+    gameState.isRolling = true;
+    document.getElementById('rollBtn').disabled = true;
+    document.getElementById('acceptBtn').disabled = true;
+
+    const rollTrack = document.getElementById('rollTrack');
+    const rollDisplay = document.getElementById('rollDisplay');
+    rollTrack.innerHTML = '';
+
+    const buttonBoost = getButtonLuckBoost();
+    const luckMult = getLuckMultiplier() * buttonBoost;
+    const enchantLuckMult = getEnchantLuckMultiplier();
+    const bulkRolls = getBulkRolls();
+    const rollDuration = getRollDuration();
+
+    // Reset luck button clicks
+    gameState.luckButtonClicks = 0;
+    document.getElementById('luckBoostDisplay').textContent = '';
+
+    // Calculate total track slots and acceptable zone
+    const totalSlots = Math.max(20, Math.floor(bulkRolls * 12.5));
+    const acceptStart = Math.floor((totalSlots - bulkRolls) / 2);
+    const acceptEnd = acceptStart + bulkRolls - 1;
+    const centerAcceptable = Math.floor((acceptStart + acceptEnd) / 2);
+
+    // Generate all slots
+    const slots = [];
+    for (let i = 0; i < totalSlots; i++) {
+        const isAcceptableSlot = (i >= acceptStart && i <= acceptEnd);
+        slots.push(generateSlot(luckMult, enchantLuckMult, isAcceptableSlot));
+    }
+
+    // Collect pending rolls from acceptable zone
+    gameState.pendingRolls = [];
+    for (let i = acceptStart; i <= acceptEnd; i++) {
+        gameState.pendingRolls.push(slots[i]);
+    }
+
+    gameState.stats.totalRolls++;
+
+    // Render squares
+    slots.forEach((slot, idx) => {
+        const isAcceptable = (idx >= acceptStart && idx <= acceptEnd);
+        const isCenter = (idx === centerAcceptable);
+
+        const square = document.createElement('div');
+        square.className = 'roll-square';
+        if (isAcceptable) square.classList.add('acceptable');
+        if (isCenter) square.classList.add('center-acceptable');
+        if (slot.isSecret) square.classList.add('secret-slot');
+
+        const rarityClass = getRarityClass(slot.value);
+
+        let enchantHTML = '';
+        if (slot.enchant) {
+            enchantHTML = `<div class="enchant-indicator" style="padding:0;overflow:hidden;background:transparent;border:none;">
+                ${enchantOrbHTML(slot.enchant, 25, '', slot.enchant.name)}
+            </div>`;
         }
 
-        // Create a new enchant orb
-        function createEnchantOrb() {
-            return {
-                id: Date.now() + Math.random(),
-                enchants: {}, // { type: enchantObj, ... }
-                timestamp: Date.now()
-            };
+        const secretBadge = slot.isSecret ? `<div class="rank-secret">🔒 secret</div>` : '';
+        let realHTML;
+        if (slot.isEpilepsy) {
+            realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>${secretBadge}`;
+        } else {
+            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>${secretBadge}`;
         }
 
-        // Add enchant to an orb (with all-in-one handling)
-        function addEnchantToOrb(orb, enchant) {
-            const type = enchant.type;
-
-            // All-in-one enchants replace all normal types (luck, speed, lighter, cloner)
-            if (type === 'allinone') {
-                // Remove any existing normal enchants of the categories covered
-                const normalTypes = ['luck', 'speed', 'lighter', 'cloner'];
-                normalTypes.forEach(t => delete orb.enchants[t]);
-
-                // Check if there's already an all-in-one; replace if new tier is higher
-                if (orb.enchants.allinone) {
-                    if (enchant.tier > orb.enchants.allinone.tier) {
-                        orb.enchants.allinone = enchant;
-                        return true;
-                    }
-                    return false; // didn't replace (tier lower or equal)
-                } else {
-                    orb.enchants.allinone = enchant;
-                    return true;
-                }
-            }
-
-            // Normal enchants: if orb already has an allinone, do nothing (allinone overrides)
-            if (orb.enchants.allinone) {
-                return false; // allinone already covers all normals
-            }
-
-            // Normal type handling (existing logic with tier comparison)
-            if (!orb.enchants[type]) {
-                orb.enchants[type] = enchant;
-                return true;
-            }
-            
-            if (enchant.tier > orb.enchants[type].tier) {
-                orb.enchants[type] = enchant;
-                return true;
-            }
-            
-            return false; // Didn't add (tier was lower or equal)
+        if (slot.isSecret || slot.isEpilepsy) {
+            square.innerHTML = `<div class="secret-mystery-box"><span class="secret-mystery-q">?</span></div>`;
+            square.dataset.realContent = realHTML;
+            if (slot.isEpilepsy) square.classList.add('epilepsy-slot');
+        } else {
+            square.innerHTML = realHTML;
         }
 
-        // Get total bulk rolls from equipped orb
-        function getBulkRolls() {
-            if (!gameState.equippedOrb) return 1;
-            
-            let totalBulkRolls = 1; // Base roll
-            
-            // Check all enchants in the orb
-            Object.values(gameState.equippedOrb.enchants).forEach(enchant => {
-                if (enchant.type === 'cloner') {
-                    totalBulkRolls += enchant.effect;
-                } else if (enchant.type === 'curse' && enchant.effects && enchant.effects.cloner) {
-                    totalBulkRolls += enchant.effects.cloner;
-                } else if (enchant.type === 'allinone' && enchant.effects && enchant.effects.cloner) {
-                    totalBulkRolls += enchant.effects.cloner;
-                }
-            });
-            
-            return Math.max(1, totalBulkRolls);
+        rollTrack.appendChild(square);
+    });
+
+    // Force reflow, reset scroll
+    rollTrack.offsetHeight;
+    rollDisplay.scrollLeft = 0;
+
+    if (rollDuration === 0) {
+        // Instant: skip animation
+        const targetSquare = rollTrack.children[centerAcceptable];
+        if (targetSquare) {
+            const targetScrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
+            rollDisplay.scrollLeft = targetScrollLeft;
         }
+        finishRoll();
+        return;
+    }
 
-        // Get roman numeral for tier or custom display for special enchants
-        function getEnchantDisplay(enchant) {
-            if (enchant.display) {
-                return enchant.display; // Custom display (curses & allinone)
-            }
-            // Normal enchants: roman numeral
-            const numerals = ['I', 'II', 'III', 'IV', 'V'];
-            return numerals[enchant.tier - 1] || enchant.tier;
-        }
+    // Animate scroll
+    setTimeout(() => {
+        const targetSquare = rollTrack.children[centerAcceptable];
+        if (!targetSquare) { finishRoll(); return; }
 
-        // Get rarity class based on value
-        function getRarityClass(value) {
-            const rankValue = typeof value === 'object' ? value.name : value;
-            if (rankValue >= 8) return 'rarity-8';
-            if (rankValue >= 7) return 'rarity-7';
-            if (rankValue >= 6) return 'rarity-6';
-            if (rankValue >= 5) return 'rarity-5';
-            if (rankValue >= 4) return 'rarity-4';
-            if (rankValue >= 3) return 'rarity-3';
-            if (rankValue >= 2) return 'rarity-2';
-            if (rankValue >= 1) return 'rarity-1';
-            return 'rarity-0';
-        }
+        const targetScrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
+        const startScrollLeft = 0;
+        const distance = targetScrollLeft - startScrollLeft;
+        const startTime = performance.now();
 
-        // Fixed roll animation
-        function performRoll() {
-            if (gameState.isRolling) return;
-            
-            gameState.isRolling = true;
-            document.getElementById('rollBtn').disabled = true;
-            document.getElementById('acceptBtn').disabled = true;
+        function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
 
-            const rollTrack = document.getElementById('rollTrack');
-            const rollDisplay = document.getElementById('rollDisplay');
-            
-            // Clear previous roll
-            rollTrack.innerHTML = '';
-
-            const bulkRolls = getBulkRolls();
-            const allRanks = [];
-
-            // Generate ranks for each bulk roll
-            for (let bulkIndex = 0; bulkIndex < bulkRolls; bulkIndex++) {
-                // Generate 20 ranks for this bulk roll
-                const ranks = [];
-                for (let i = 0; i < 20; i++) {
-                    const rank = generateRank();
-                    let enchant = null;
-                    
-                    // Check for enchant drop (logRNG >= 3)
-                    if (rank.name >= 3) {
-                        enchant = rollEnchant();
-                    }
-                    
-                    ranks.push({ rank, enchant, bulkIndex });
-                }
-                allRanks.push(...ranks);
-            }
-
-            // Middle slot of first bulk roll (index 10) is the actual result
-            gameState.currentRoll = allRanks[10].rank;
-            gameState.stats.totalRolls++;
-
-            // Collect all enchants from middle slots of all bulk rolls
-            const middleEnchants = [];
-            for (let bulkIndex = 0; bulkIndex < bulkRolls; bulkIndex++) {
-                const middleIndex = bulkIndex * 20 + 10;
-                if (allRanks[middleIndex].enchant) {
-                    middleEnchants.push(allRanks[middleIndex].enchant);
-                }
-            }
-
-            // If we got enchants and have space, add them to a new orb or existing equipped orb
-            if (middleEnchants.length > 0 && gameState.enchantOrbs.length < MAX_ENCHANTS) {
-                let targetOrb;
-                
-                // If an orb is equipped, try to add to it
-                if (gameState.equippedOrb) {
-                    targetOrb = gameState.equippedOrb;
-                } else {
-                    // Create new orb
-                    targetOrb = createEnchantOrb();
-                    gameState.enchantOrbs.push(targetOrb);
-                    gameState.equippedOrb = targetOrb; // Auto-equip first orb
-                }
-
-                // Add all enchants to the orb
-                for (const enchant of middleEnchants) {
-                    addEnchantToOrb(targetOrb, enchant);
-                }
-
-                renderEnchantInventory();
-            }
-
-            // Create squares
-            allRanks.forEach((item, index) => {
-                const square = document.createElement('div');
-                square.className = 'roll-square';
-                
-                // Middle of each bulk roll is active
-                const isMiddleOfBulk = (index % 20) === 10;
-                if (isMiddleOfBulk) {
-                    square.classList.add('active');
-                }
-
-                const rarityClass = getRarityClass(item.rank);
-                
-                let enchantIndicator = '';
-                if (item.enchant) {
-                    const displayText = getEnchantDisplay(item.enchant);
-                    const textColor = item.enchant.textColor || 'white';
-                    const fontSize = item.enchant.display === 'HELP' ? '0.5em' : (item.enchant.display ? '0.7em' : '0.7em');
-                    const shakeClass = item.enchant.shake ? 'shake-animation' : '';
-                    const background = item.enchant.color && item.enchant.color.includes('gradient') 
-                        ? `background: ${item.enchant.color};` 
-                        : `background-color: ${item.enchant.color || '#888'};`;
-                    
-                    enchantIndicator = `<div class="enchant-indicator ${shakeClass}" style="${background} color: ${textColor}; font-size: ${fontSize};">${displayText}</div>`;
-                }
-                
-                square.innerHTML = `
-                    ${enchantIndicator}
-                    <div class="rank-name ${rarityClass}">${item.rank.name}</div>
-                    <div class="rank-value">${item.rank.floor}</div>
-                `;
-                
-                rollTrack.appendChild(square);
-            });
-
-            // Force reflow
-            rollTrack.offsetHeight;
-            
-            // Reset scroll to beginning (first square)
-            rollDisplay.scrollLeft = 0;
-
-            // Short delay to ensure layout is stable, then start animation
-            setTimeout(() => {
-                const targetSquare = rollTrack.children[10]; // First bulk roll's middle
-                if (!targetSquare) {
-                    // Fallback
-                    gameState.isRolling = false;
-                    document.getElementById('rollBtn').disabled = false;
-                    document.getElementById('acceptBtn').disabled = false;
-                    return;
-                }
-
-                const targetScrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
-                const startScrollLeft = 0; // We set it to 0 above
-                const distance = targetScrollLeft - startScrollLeft;
-                const duration = 1750; // 1.75 seconds
-                const startTime = performance.now();
-
-                function easeOutExpo(t) {
-                    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-                }
-
-                function animateScroll(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const eased = easeOutExpo(progress);
-
-                    rollDisplay.scrollLeft = startScrollLeft + (distance * eased);
-
-                    if (progress < 1) {
-                        requestAnimationFrame(animateScroll);
-                    } else {
-                        // Animation complete
-                        setTimeout(() => {
-                            gameState.isRolling = false;
-                            document.getElementById('rollBtn').disabled = false;
-                            document.getElementById('acceptBtn').disabled = false;
-                            saveGame();
-                            updateStats();
-                        }, 100);
-                    }
-                }
-
+        function animateScroll(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / rollDuration, 1);
+            rollDisplay.scrollLeft = startScrollLeft + distance * easeOutExpo(progress);
+            if (progress < 1) {
                 requestAnimationFrame(animateScroll);
-            }, 50); // Small delay to ensure squares are rendered and scroll reset
-        }
-
-        // Accept current roll
-        function acceptRoll() {
-            if (!gameState.currentRoll || gameState.inventory.length >= MAX_INVENTORY) {
-                if (gameState.inventory.length >= MAX_INVENTORY) {
-                    alert('Inventory is full! Delete some ranks first.');
-                }
-                return;
-            }
-
-            const rankValue = gameState.currentRoll.name;
-
-            gameState.inventory.push({
-                value: rankValue,
-                timestamp: Date.now()
-            });
-
-            gameState.stats.acceptedRanks++;
-            gameState.stats.totalValue += rankValue;
-
-            if (!gameState.stats.highestRank || rankValue > gameState.stats.highestRank) {
-                gameState.stats.highestRank = rankValue;
-            }
-
-            gameState.currentRoll = null;
-            document.getElementById('acceptBtn').disabled = true;
-
-            saveGame();
-            renderInventory();
-            updateStats();
-        }
-
-        // Render inventory
-        function renderInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
-
-            const startIndex = (gameState.currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
-
-            for (let i = 0; i < ITEMS_PER_PAGE; i++) {
-                const actualIndex = startIndex + i;
-                const slot = document.createElement('div');
-                slot.className = 'inventory-slot';
-
-                if (actualIndex < gameState.inventory.length) {
-                    const item = gameState.inventory[actualIndex];
-                    const rarityClass = getRarityClass(item.value);
-                    slot.innerHTML = `<div class="slot-value ${rarityClass}">${item.value}</div>`;
-                    slot.onclick = () => openDeleteModal(actualIndex);
-                } else {
-                    slot.classList.add('empty');
-                    slot.innerHTML = '<div style="opacity: 0.3;">Empty</div>';
-                }
-
-                grid.appendChild(slot);
-            }
-
-            updatePaginationControls();
-        }
-
-        function updatePaginationControls() {
-            document.getElementById('currentPage').textContent = gameState.currentPage;
-            document.getElementById('prevBtn').disabled = gameState.currentPage === 1;
-            document.getElementById('nextBtn').disabled = gameState.currentPage === TOTAL_PAGES;
-        }
-
-        function changePage(direction) {
-            const newPage = gameState.currentPage + direction;
-            if (newPage >= 1 && newPage <= TOTAL_PAGES) {
-                gameState.currentPage = newPage;
-                renderInventory();
-                saveGame();
+            } else {
+                setTimeout(finishRoll, 100);
             }
         }
+        requestAnimationFrame(animateScroll);
+    }, 50);
+}
 
-        function sortInventory(method) {
-            switch(method) {
-                case 'value-desc':
-                    gameState.inventory.sort((a, b) => b.value - a.value);
-                    break;
-                case 'value-asc':
-                    gameState.inventory.sort((a, b) => a.value - b.value);
-                    break;
-                case 'newest':
-                    gameState.inventory.sort((a, b) => b.timestamp - a.timestamp);
-                    break;
-                case 'oldest':
-                    gameState.inventory.sort((a, b) => a.timestamp - b.timestamp);
-                    break;
+function finishRoll() {
+    // Reveal all secret mystery boxes
+    const rollTrack = document.getElementById('rollTrack');
+    rollTrack.querySelectorAll('.secret-slot').forEach(square => {
+        if (square.dataset.realContent) {
+            square.innerHTML = square.dataset.realContent;
+            delete square.dataset.realContent;
+        }
+    });
+
+    gameState.isRolling = false;
+    document.getElementById('rollBtn').disabled = false;
+    document.getElementById('acceptBtn').disabled = false;
+    renderPendingPanel();
+    saveGame();
+    updateStats();
+}
+
+// ============================================================
+// PENDING PANEL
+// ============================================================
+function renderPendingPanel() {
+    const panel = document.getElementById('pendingPanel');
+    const orbsDiv = document.getElementById('pendingPanelOrbs');
+
+    if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) {
+        panel.classList.remove('visible');
+        return;
+    }
+
+    const pendingEnchants = gameState.pendingRolls.filter(r => r.enchant).map(r => r.enchant);
+    if (pendingEnchants.length === 0) {
+        panel.classList.remove('visible');
+        return;
+    }
+
+    let html = '';
+    pendingEnchants.forEach(e => {
+        html += enchantOrbHTML(e, 35, '', e.name);
+        html += `<span style="font-size:0.8em;align-self:center;color:#ffd700;">${e.name}</span>`;
+    });
+
+    orbsDiv.innerHTML = html;
+    panel.classList.add('visible');
+}
+
+// ============================================================
+// ACCEPT ROLL
+// ============================================================
+function acceptRoll() {
+    if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
+
+    // Add values to inventory (as many as fit)
+    let added = 0;
+    for (const slot of gameState.pendingRolls) {
+        if (gameState.inventory.length >= MAX_INVENTORY) break;
+        const invItem = { value: slot.value, timestamp: Date.now() + added };
+        if (slot.isEpilepsy) invItem.isEpilepsy = true;
+        gameState.inventory.push(invItem);
+        gameState.stats.acceptedRanks++;
+        if (!slot.isEpilepsy) {
+            gameState.stats.totalValue += slot.value;
+            if (gameState.stats.highestRank === null || slot.value > gameState.stats.highestRank) {
+                gameState.stats.highestRank = slot.value;
             }
-            renderInventory();
-            saveGame();
+        }
+        added++;
+    }
+
+    if (gameState.inventory.length >= MAX_INVENTORY && added < gameState.pendingRolls.length) {
+        alert('Inventory is full! Some ranks were not accepted.');
+    }
+
+    // Process pending enchants
+    const pendingEnchants = gameState.pendingRolls.filter(r => r.enchant).map(r => r.enchant);
+
+    for (const enchant of pendingEnchants) {
+        // Handle brick: increment global display counter (stats come from equipped orb)
+        if (enchant.type === 'joke' && enchant.name === 'Brick') {
+            gameState.brickCount++;
+            document.getElementById('brickStatBox').style.display = '';
+            document.getElementById('brickCount').textContent = gameState.brickCount;
         }
 
-        // Render enchant inventory (updated to handle allinone display)
-        function renderEnchantInventory() {
-            const grid = document.getElementById('enchantGrid');
-            grid.innerHTML = '';
-
-            const startIndex = (gameState.currentEnchantPage - 1) * ENCHANTS_PER_PAGE;
-            const endIndex = startIndex + ENCHANTS_PER_PAGE;
-
-            for (let i = 0; i < ENCHANTS_PER_PAGE; i++) {
-                const actualIndex = startIndex + i;
-                const slot = document.createElement('div');
-                slot.className = 'enchant-slot';
-
-                if (actualIndex < gameState.enchantOrbs.length) {
-                    const orb = gameState.enchantOrbs[actualIndex];
-                    const isEquipped = gameState.equippedOrb && gameState.equippedOrb.id === orb.id;
-                    
-                    if (isEquipped) {
-                        slot.classList.add('equipped');
-                    }
-                    
-                    const equippedBadge = isEquipped ? '<div class="equipped-badge">EQUIPPED</div>' : '';
-                    
-                    // Get all enchants in the orb
-                    const enchantTypes = Object.keys(orb.enchants);
-                    let enchantsHTML = '';
-                    
-                    if (enchantTypes.length > 0) {
-                        enchantsHTML = '<div class="orb-enchants-display">';
-                        enchantTypes.forEach(type => {
-                            const enchant = orb.enchants[type];
-                            const displayText = getEnchantDisplay(enchant);
-                            const textColor = enchant.textColor || 'white';
-                            const fontSize = enchant.display === 'HELP' ? '0.45em' : (enchant.display ? '0.9em' : '0.8em');
-                            const shakeClass = enchant.shake ? 'shake-animation' : '';
-                            const background = enchant.color && enchant.color.includes('gradient') 
-                                ? `background: ${enchant.color};` 
-                                : `background-color: ${enchant.color || '#888'};`;
-                            
-                            enchantsHTML += `
-                                <div class="mini-enchant-orb ${shakeClass}" style="${background} color: ${textColor}; font-size: ${fontSize};" title="${enchant.name}">
-                                    ${displayText}
-                                </div>
-                            `;
-                        });
-                        enchantsHTML += '</div>';
-                    }
-                    
-                    slot.innerHTML = `
-                        ${equippedBadge}
-                        <div style="font-weight: bold; margin-bottom: 5px;">Enchant Orb</div>
-                        ${enchantsHTML}
-                        <button class="delete-orb-btn" onclick="event.stopPropagation(); openDeleteEnchantModal(${actualIndex})">Delete</button>
-                    `;
-                    slot.onclick = () => toggleEquipOrb(actualIndex);
-                } else {
-                    slot.classList.add('empty');
-                    slot.innerHTML = '<div style="opacity: 0.3;">Empty</div>';
-                }
-
-                grid.appendChild(slot);
-            }
-
-            updateEnchantPaginationControls();
-            renderEquippedEnchants();
-        }
-
-        function updateEnchantPaginationControls() {
-            document.getElementById('currentEnchantPage').textContent = gameState.currentEnchantPage;
-            document.getElementById('prevEnchantBtn').disabled = gameState.currentEnchantPage === 1;
-            document.getElementById('nextEnchantBtn').disabled = gameState.currentEnchantPage === TOTAL_ENCHANT_PAGES;
-        }
-
-        function renderEquippedEnchants() {
-            const grid = document.getElementById('equippedGrid');
-            grid.innerHTML = '';
-
-            const slot = document.createElement('div');
-            slot.className = 'equipped-slot';
-
+        // Add to orb system if there's space
+        if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
+            let targetOrb;
             if (gameState.equippedOrb) {
-                const orb = gameState.equippedOrb;
-                
-                const enchantTypes = Object.keys(orb.enchants);
-                let enchantsHTML = '';
-                
-                if (enchantTypes.length > 0) {
-                    enchantsHTML = '<div class="orb-enchants-display">';
-                    enchantTypes.forEach(type => {
-                        const enchant = orb.enchants[type];
-                        const displayText = getEnchantDisplay(enchant);
-                        const textColor = enchant.textColor || 'white';
-                        const fontSize = enchant.display === 'HELP' ? '0.45em' : (enchant.display ? '0.9em' : '0.8em');
-                        const shakeClass = enchant.shake ? 'shake-animation' : '';
-                        const background = enchant.color && enchant.color.includes('gradient') 
-                            ? `background: ${enchant.color};` 
-                            : `background-color: ${enchant.color || '#888'};`;
-                        
-                        enchantsHTML += `
-                            <div class="mini-enchant-orb ${shakeClass}" style="${background} color: ${textColor}; font-size: ${fontSize};" title="${enchant.name}">
-                                ${displayText}
-                            </div>
-                        `;
-                    });
-                    enchantsHTML += '</div>';
+                targetOrb = gameState.equippedOrb;
+            } else {
+                targetOrb = createEnchantOrb();
+                gameState.enchantOrbs.push(targetOrb);
+                gameState.equippedOrb = targetOrb;
+            }
+            addEnchantToOrb(targetOrb, enchant);
+        }
+    }
+
+    // Clear pending
+    gameState.pendingRolls = [];
+
+    document.getElementById('acceptBtn').disabled = true;
+    document.getElementById('pendingPanel').classList.remove('visible');
+
+    saveGame();
+    renderInventory();
+    renderEnchantInventory();
+    updateStats();
+    updateActiveEffectsBar();
+}
+
+// ============================================================
+// RENDER INVENTORY
+// ============================================================
+function renderInventory() {
+    const grid = document.getElementById('inventoryGrid');
+    grid.innerHTML = '';
+    const startIndex = (gameState.currentPage - 1) * ITEMS_PER_PAGE;
+
+    for (let i = 0; i < ITEMS_PER_PAGE; i++) {
+        const actualIndex = startIndex + i;
+        const slot = document.createElement('div');
+        slot.className = 'inventory-slot';
+
+        if (actualIndex < gameState.inventory.length) {
+            const item = gameState.inventory[actualIndex];
+            if (item.isEpilepsy) {
+                slot.classList.add('epilepsy-inv');
+                slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
+            } else {
+                const rarityClass = getRarityClass(item.value);
+                slot.innerHTML = `<div class="slot-value ${rarityClass}">${item.value}</div>`;
+            }
+            slot.onclick = () => openDeleteModal(actualIndex);
+        } else {
+            slot.classList.add('empty');
+            slot.innerHTML = '<div style="opacity:0.3;">Empty</div>';
+        }
+        grid.appendChild(slot);
+    }
+    updatePaginationControls();
+}
+
+function updatePaginationControls() {
+    document.getElementById('currentPage').textContent = gameState.currentPage;
+    document.getElementById('prevBtn').disabled = gameState.currentPage === 1;
+    document.getElementById('nextBtn').disabled = gameState.currentPage === TOTAL_PAGES;
+}
+
+function changePage(direction) {
+    const newPage = gameState.currentPage + direction;
+    if (newPage >= 1 && newPage <= TOTAL_PAGES) {
+        gameState.currentPage = newPage;
+        renderInventory();
+        saveGame();
+    }
+}
+
+function sortInventory(method) {
+    switch(method) {
+        case 'value-desc': gameState.inventory.sort((a,b) => b.value - a.value); break;
+        case 'value-asc':  gameState.inventory.sort((a,b) => a.value - b.value); break;
+        case 'newest':     gameState.inventory.sort((a,b) => b.timestamp - a.timestamp); break;
+        case 'oldest':     gameState.inventory.sort((a,b) => a.timestamp - b.timestamp); break;
+    }
+    renderInventory();
+    saveGame();
+}
+
+// ============================================================
+// RENDER ENCHANT INVENTORY
+// ============================================================
+function renderEnchantInventory() {
+    const grid = document.getElementById('enchantGrid');
+    grid.innerHTML = '';
+    const startIndex = (gameState.currentEnchantPage - 1) * ENCHANTS_PER_PAGE;
+
+    for (let i = 0; i < ENCHANTS_PER_PAGE; i++) {
+        const actualIndex = startIndex + i;
+        const slot = document.createElement('div');
+        slot.className = 'enchant-slot';
+
+        if (actualIndex < gameState.enchantOrbs.length) {
+            const orb = gameState.enchantOrbs[actualIndex];
+            const isEquipped = gameState.equippedOrb && gameState.equippedOrb.id === orb.id;
+            const isSelectedForMerge = gameState.mergeSelection.includes(orb.id);
+            const isLocked = !!orb.locked;
+
+            if (isEquipped && !gameState.mergeModeActive) slot.classList.add('equipped');
+            if (isSelectedForMerge) slot.classList.add('selected-for-merge');
+            if (isLocked) slot.classList.add('locked');
+
+            const equippedBadge = (isEquipped && !gameState.mergeModeActive) ? '<div class="equipped-badge">EQUIPPED</div>' : '';
+            const lockedBadge = isLocked ? '<div class="locked-badge">🔒 MERGED</div>' : '';
+            const mergeBadge = isSelectedForMerge ? '<div class="equipped-badge" style="background:#f59e0b;color:#000;">SELECTED</div>' : '';
+
+            slot.innerHTML = `
+                ${equippedBadge}${lockedBadge}${mergeBadge}
+                <div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>
+                ${orbEnchantsHTML(orb)}
+                <button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>
+            `;
+
+            if (gameState.mergeModeActive) {
+                if (!isLocked) {
+                    slot.onclick = () => { event.stopPropagation(); selectForMerge(orb.id); };
+                    slot.title = isSelectedForMerge ? 'Click to deselect' : 'Click to select for merge';
+                } else {
+                    slot.style.cursor = 'not-allowed';
+                    slot.title = 'Merged orbs cannot be merged again';
                 }
-                
-                slot.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">Equipped Orb</div>
-                    ${enchantsHTML}
-                `;
-                slot.onclick = () => unequipOrb();
             } else {
-                slot.classList.add('empty');
-                slot.innerHTML = '<div style="opacity: 0.3;">No Orb Equipped</div>';
+                slot.onclick = () => toggleEquipOrb(actualIndex);
             }
-
-            grid.appendChild(slot);
+        } else {
+            slot.classList.add('empty');
+            slot.innerHTML = '<div style="opacity:0.3;">Empty</div>';
         }
+        grid.appendChild(slot);
+    }
 
-        function toggleEquipOrb(index) {
-            const orb = gameState.enchantOrbs[index];
+    updateEnchantPaginationControls();
+    renderEquippedEnchants();
+}
 
-            if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
-                gameState.equippedOrb = null;
-            } else {
-                gameState.equippedOrb = orb;
-            }
+function updateEnchantPaginationControls() {
+    document.getElementById('currentEnchantPage').textContent = gameState.currentEnchantPage;
+    document.getElementById('prevEnchantBtn').disabled = gameState.currentEnchantPage === 1;
+    document.getElementById('nextEnchantBtn').disabled = gameState.currentEnchantPage === TOTAL_ENCHANT_PAGES;
+}
 
-            saveGame();
-            renderEnchantInventory();
-        }
+function changeEnchantPage(direction) {
+    const newPage = gameState.currentEnchantPage + direction;
+    if (newPage >= 1 && newPage <= TOTAL_ENCHANT_PAGES) {
+        gameState.currentEnchantPage = newPage;
+        renderEnchantInventory();
+        saveGame();
+    }
+}
 
-        function unequipOrb() {
+function sortEnchants(method) {
+    function getMaxTier(orb) {
+        let max = 0;
+        Object.values(orb.enchants).forEach(e => { if ((e.tier || 0) > max) max = e.tier; });
+        return max;
+    }
+    function getFirstType(orb) {
+        const keys = Object.keys(orb.enchants);
+        return keys.length > 0 ? (orb.enchants[keys[0]].type || '') : '';
+    }
+
+    switch(method) {
+        case 'tier-desc': gameState.enchantOrbs.sort((a,b) => getMaxTier(b) - getMaxTier(a)); break;
+        case 'tier-asc':  gameState.enchantOrbs.sort((a,b) => getMaxTier(a) - getMaxTier(b)); break;
+        case 'type':      gameState.enchantOrbs.sort((a,b) => getFirstType(a).localeCompare(getFirstType(b))); break;
+        case 'newest':    gameState.enchantOrbs.sort((a,b) => b.timestamp - a.timestamp); break;
+    }
+    renderEnchantInventory();
+    saveGame();
+}
+
+function renderEquippedEnchants() {
+    const grid = document.getElementById('equippedGrid');
+    grid.innerHTML = '';
+
+    const slot = document.createElement('div');
+    slot.className = 'equipped-slot';
+
+    if (gameState.equippedOrb) {
+        const orb = gameState.equippedOrb;
+        slot.innerHTML = `
+            <div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Equipped Orb</div>
+            ${orbEnchantsHTML(orb)}
+            <div style="font-size:0.75em;opacity:0.6;margin-top:6px;">Click to unequip</div>
+        `;
+        slot.onclick = () => unequipOrb();
+    } else {
+        slot.classList.add('empty');
+        slot.innerHTML = '<div style="opacity:0.3;">No Orb Equipped</div>';
+    }
+
+    grid.appendChild(slot);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openDeleteModal(index) {
+    gameState.deleteIndex = index;
+    gameState.deleteEnchantIndex = null;
+    const item = gameState.inventory[index];
+    document.getElementById('deleteRankValue').textContent = `rank ${item.value}`;
+    document.getElementById('deleteModal').classList.add('show');
+}
+
+function openDeleteEnchantModal(index) {
+    gameState.deleteEnchantIndex = index;
+    gameState.deleteIndex = null;
+    const orb = gameState.enchantOrbs[index];
+    const names = Object.values(orb.enchants).map(e => e.name).join(' + ') || 'empty orb';
+    document.getElementById('deleteRankValue').textContent = `Orb (${names})`;
+    document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+    gameState.deleteIndex = null;
+    gameState.deleteEnchantIndex = null;
+}
+
+function confirmDelete() {
+    if (gameState.deleteEnchantIndex !== null) {
+        const orb = gameState.enchantOrbs[gameState.deleteEnchantIndex];
+        if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
             gameState.equippedOrb = null;
-            saveGame();
-            renderEnchantInventory();
         }
+        gameState.enchantOrbs.splice(gameState.deleteEnchantIndex, 1);
+        renderEnchantInventory();
+        updateActiveEffectsBar();
+        saveGame();
+    } else if (gameState.deleteIndex !== null) {
+        gameState.inventory.splice(gameState.deleteIndex, 1);
+        gameState.stats.acceptedRanks = gameState.inventory.length;
+        gameState.stats.totalValue = gameState.inventory.reduce((s, it) => s + it.value, 0);
+        gameState.stats.highestRank = gameState.inventory.length > 0
+            ? Math.max(...gameState.inventory.map(it => it.value))
+            : null;
+        renderInventory();
+        updateStats();
+        saveGame();
+    }
+    closeDeleteModal();
+}
 
-        function changeEnchantPage(direction) {
-            const newPage = gameState.currentEnchantPage + direction;
-            if (newPage >= 1 && newPage <= TOTAL_ENCHANT_PAGES) {
-                gameState.currentEnchantPage = newPage;
-                renderEnchantInventory();
-                saveGame();
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+    document.getElementById('totalRolls').textContent = gameState.stats.totalRolls;
+    document.getElementById('acceptedRanks').textContent = gameState.stats.acceptedRanks;
+    document.getElementById('highestRank').textContent =
+        gameState.stats.highestRank !== null ? gameState.stats.highestRank : '-';
+    const avg = gameState.inventory.length > 0
+        ? (gameState.stats.totalValue / gameState.inventory.length).toFixed(2)
+        : '-';
+    document.getElementById('avgRank').textContent = avg;
+    if (gameState.brickCount > 0) {
+        document.getElementById('brickStatBox').style.display = '';
+        document.getElementById('brickCount').textContent = gameState.brickCount;
+    }
+}
+
+// ============================================================
+// ENCHANT INDEX TOGGLE
+// ============================================================
+function toggleEnchantType(type) {
+    const content = document.getElementById(`${type}-content`);
+    const toggle = document.getElementById(`${type}-toggle`);
+    if (!content || !toggle) return;
+    if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        toggle.textContent = '▼';
+    } else {
+        content.classList.add('open');
+        toggle.textContent = '▲';
+    }
+}
+
+function toggleJokeEnchants(enabled) {
+    gameState.jokeEnchantsEnabled = enabled;
+    document.getElementById('jokeToggleStatus').textContent = enabled ? 'ON' : 'OFF';
+    document.getElementById('jokeToggleStatus').style.color = enabled ? '#ffd700' : '#aaa';
+    saveGame();
+}
+
+// ============================================================
+// SAVE / LOAD
+// ============================================================
+function saveGame() {
+    try {
+        localStorage.setItem('logmaRNGame', JSON.stringify(gameState));
+    } catch(e) { /* storage full or unavailable */ }
+}
+
+function loadGame() {
+    try {
+        const saved = localStorage.getItem('logmaRNGame');
+        if (saved) {
+            const d = JSON.parse(saved);
+            gameState.inventory = d.inventory || [];
+            gameState.enchantOrbs = d.enchantOrbs || [];
+            gameState.equippedOrb = d.equippedOrb || null;
+            gameState.stats = d.stats || { totalRolls:0, acceptedRanks:0, highestRank:null, totalValue:0 };
+            gameState.currentPage = d.currentPage || 1;
+            gameState.currentEnchantPage = d.currentEnchantPage || 1;
+            gameState.jokeEnchantsEnabled = d.jokeEnchantsEnabled || false;
+            gameState.brickCount = d.brickCount || 0;
+            gameState.luckButtonClicks = 0; // always reset on load
+        }
+    } catch(e) { /* parse error, start fresh */ }
+
+    // Reset transient state
+    gameState.pendingRolls = [];
+    gameState.mergeSelection = [];
+    gameState.mergeModeActive = false;
+    gameState.isRolling = false;
+    gameState.deleteIndex = null;
+    gameState.deleteEnchantIndex = null;
+
+    // Sync joke toggle UI
+    document.getElementById('jokeToggleSwitch').checked = gameState.jokeEnchantsEnabled;
+    document.getElementById('jokeToggleStatus').textContent = gameState.jokeEnchantsEnabled ? 'ON' : 'OFF';
+    document.getElementById('jokeToggleStatus').style.color = gameState.jokeEnchantsEnabled ? '#ffd700' : '#aaa';
+
+    if (gameState.brickCount > 0) {
+        document.getElementById('brickStatBox').style.display = '';
+    }
+
+    // Inject Avarice SVG into enchant index
+    const avariceOrb = document.getElementById('avariceIndexOrb');
+    if (avariceOrb) {
+        avariceOrb.style.width = '56px';
+        avariceOrb.style.height = '56px';
+        avariceOrb.innerHTML = getAvariceSVG(56);
+    }
+
+    renderInventory();
+    renderEnchantInventory();
+    updateStats();
+    updateActiveEffectsBar();
+}
+
+// ============================================================
+// MERGE LOGIC
+// ============================================================
+function toggleMergeMode() {
+    gameState.mergeModeActive = !gameState.mergeModeActive;
+    if (!gameState.mergeModeActive) {
+        gameState.mergeSelection = [];
+        renderMergePanel();
+    }
+    const btn = document.getElementById('mergeModeBtn');
+    btn.textContent = '🔀 Merge Mode: ' + (gameState.mergeModeActive ? 'ON' : 'OFF');
+    btn.classList.toggle('active', gameState.mergeModeActive);
+    renderEnchantInventory();
+}
+
+function cancelMerge() {
+    gameState.mergeSelection = [];
+    renderMergePanel();
+    renderEnchantInventory();
+}
+
+function selectForMerge(orbId) {
+    const idx = gameState.mergeSelection.indexOf(orbId);
+    if (idx >= 0) {
+        gameState.mergeSelection.splice(idx, 1);
+    } else if (gameState.mergeSelection.length < 2) {
+        gameState.mergeSelection.push(orbId);
+    }
+    renderMergePanel();
+    renderEnchantInventory();
+}
+
+function findMergeCostItem() {
+    // Find lowest inventory item >= 6 logRNG (non-EPILEPSY)
+    let best = null;
+    let bestIdx = -1;
+    gameState.inventory.forEach((item, i) => {
+        if (item.isEpilepsy) return;
+        if (item.value >= 6) {
+            if (best === null || item.value < best.value) {
+                best = item; bestIdx = i;
             }
         }
+    });
+    return { item: best, index: bestIdx };
+}
 
-        function sortEnchants(method) {
-            switch(method) {
-                case 'tier-desc':
-                case 'tier-asc':
-                case 'type':
-                    gameState.enchantOrbs.sort((a, b) => b.timestamp - a.timestamp);
-                    break;
-                case 'newest':
-                    gameState.enchantOrbs.sort((a, b) => b.timestamp - a.timestamp);
-                    break;
-            }
-            renderEnchantInventory();
-            saveGame();
+function renderMergePanel() {
+    const panel = document.getElementById('mergePanel');
+    const preview = document.getElementById('mergeOrbsPreview');
+    const costInfo = document.getElementById('mergeCostInfo');
+    const mergeBtn = document.getElementById('doMergeBtn');
+
+    if (gameState.mergeSelection.length === 0) {
+        panel.classList.remove('visible');
+        return;
+    }
+    panel.classList.add('visible');
+
+    let previewHTML = '';
+    gameState.mergeSelection.forEach(id => {
+        const orb = gameState.enchantOrbs.find(o => o.id === id);
+        if (!orb) return;
+        previewHTML += `<div class="merge-orb-preview">
+            <div style="font-size:0.8em;margin-bottom:6px;opacity:0.7;">Orb</div>
+            ${orbEnchantsHTML(orb)}
+        </div>`;
+    });
+
+    if (gameState.mergeSelection.length === 1) {
+        previewHTML += `<div style="opacity:0.5;font-size:0.85em;">Select one more orb…</div>`;
+    } else if (gameState.mergeSelection.length === 2) {
+        previewHTML += `<div style="font-size:1.5em;">→</div>
+        <div class="merge-orb-preview">
+            <div style="font-size:0.8em;margin-bottom:6px;color:#f59e0b;">Merged</div>
+            ${getMergePreviewHTML()}
+        </div>`;
+    }
+    preview.innerHTML = previewHTML;
+
+    const { item } = findMergeCostItem();
+    if (gameState.mergeSelection.length === 2) {
+        if (item) {
+            costInfo.className = 'merge-cost-info';
+            costInfo.textContent = `Cost: rank ${item.value} (lowest ≥6 in inventory)`;
+            mergeBtn.disabled = false;
+        } else {
+            costInfo.className = 'merge-cost-info no-cost';
+            costInfo.textContent = 'Need at least one rank ≥ 6 in inventory to merge!';
+            mergeBtn.disabled = true;
         }
+    } else {
+        costInfo.textContent = '';
+        mergeBtn.disabled = true;
+    }
+}
 
-        function toggleEnchantType(type) {
-            const content = document.getElementById(`${type}-content`);
-            const toggle = document.getElementById(`${type}-toggle`);
-            
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-                toggle.textContent = '▼';
+function getMergePreviewHTML() {
+    const mergedEnchants = buildMergedEnchants();
+    const fakeOrb = { enchants: mergedEnchants };
+    return orbEnchantsHTML(fakeOrb);
+}
+
+function buildMergedEnchants() {
+    const merged = {};
+    gameState.mergeSelection.forEach(id => {
+        const orb = gameState.enchantOrbs.find(o => o.id === id);
+        if (!orb) return;
+        Object.entries(orb.enchants).forEach(([key, enchant]) => {
+            if (!merged[key]) {
+                merged[key] = { ...enchant };
             } else {
-                content.classList.add('open');
-                toggle.textContent = '▲';
-            }
-        }
-
-        let deleteEnchantIndex = null;
-
-        function openDeleteEnchantModal(index) {
-            deleteEnchantIndex = index;
-            gameState.deleteIndex = null;
-            const orb = gameState.enchantOrbs[index];
-            const enchantNames = Object.values(orb.enchants).map(e => e.name).join(' + ');
-            document.getElementById('deleteRankValue').textContent = `Orb (${enchantNames})`;
-            document.getElementById('deleteModal').classList.add('show');
-        }
-
-        function openDeleteModal(index) {
-            gameState.deleteIndex = index;
-            deleteEnchantIndex = null;
-            const item = gameState.inventory[index];
-            document.getElementById('deleteRankValue').textContent = item.value;
-            document.getElementById('deleteModal').classList.add('show');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('show');
-            gameState.deleteIndex = null;
-            deleteEnchantIndex = null;
-        }
-
-        function confirmDelete() {
-            if (deleteEnchantIndex !== null) {
-                const orb = gameState.enchantOrbs[deleteEnchantIndex];
-                
-                if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
-                    gameState.equippedOrb = null;
+                // Brick: sum counts
+                if (key === 'brick') {
+                    merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
+                } else {
+                    // Duplicate: keep both under a unique key instead of discarding
+                    let dupKey = key + '_2';
+                    let n = 2;
+                    while (merged[dupKey]) { n++; dupKey = key + '_' + n; }
+                    merged[dupKey] = { ...enchant };
                 }
-                
-                gameState.enchantOrbs.splice(deleteEnchantIndex, 1);
-                renderEnchantInventory();
-                saveGame();
-                deleteEnchantIndex = null;
-            } else if (gameState.deleteIndex !== null) {
-                gameState.inventory.splice(gameState.deleteIndex, 1);
-                gameState.stats.acceptedRanks = gameState.inventory.length;
-                
-                gameState.stats.totalValue = gameState.inventory.reduce((sum, item) => sum + item.value, 0);
-                gameState.stats.highestRank = gameState.inventory.length > 0 
-                    ? Math.max(...gameState.inventory.map(item => item.value))
-                    : null;
-
-                renderInventory();
-                updateStats();
-                saveGame();
             }
-            closeDeleteModal();
-        }
+        });
+    });
+    return merged;
+}
 
-        function updateStats() {
-            document.getElementById('totalRolls').textContent = gameState.stats.totalRolls;
-            document.getElementById('acceptedRanks').textContent = gameState.stats.acceptedRanks;
-            document.getElementById('highestRank').textContent = 
-                gameState.stats.highestRank !== null ? gameState.stats.highestRank : '-';
-            
-            const avgRank = gameState.inventory.length > 0 
-                ? (gameState.stats.totalValue / gameState.inventory.length).toFixed(2)
-                : '-';
-            document.getElementById('avgRank').textContent = avgRank;
-        }
+function performMerge() {
+    if (gameState.mergeSelection.length !== 2) return;
+    const { item, index } = findMergeCostItem();
+    if (!item) return;
 
-        function saveGame() {
-            localStorage.setItem('logmaRNGame', JSON.stringify(gameState));
-        }
+    // Build merged orb
+    const mergedEnchants = buildMergedEnchants();
+    const newOrb = {
+        id: Date.now() + Math.random(),
+        enchants: mergedEnchants,
+        timestamp: Date.now(),
+        locked: true   // can never be selected for merge again
+    };
 
-        function loadGame() {
-            const saved = localStorage.getItem('logmaRNGame');
-            if (saved) {
-                const savedData = JSON.parse(saved);
-                gameState.inventory = savedData.inventory || [];
-                gameState.enchantOrbs = savedData.enchantOrbs || savedData.enchants || [];
-                gameState.equippedOrb = savedData.equippedOrb || null;
-                gameState.stats = savedData.stats || {
-                    totalRolls: 0,
-                    acceptedRanks: 0,
-                    highestRank: null,
-                    totalValue: 0
-                };
-                gameState.currentPage = savedData.currentPage || 1;
-                gameState.currentEnchantPage = savedData.currentEnchantPage || 1;
-            }
-            gameState.currentRoll = null;
-            gameState.isRolling = false;
-            gameState.deleteIndex = null;
-            deleteEnchantIndex = null;
-            
-            renderInventory();
-            renderEnchantInventory();
-            updateStats();
-        }
+    // Remove source orbs (by id)
+    const removedIds = [...gameState.mergeSelection];
+    gameState.enchantOrbs = gameState.enchantOrbs.filter(o => !removedIds.includes(o.id));
 
-        document.getElementById('rollBtn').addEventListener('click', performRoll);
-        document.getElementById('acceptBtn').addEventListener('click', acceptRoll);
+    // If equipped orb was one of the merged, unequip
+    if (gameState.equippedOrb && removedIds.includes(gameState.equippedOrb.id)) {
+        gameState.equippedOrb = null;
+    }
 
-        loadGame();
-    </script>
+    // Add merged orb (if space)
+    if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
+        gameState.enchantOrbs.push(newOrb);
+    }
+
+    // Consume cost item from inventory
+    gameState.inventory.splice(index, 1);
+    gameState.stats.acceptedRanks = gameState.inventory.length;
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+        : null;
+
+    // Reset
+    gameState.mergeSelection = [];
+    gameState.mergeModeActive = false;
+    const btn = document.getElementById('mergeModeBtn');
+    btn.textContent = '🔀 Merge Mode: OFF';
+    btn.classList.remove('active');
+
+    saveGame();
+    renderInventory();
+    renderEnchantInventory();
+    renderMergePanel();
+    updateStats();
+    updateActiveEffectsBar();
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+document.getElementById('rollBtn').addEventListener('click', performRoll);
+document.getElementById('acceptBtn').addEventListener('click', acceptRoll);
+
+loadGame();
+</script>
+
 </body>
 </html>

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>poly's logmaRNGame</title>
     <style>
-        /* existing styles preserved, with additions */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -65,6 +64,9 @@
             border: 2px solid transparent;
             transition: all 0.3s;
             position: relative;
+            width: calc(120px * var(--slot-scale, 1));
+            height: calc(110px * var(--slot-scale, 1));
+            font-size: calc(1em * var(--slot-scale, 1));
         }
 
         .roll-square.acceptable {
@@ -98,7 +100,6 @@
 
         .rank-name { font-size: 1.5em; font-weight: bold; margin-bottom: 8px; }
         .rank-value { font-size: 0.9em; opacity: 0.7; }
-        .rank-secret { font-size: 0.7em; opacity: 0.6; color: #bb88ff; margin-top: 3px; }
 
         .controls {
             display: flex;
@@ -116,7 +117,7 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 600;
-            touch-action: manipulation; /* prevent double-tap zoom on mobile */
+            touch-action: manipulation;
         }
 
         .roll-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
@@ -127,7 +128,6 @@
 
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Pending enchants panel */
         .pending-panel {
             background: rgba(255,215,0,0.08);
             border: 1px solid rgba(255,215,0,0.3);
@@ -140,7 +140,6 @@
         .pending-panel h4 { color: #ffd700; margin-bottom: 8px; font-size: 0.9em; }
         .pending-panel-orbs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
-        /* Bulk info label */
         .bulk-info {
             font-size: 0.85em;
             color: rgba(0,212,255,0.7);
@@ -184,6 +183,7 @@
             transition: all 0.3s;
             padding: 10px;
             position: relative;
+            font-size: clamp(0.8rem, 2vw, 1.5rem);
         }
 
         .inventory-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
@@ -191,7 +191,6 @@
         .inventory-slot.empty:hover { transform: none; border-color: rgba(255,255,255,0.1); }
         .slot-value { font-size: 1.3em; font-weight: bold; }
 
-        /* bulk delete checkbox */
         .delete-checkbox {
             position: absolute;
             top: 5px;
@@ -230,7 +229,6 @@
         .confirm-btn { background: #f5576c; color: white; padding: 10px 25px; }
         .cancel-btn { background: rgba(255,255,255,0.1); color: white; padding: 10px 25px; }
 
-        /* Rarity colors */
         .rarity-neg { color: #ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.5); }
         .rarity-0 { color: #aaa; }
         .rarity-1 { color: #5dff5d; }
@@ -246,7 +244,6 @@
         .roll-square.secret-slot.acceptable { border-color: rgba(187,136,255,0.8) !important; }
         .roll-square.secret-slot.center-acceptable { border-color: #bb88ff !important; box-shadow: 0 0 20px rgba(187,136,255,0.6) !important; }
 
-        /* Secret mystery box */
         .secret-mystery-box {
             width: 100%; height: 100%;
             background: #000;
@@ -269,7 +266,6 @@
             100% { background-position: 200% center; }
         }
 
-        /* Enchant styling */
         .enchant-orb {
             width: 60px; height: 60px;
             border-radius: 50%;
@@ -381,7 +377,6 @@
         .enchant-item-effect { font-size: 0.85em; opacity: 0.8; }
         .enchant-item-rarity { font-size: 0.75em; opacity: 0.6; }
 
-        /* Joke enchant toggle switch */
         .joke-toggle-row {
             display: flex; align-items: center; gap: 12px;
             padding: 10px; background: rgba(255,255,100,0.06);
@@ -407,7 +402,6 @@
         input:checked + .toggle-slider { background-color: #ffd700; }
         input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-        /* Secret number section */
         .secret-section .enchant-type-header h3 { color: #bb88ff; }
         .secret-item {
             padding: 8px;
@@ -493,7 +487,6 @@
         .do-merge-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .inventory-slot.epilepsy-inv { border-color: rgba(255,0,0,0.4) !important; background: rgba(50,0,0,0.2) !important; }
 
-        /* bulk delete controls */
         .bulk-delete-bar {
             background: rgba(255,87,108,0.1);
             border: 1px solid #f5576c;
@@ -509,6 +502,10 @@
         .threshold-input { width: 100px; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #f5576c; color: white; border-radius: 4px; }
         .threshold-input::placeholder { color: #aaa; }
         .exclude-secrets-label { display: flex; align-items: center; gap: 5px; font-size: 0.85em; color: #bb88ff; }
+
+        .imaginary { filter: hue-rotate(75deg); }
+        .negative { filter: hue-rotate(-100deg); }
+        .imaginary.negative { filter: hue-rotate(75deg) hue-rotate(-100deg); }
     </style>
 </head>
 <body>
@@ -577,7 +574,6 @@
                 <button class="page-btn" onclick="changePage(1)" id="nextBtn">▶</button>
             </div>
         </div>
-        <!-- bulk delete bar -->
         <div id="bulkDeleteBar" class="bulk-delete-bar" style="display:none;">
             <button class="bulk-delete-btn" onclick="deleteSelectedInventory()">Delete Selected</button>
             <div style="display:flex; gap:5px; align-items:center;">
@@ -794,7 +790,7 @@
                 </div>
             </div>
 
-            <!-- Curse -->
+            <!-- Curse (updated with Wrath and shifted tiers) -->
             <div class="enchant-type-section">
                 <div class="enchant-type-header" onclick="toggleEnchantType('curse')">
                     <h3>💀 Curse Enchants</h3><span id="curse-toggle">▼</span>
@@ -814,6 +810,15 @@
                             <div class="enchant-item-name">Sloth</div>
                             <div class="enchant-item-effect">+5x luck, +2.5s roll time, +5 bulk rolls</div>
                             <div class="enchant-item-rarity">Rarity: 1/163 (0.61%)</div>
+                        </div>
+                    </div>
+                    <!-- new Wrath -->
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#b91c1c;color:#ffd700;">W</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Wrath</div>
+                            <div class="enchant-item-effect">+15x luck (total: +10x from first, +5x from second), -1500 bulk roll (minimum 1), +2.5x enchant luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/652 (0.153%)</div>
                         </div>
                     </div>
                     <div class="enchant-item">
@@ -848,7 +853,6 @@
                             <div class="enchant-item-rarity">Rarity: 1/12,725,284,173.51 (0.0000000079%)</div>
                         </div>
                     </div>
-                    <!-- new nihilism curse -->
                     <div class="enchant-item">
                         <div class="enchant-orb" style="background:#000000;color:#ff4444;border:2px solid #444;">N</div>
                         <div class="enchant-item-info">
@@ -860,7 +864,7 @@
                 </div>
             </div>
 
-            <!-- All-in-One -->
+            <!-- All-in-One (updated with secretLuck and weird) -->
             <div class="enchant-type-section">
                 <div class="enchant-type-header" onclick="toggleEnchantType('allinone')">
                     <h3>🔮 All-in-One Enchants</h3><span id="allinone-toggle">▼</span>
@@ -870,7 +874,7 @@
                         <div class="enchant-orb" style="background:#FFD700;color:#000;">Σ</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Synergy</div>
-                            <div class="enchant-item-effect">Combines all Tier 1 normal enchants (Luck I, Speed I, Lighter I, Cloner I)</div>
+                            <div class="enchant-item-effect">Combines all Tier 1 normal enchants (Luck I, Speed I, Lighter I, Cloner I, Weird I)</div>
                             <div class="enchant-item-rarity">Rarity: 1/50,000 (0.002%)</div>
                         </div>
                     </div>
@@ -878,7 +882,7 @@
                         <div class="enchant-orb" style="background:#C0C0C0;color:#000;">C</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Convergence</div>
-                            <div class="enchant-item-effect">Combines all Tier 2 normal enchants (Luck II, Speed II, Lighter II, Cloner II)</div>
+                            <div class="enchant-item-effect">Combines all Tier 2 normal enchants (Luck II, Speed II, Lighter II, Cloner II, Weird II)</div>
                             <div class="enchant-item-rarity">Rarity: 1/1,000,000 (0.0001%)</div>
                         </div>
                     </div>
@@ -886,7 +890,7 @@
                         <div class="enchant-orb" style="background:#CD7F32;color:#000;">Ω</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Combination</div>
-                            <div class="enchant-item-effect">Combines all Tier 3 normal enchants (Luck III, Blitz, Magician, Duplication)</div>
+                            <div class="enchant-item-effect">Combines all Tier 3 normal enchants (Luck III, Blitz, Magician, Duplication, Abnormal)</div>
                             <div class="enchant-item-rarity">Rarity: 1/727,180,000 (1.375e-7%)</div>
                         </div>
                     </div>
@@ -894,14 +898,14 @@
                         <div class="enchant-orb" style="background:#8A2BE2;">∞</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">MULTITUDE</div>
-                            <div class="enchant-item-effect">Combines all Tier 4 normal enchants (Craziness, KUGELBLITZ, Unnatural, Replica)</div>
+                            <div class="enchant-item-effect">Combines all Tier 4 normal enchants (Craziness, KUGELBLITZ, Unnatural, Replica, Unknown)</div>
                             <div class="enchant-item-rarity">Rarity: 1/18,136,725,800 (5.51e-9%)</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Joke Enchants -->
+            <!-- Joke Enchants (added Brick Wall) -->
             <div class="enchant-type-section">
                 <div class="enchant-type-header" onclick="toggleEnchantType('joke')">
                     <h3>😂 Joke Enchants</h3><span id="joke-toggle">▼</span>
@@ -939,7 +943,6 @@
                             <div class="enchant-item-rarity">Rarity: 1/6,942,069,420 (0.0000000144%) — requires joke enchants ON</div>
                         </div>
                     </div>
-                    <!-- new horse enchant -->
                     <div class="enchant-item">
                         <div class="enchant-orb" style="background:transparent;border:none;font-size:1.5em;">🐎</div>
                         <div class="enchant-item-info">
@@ -948,10 +951,109 @@
                             <div class="enchant-item-rarity">Rarity: 1/6969.69 (0.0143%) — requires joke enchants ON</div>
                         </div>
                     </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="display:flex;flex-wrap:wrap;gap:1px;background:transparent;border:none;font-size:0.5em;line-height:1;">🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱🧱</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Brick Wall</div>
+                            <div class="enchant-item-effect">200 bricks in one! (counts as 200 bricks)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/222,222,222,222 — requires joke enchants ON</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Secret Numbers -->
+            <!-- Special Enchants (updated demonic without extra line) -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('special')">
+                    <h3>✨ Special Enchants</h3><span id="special-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="special-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#808080; position:relative;">
+                            <span style="position:relative; z-index:2; font-size:1.2em; color:black; text-shadow:0 0 2px white;">α</span>
+                            <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:1.5em; opacity:0.6;">✦</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Alpha</div>
+                            <div class="enchant-item-effect">+1 luck, +0.5s speed reduction, +0.25 secret luck, +0.125 enchant luck. If both merged orbs have Alpha, result not locked.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/75,000 (0.00133%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg, #ff69b4, #800080);">
+                            <span style="color:black; font-size:1.2em; font-weight:bold;">↑</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">✦ Blessing</div>
+                            <div class="enchant-item-effect">Gains scaling bonuses with total rolls: +0.001 bulk/roll (cap +19), +0.01 luck/roll (cap +750), +0.05s speed reduction/roll (capped at instant), +0.0025 secret luck/roll (cap +15), +0.001 enchant luck/roll (cap +5). Starts with -12.5s speed reduction.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/750,000 (0.000133%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg, #000, #800080); transform:rotate(-45deg);">
+                            <span style="transform:rotate(45deg); display:block; color:white; font-size:1.2em; font-weight:bold;">D</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Demonic</div>
+                            <div class="enchant-item-effect">+6.66 luck, +33.33 secret luck.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/666,666.66 (0.00015%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); animation: rainbowMove 2s linear infinite;">
+                            <span style="color:white; font-weight:bold;">M</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">MYTHICAL</div>
+                            <div class="enchant-item-effect">Each roll: luck = random()**-1, secret luck = 1+random()**-1.5, bulk = random(1,10).</div>
+                            <div class="enchant-item-rarity">Rarity: 1/10,000,000 (0.00001%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weird Enchants -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('weird')">
+                    <h3>🌀 Weird Enchants</h3><span id="weird-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="weird-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#6a0dad;">I</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Weird I</div>
+                            <div class="enchant-item-effect">+1.5x secret luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/75 (1.33%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#4b0082;">II</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Weird II</div>
+                            <div class="enchant-item-effect">+3x secret luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/520 (0.192%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#2e0854;">III</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Abnormal</div>
+                            <div class="enchant-item-effect">+10x secret luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/62,570 (0.0016%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#1a001a;">IV</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Unknown</div>
+                            <div class="enchant-item-effect">+50x secret luck</div>
+                            <div class="enchant-item-rarity">Rarity: 1/71,525,015 (0.0000014%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secret Numbers (with -666) -->
             <div class="enchant-type-section secret-section">
                 <div class="enchant-type-header" onclick="toggleEnchantType('secrets')">
                     <h3>🔒 Secret Numbers</h3><span id="secrets-toggle">▼</span>
@@ -1056,6 +1158,14 @@
                             <div class="secret-item-note">Can have enchant if raw floor ≥ 1000.</div>
                         </div>
                     </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-666</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -666</div>
+                            <div class="secret-item-rarity">Special needs.</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1099,7 +1209,7 @@ let gameState = {
     brickCount: 0,
     luckButtonClicks: 0,
     secretLuckButtonClicks: 0,
-    mergeSelection: [],   // array of up to 2 orb ids selected for merge
+    mergeSelection: [],
     mergeModeActive: false,
     bulkDeleteMode: false,
     bulkDeleteEnchantMode: false,
@@ -1115,11 +1225,14 @@ let gameState = {
     deleteIndex: null,
     deleteEnchantIndex: null,
     currentPage: 1,
-    currentEnchantPage: 1
+    currentEnchantPage: 1,
+    mythicalLuck: 1,
+    mythicalSecretLuck: 1,
+    mythicalBulk: 1
 };
 
 // ============================================================
-// ENCHANT DEFINITIONS (updated with horse and nihilism)
+// ENCHANT DEFINITIONS (updated with Wrath and shifted curse tiers)
 // ============================================================
 const ENCHANTS = {
     // --- Luck ---
@@ -1146,7 +1259,7 @@ const ENCHANTS = {
     duplication: { name: 'Duplication',type: 'cloner',  tier: 3, rarity: 1/50000,       effect: 4,        color: '#ea580c' },
     replica:     { name: 'Replica',    type: 'cloner',  tier: 4, rarity: 1/7500000,     effect: 10,       color: '#c2410c' },
 
-    // --- Curses ---
+    // --- Curses (updated with Wrath and shifted tiers) ---
     greed: {
         name: 'Greed', type: 'curse', tier: 1, rarity: 1/57,
         effects: { luck: -2.5, cloner: 3, speed: 0.7 },
@@ -1157,28 +1270,33 @@ const ENCHANTS = {
         effects: { luck: 5, speed: -2.5, cloner: 5 },
         display: '↓', color: 'linear-gradient(135deg,#ec4899 0%,#f97316 100%)', textColor: '#3b82f6'
     },
+    wrath: {
+        name: 'Wrath', type: 'curse', tier: 3, rarity: 1/652,
+        effects: { luck: 15, cloner: -1500, lighter: 2.5 }, // +10x luck and +5x luck combined, bulk -1500, enchant luck +2.5
+        display: 'W', color: '#b91c1c', textColor: '#ffd700'
+    },
     stress: {
-        name: 'Stress', type: 'curse', tier: 3, rarity: 1/614,
+        name: 'Stress', type: 'curse', tier: 4, rarity: 1/614,
         effects: { luck: 7.5, cloner: 7, speed: -12.5 },
         display: '!', color: 'linear-gradient(135deg,#374151 0%,#000000 100%)', textColor: '#22c55e'
     },
     insanity: {
-        name: 'Insanity', type: 'curse', tier: 4, rarity: 1/1725,
+        name: 'Insanity', type: 'curse', tier: 5, rarity: 1/1725,
         effects: { luck: -1000, cloner: 10, lighter: 1.5, speed: -1.5 },
         display: 'HELP', color: '#ffffff', textColor: '#000000', shake: true
     },
     heresy: {
-        name: 'Heresy', type: 'curse', tier: 5, rarity: 1/273627171.6,
+        name: 'Heresy', type: 'curse', tier: 6, rarity: 1/273627171.6,
         effects: { luck: -10000000, cloner: 15, speed: -3, lighter: 15 },
         display: 'H', color: '#4c1d95', textColor: '#a78bfa'
     },
     avarice: {
-        name: 'Avarice', type: 'curse', tier: 6, rarity: 1/12725284173.51,
+        name: 'Avarice', type: 'curse', tier: 7, rarity: 1/12725284173.51,
         effects: { luck: -100000000, cloner: 50, speed: -20, lighter: 1.5 },
         display: 'A', color: 'avarice', textColor: '#fff', isAvarice: true
     },
     nihilism: {
-        name: 'nilihilism', type: 'curse', tier: 7, rarity: 1/582715271825,
+        name: 'nilihilism', type: 'curse', tier: 8, rarity: 1/582715271825,
         effects: { luck: -1e303, lighter: 1000, speed: -7.5, secretLuck: 10 },
         display: 'N', color: '#000000', textColor: '#ff4444'
     },
@@ -1186,26 +1304,26 @@ const ENCHANTS = {
     // --- All-in-One ---
     synergy: {
         name: 'Synergy', type: 'allinone', tier: 1, rarity: 1/50000,
-        effects: { luck: 0.5, speed: 0.1, lighter: 0.5, cloner: 1 },
+        effects: { luck: 0.5, speed: 0.1, lighter: 0.5, cloner: 1, secretLuck: 1.5 },
         display: 'Σ', color: '#FFD700', textColor: '#000000'
     },
     convergence: {
         name: 'Convergence', type: 'allinone', tier: 2, rarity: 1/1000000,
-        effects: { luck: 2.5, speed: 0.25, lighter: 1.25, cloner: 2 },
+        effects: { luck: 2.5, speed: 0.25, lighter: 1.25, cloner: 2, secretLuck: 3 },
         display: 'C', color: '#C0C0C0', textColor: '#000000'
     },
     combination: {
         name: 'Combination', type: 'allinone', tier: 3, rarity: 1/727180000,
-        effects: { luck: 3.33, speed: 0.5, lighter: 4, cloner: 4 },
+        effects: { luck: 3.33, speed: 0.5, lighter: 4, cloner: 4, secretLuck: 10 },
         display: 'Ω', color: '#CD7F32', textColor: '#000000'
     },
     multitude: {
         name: 'MULTITUDE', type: 'allinone', tier: 4, rarity: 1/18136725800,
-        effects: { luck: 25, speed: 'instant', lighter: 10, cloner: 10 },
+        effects: { luck: 25, speed: 'instant', lighter: 10, cloner: 10, secretLuck: 50 },
         display: '∞', color: '#8A2BE2', textColor: '#ffffff'
     },
 
-    // --- Joke Enchants (only active when jokeEnchantsEnabled) ---
+    // --- Joke Enchants ---
     air: {
         name: 'Air', type: 'joke', tier: 1, rarity: 1/500,
         effects: {},
@@ -1229,11 +1347,57 @@ const ENCHANTS = {
         effects: { luck: 0.05, speed: 0.05, lighter: -0.05, secretLuck: 0.025 },
         display: '🐎', color: 'transparent', textColor: '#ffffff', noBorder: true,
         jokeOnly: true
+    },
+    brickwall: {
+        name: 'Brick Wall', type: 'joke', tier: 5, rarity: 1/222222222222,
+        effects: { brick: 200 },
+        display: '🧱', color: 'transparent', textColor: '#ffffff', noBorder: true, brickWall: true,
+        jokeOnly: true
+    },
+
+    // --- Special Enchants ---
+    alpha: {
+        name: 'Alpha', type: 'special', tier: 1, rarity: 1/75000,
+        effects: { luck: 1, speed: 0.5, secretLuck: 0.25, lighter: 0.125 },
+        color: '#808080', specialDesign: 'alpha'
+    },
+    blessing: {
+        name: '✦ Blessing', type: 'special', tier: 2, rarity: 1/750000,
+        effects: { }, // dynamic
+        color: 'linear-gradient(135deg, #ff69b4, #800080)', specialDesign: 'blessing'
+    },
+    demonic: {
+        name: 'Demonic', type: 'special', tier: 3, rarity: 1/666666.66,
+        effects: { luck: 6.66, secretLuck: 33.33 },
+        color: 'linear-gradient(135deg, #000, #800080)', specialDesign: 'demonic'
+    },
+    mythical: {
+        name: 'MYTHICAL', type: 'special', tier: 4, rarity: 1/10000000,
+        effects: { }, // dynamic per roll
+        color: 'rainbow', specialDesign: 'mythical'
+    },
+
+    // --- Weird Enchants ---
+    weird1: {
+        name: 'Weird I', type: 'weird', tier: 1, rarity: 1/75,
+        effect: 1.5, color: '#6a0dad'
+    },
+    weird2: {
+        name: 'Weird II', type: 'weird', tier: 2, rarity: 1/520,
+        effect: 3, color: '#4b0082'
+    },
+    abnormal: {
+        name: 'Abnormal', type: 'weird', tier: 3, rarity: 1/62570,
+        effect: 10, color: '#2e0854'
+    },
+    unknown: {
+        name: 'Unknown', type: 'weird', tier: 4, rarity: 1/71525015,
+        effect: 50, color: '#1a001a'
     }
 };
 
 // ============================================================
-// SECRET NUMBERS (sorted rarest-first so rarest wins on lucky rolls)
+// SECRET NUMBERS (unchanged)
 // ============================================================
 const SECRET_NUMBERS_RAW = [
     { logValue: -0.69,  rarity: 1/690,     display: '-0.69' },
@@ -1247,9 +1411,9 @@ const SECRET_NUMBERS_RAW = [
     { logValue: -1.23,  rarity: 1/50000,   display: '-1.23' },
     { logValue: -7,     rarity: 1/77777,   display: '-7'    },
     { logValue: -101,   rarity: 1/101000,  display: '-101'  },
-    { logValue: -9999,  rarity: 1/1234567, display: 'EPILEPSY', isEpilepsy: true }
+    { logValue: -9999,  rarity: 1/1234567, display: 'EPILEPSY', isEpilepsy: true },
+    { logValue: -666,   rarity: 0,          display: '-666', isDemonicSecret: true }
 ];
-// Sort ascending by rarity value (rarest first = smallest fraction value first)
 const SECRET_NUMBERS = [...SECRET_NUMBERS_RAW].sort((a, b) => a.rarity - b.rarity);
 
 // ============================================================
@@ -1295,19 +1459,38 @@ function getAvariceSVG(size) {
 }
 
 // ============================================================
-// ENCHANT STAT HELPERS (updated secret luck)
+// ENCHANT STAT HELPERS (updated with Wrath and bulk minimum)
 // ============================================================
 
-// Returns brick count only from the currently equipped orb
 function getEquippedBrickCount() {
     if (!gameState.equippedOrb || !gameState.equippedOrb.enchants.brick) return 0;
-    return gameState.equippedOrb.enchants.brick.count || 0;
+    let count = 0;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.name === 'Brick') count += e.count || 1;
+        if (e.name === 'Brick Wall') count += 200;
+    });
+    return count;
+}
+
+function getBlessingBonuses() {
+    let bulk = 0, luck = 0, speed = 0, secretLuck = 0, enchantLuck = 0;
+    if (!gameState.equippedOrb) return { bulk, luck, speed, secretLuck, enchantLuck };
+    const hasBlessing = Object.values(gameState.equippedOrb.enchants).some(e => e.name === '✦ Blessing');
+    if (!hasBlessing) return { bulk, luck, speed, secretLuck, enchantLuck };
+    const rolls = gameState.stats.totalRolls;
+    bulk = Math.min(19, Math.floor(rolls * 0.001));
+    luck = Math.min(750, rolls * 0.01);
+    speed = Math.min(12.5, rolls * 0.05);
+    secretLuck = Math.min(15, rolls * 0.0025);
+    enchantLuck = Math.min(5, rolls * 0.001);
+    return { bulk, luck, speed, secretLuck, enchantLuck };
 }
 
 function getLuckMultiplier() {
     let luck = 1;
     const bricks = getEquippedBrickCount();
-    if (!gameState.equippedOrb) return Math.max(1, luck + bricks * 5);
+    const blessing = getBlessingBonuses();
+    if (!gameState.equippedOrb) return Math.max(1, luck + bricks * 5 + blessing.luck);
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.type === 'luck') {
             luck += e.effect;
@@ -1317,17 +1500,23 @@ function getLuckMultiplier() {
             luck += e.effects.luck;
         } else if (e.type === 'joke' && e.effects && e.effects.luck != null && e.name !== 'Brick') {
             luck += e.effects.luck;
+        } else if (e.type === 'special' && e.name === 'Alpha') {
+            luck += 1;
+        } else if (e.type === 'special' && e.name === 'Demonic') {
+            luck += 6.66;
+        } else if (e.type === 'special' && e.name === 'MYTHICAL') {
+            luck += gameState.mythicalLuck;
         }
     });
-    // Brick hidden bonus (equipped orb only)
-    luck += bricks * 5;
+    luck += bricks * 5 + blessing.luck;
     return Math.max(1, luck);
 }
 
 function getEnchantLuckMultiplier() {
     let mult = 1;
     const bricks = getEquippedBrickCount();
-    if (!gameState.equippedOrb) return mult + bricks * 1.5;
+    const blessing = getBlessingBonuses();
+    if (!gameState.equippedOrb) return mult + bricks * 1.5 + blessing.enchantLuck;
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.type === 'lighter') {
             mult += e.effect;
@@ -1337,16 +1526,18 @@ function getEnchantLuckMultiplier() {
             mult += e.effects.lighter;
         } else if (e.type === 'joke' && e.effects && e.effects.lighter != null && e.name !== 'Brick') {
             mult += e.effects.lighter;
+        } else if (e.type === 'special' && e.name === 'Alpha') {
+            mult += 0.125;
         }
     });
-    // Brick hidden bonus (equipped orb only)
-    mult += bricks * 1.5;
+    mult += bricks * 1.5 + blessing.enchantLuck;
     return mult;
 }
 
 function getBulkRolls() {
     let total = 1;
-    if (!gameState.equippedOrb) return total;
+    const blessing = getBlessingBonuses();
+    if (!gameState.equippedOrb) return Math.max(1, total + blessing.bulk);
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.type === 'cloner') {
             total += e.effect;
@@ -1356,19 +1547,23 @@ function getBulkRolls() {
             total += e.effects.cloner;
         } else if (e.type === 'joke' && e.effects && e.effects.cloner != null) {
             total += e.effects.cloner;
+        } else if (e.type === 'special' && e.name === 'MYTHICAL') {
+            total += gameState.mythicalBulk;
         }
     });
-    return Math.max(1, Math.round(total));
+    total += blessing.bulk;
+    return Math.max(1, Math.round(total)); // ensure at least 1
 }
 
-// Returns { savedSeconds: number, isInstant: boolean }
-// savedSeconds: positive = roll is FASTER, negative = roll is SLOWER
 function getSpeedConfig() {
     let savedSeconds = 0;
     let isInstant = false;
     const bricks = getEquippedBrickCount();
+    const blessing = getBlessingBonuses();
     if (!gameState.equippedOrb) {
         savedSeconds += bricks * 1;
+        savedSeconds -= 12.5 * (blessing.speed > 0 ? 1 : 0);
+        savedSeconds += blessing.speed;
         return { savedSeconds, isInstant };
     }
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
@@ -1382,22 +1577,37 @@ function getSpeedConfig() {
             savedSeconds += e.effects.speed;
         } else if (e.type === 'joke' && e.effects && e.effects.speed != null && e.name !== 'Brick') {
             savedSeconds += e.effects.speed;
+        } else if (e.type === 'special' && e.name === 'Alpha') {
+            savedSeconds += 0.5;
         }
     });
-    // Brick hidden bonus: +1s saved per brick (equipped orb only)
     savedSeconds += bricks * 1;
+    savedSeconds -= 12.5;
+    savedSeconds += blessing.speed;
     return { savedSeconds, isInstant };
 }
 
 function getSecretLuckMultiplier() {
     let mult = 1;
-    if (!gameState.equippedOrb) return mult;
+    const blessing = getBlessingBonuses();
+    if (!gameState.equippedOrb) return mult + blessing.secretLuck;
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.effects && e.effects.secretLuck != null) {
             mult += e.effects.secretLuck;
+        } else if (e.type === 'weird') {
+            mult += e.effect;
+        } else if (e.type === 'special' && e.name === 'Alpha') {
+            mult += 0.25;
+        } else if (e.type === 'special' && e.name === 'Demonic') {
+            mult += 33.33;
+        } else if (e.type === 'special' && e.name === 'MYTHICAL') {
+            mult += gameState.mythicalSecretLuck;
+        } else if (e.type === 'allinone' && e.effects && e.effects.secretLuck != null) {
+            mult += e.effects.secretLuck;
         }
     });
-    return Math.max(0.1, mult); // prevent negative
+    mult += blessing.secretLuck;
+    return Math.max(0.1, mult);
 }
 
 function getSecretLuckButtonBoost() {
@@ -1412,11 +1622,10 @@ function getRollDuration() {
 }
 
 // ============================================================
-// LUCK BUTTONS
+// LUCK BUTTONS (unchanged)
 // ============================================================
 function getButtonLuckBoost() {
     if (gameState.luckButtonClicks <= 0) return 1;
-    // min +1x means the additive bonus is at least 1, so total multiplier is at least 2x
     return 1 + Math.max(1, Math.pow(Math.log(gameState.luckButtonClicks) / Math.log(5), 0.75));
 }
 
@@ -1435,54 +1644,29 @@ function clickSecretLuckButton() {
 }
 
 // ============================================================
-// SLOT GENERATION (fixed: logRNG unaffected by luck, enchant on rawFloor >=1000)
+// SLOT GENERATION (unchanged)
 // ============================================================
 
-function generateRank(luckMult) {
-    const random = Math.random();
-    const rawFloor = Math.floor(Math.pow(random, -1.5));
-    const logValue = Number(Math.log10(rawFloor * luckMult).toFixed(2));
-    return { logValue, rawFloor };
-}
-
-function checkSecretNumber() {
-    const roll = Math.random();
-    const baseSecretLuck = getSecretLuckMultiplier();
-    const buttonBoost = getSecretLuckButtonBoost();
-    const totalSecretLuck = baseSecretLuck * buttonBoost;
-    for (const s of SECRET_NUMBERS) {
-        if (roll < s.rarity * totalSecretLuck) return s;
-    }
-    return null;
-}
-
-function rollEnchant(enchantLuckMult) {
-    if (enchantLuckMult <= 0) return null;
-    const roll = Math.random();
-    // Collect eligible enchants
-    const eligible = Object.entries(ENCHANTS)
-        .filter(([key, e]) => {
-            if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
-            return true;
-        })
-        .map(([key, e]) => ({ key, ...e }))
-        .sort((a, b) => a.rarity - b.rarity); // rarest first
-
-    for (const e of eligible) {
-        const threshold = e.rarity * enchantLuckMult;
-        if (roll < threshold) {
-            return { ...e };
-        }
-    }
-    return null;
-}
-
-// Generate one slot (secrets only eligible if isAcceptableSlot is true)
 function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
     const random = Math.random();
-    const rawFloor = Math.floor(Math.pow(random, -1.5));
+    let rawFloor = Math.floor(Math.pow(random, -1.5));
+    rawFloor = Math.floor(rawFloor * luckMult);
+    if (rawFloor < 1) rawFloor = 1;
+    let logValue = Number(Math.log10(rawFloor).toFixed(2));
 
-    // Check secret number ONLY for acceptable (bulk roll) slots
+    if (isAcceptableSlot && gameState.equippedOrb && Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Demonic')) {
+        if (Math.random() < 1/66666.66) {
+            const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
+            return {
+                value: -666,
+                rawFloor,
+                isSecret: true,
+                secretDisplay: '-666',
+                enchant
+            };
+        }
+    }
+
     if (isAcceptableSlot) {
         const secret = checkSecretNumber();
         if (secret) {
@@ -1498,8 +1682,13 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
         }
     }
 
-    // Normal slot: log10(floor) WITHOUT luck multiplier (as requested)
-    const logValue = Number(Math.log10(rawFloor).toFixed(2));
+    let imaginary = false, negative = false;
+    if (Math.random() < 1/85) imaginary = true;
+    if (Math.random() < 1/25) negative = true;
+
+    let displayValue = logValue;
+    if (negative) displayValue = -displayValue;
+    if (imaginary) displayValue = displayValue + 'i';
 
     const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
 
@@ -1507,8 +1696,42 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
         value: logValue,
         rawFloor,
         isSecret: false,
+        imaginary,
+        negative,
+        displayValue,
         enchant
     };
+}
+
+function checkSecretNumber() {
+    const roll = Math.random();
+    const baseSecretLuck = getSecretLuckMultiplier();
+    const buttonBoost = getSecretLuckButtonBoost();
+    const totalSecretLuck = baseSecretLuck * buttonBoost;
+    for (const s of SECRET_NUMBERS) {
+        if (s.rarity > 0 && roll < s.rarity * totalSecretLuck) return s;
+    }
+    return null;
+}
+
+function rollEnchant(enchantLuckMult) {
+    if (enchantLuckMult <= 0) return null;
+    const roll = Math.random();
+    const eligible = Object.entries(ENCHANTS)
+        .filter(([key, e]) => {
+            if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
+            return true;
+        })
+        .map(([key, e]) => ({ key, ...e }))
+        .sort((a, b) => a.rarity - b.rarity);
+
+    for (const e of eligible) {
+        const threshold = e.rarity * enchantLuckMult;
+        if (roll < threshold) {
+            return { ...e };
+        }
+    }
+    return null;
 }
 
 // ============================================================
@@ -1528,7 +1751,7 @@ function getRarityClass(v) {
 }
 
 // ============================================================
-// ENCHANT DISPLAY HELPERS (unchanged except horse)
+// ENCHANT DISPLAY HELPERS (unchanged)
 // ============================================================
 
 function getEnchantDisplay(enchant) {
@@ -1537,7 +1760,6 @@ function getEnchantDisplay(enchant) {
     return numerals[(enchant.tier || 1) - 1] || String(enchant.tier);
 }
 
-// Returns HTML string for an enchant circle of given size (px)
 function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
     if (!enchant) return '';
 
@@ -1548,7 +1770,34 @@ function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
         </div>`;
     }
 
-    // Brick shows count if stacked
+    if (enchant.specialDesign === 'alpha') {
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#808080;display:flex;align-items:center;justify-content:center;position:relative;" title="${titleAttr || enchant.name}">
+            <span style="position:relative; z-index:2; color:black; font-size:${size*0.6}px; text-shadow:0 0 2px white;">α</span>
+            <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:${size*0.7}px; opacity:0.6;">✦</span>
+        </div>`;
+    }
+    if (enchant.specialDesign === 'blessing') {
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg, #ff69b4, #800080);display:flex;align-items:center;justify-content:center;" title="${titleAttr || enchant.name}">
+            <span style="color:black; font-size:${size*0.6}px; font-weight:bold;">↑</span>
+        </div>`;
+    }
+    if (enchant.specialDesign === 'demonic') {
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg, #000, #800080);transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;" title="${titleAttr || enchant.name}">
+            <span style="transform:rotate(45deg); display:block; color:white; font-size:${size*0.6}px; font-weight:bold;">D</span>
+        </div>`;
+    }
+    if (enchant.specialDesign === 'mythical') {
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); animation: rainbowMove 2s linear infinite; display:flex; align-items:center; justify-content:center;" title="${titleAttr || enchant.name}">
+            <span style="color:white; font-size:${size*0.6}px; font-weight:bold;">M</span>
+        </div>`;
+    }
+
+    if (enchant.name === 'Brick Wall') {
+        return `<div style="display:flex; flex-wrap:wrap; gap:1px; width:${size}px; height:${size}px; background:transparent; align-items:center; justify-content:center;" title="${titleAttr || enchant.name}">
+            ${Array(20).fill('🧱').join('')}
+        </div>`;
+    }
+
     if (enchant.name === 'Brick' && enchant.count && enchant.count > 1) {
         return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;" title="${titleAttr || enchant.name} ×${enchant.count}">
             <span style="font-size:${size * 0.55}px;line-height:1;">🧱</span>
@@ -1583,7 +1832,6 @@ function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
     </div>`;
 }
 
-// Orb enchants display (mini orbs row)
 function orbEnchantsHTML(orb) {
     const enchantTypes = Object.keys(orb.enchants);
     if (enchantTypes.length === 0) return '<span style="opacity:0.5;font-size:0.8em;">Empty orb</span>';
@@ -1607,7 +1855,6 @@ function createEnchantOrb() {
 function addEnchantToOrb(orb, enchant) {
     const type = enchant.type;
 
-    // Brick stacks by count using its own key
     if (enchant.name === 'Brick') {
         if (!orb.enchants.brick) {
             orb.enchants.brick = { ...enchant, count: 1 };
@@ -1616,10 +1863,17 @@ function addEnchantToOrb(orb, enchant) {
         }
         return true;
     }
+    if (enchant.name === 'Brick Wall') {
+        if (!orb.enchants.brickwall) {
+            orb.enchants.brickwall = { ...enchant, count: 200 };
+        } else {
+            orb.enchants.brickwall.count = (orb.enchants.brickwall.count || 200) + 200;
+        }
+        return true;
+    }
 
     if (type === 'allinone') {
-        // Allinone replaces individual luck/speed/lighter/cloner
-        ['luck','speed','lighter','cloner'].forEach(t => delete orb.enchants[t]);
+        ['luck','speed','lighter','cloner','weird'].forEach(t => delete orb.enchants[t]);
         if (!orb.enchants.allinone || enchant.tier > orb.enchants.allinone.tier) {
             orb.enchants.allinone = enchant;
             return true;
@@ -1627,13 +1881,11 @@ function addEnchantToOrb(orb, enchant) {
         return false;
     }
 
-    // If allinone exists, it covers luck/speed/lighter/cloner
-    if (['luck','speed','lighter','cloner'].includes(type) && orb.enchants.allinone) {
+    if (['luck','speed','lighter','cloner','weird'].includes(type) && orb.enchants.allinone) {
         return false;
     }
 
-    // luck/speed/lighter/cloner: one per type (higher tier wins)
-    if (['luck','speed','lighter','cloner'].includes(type)) {
+    if (['luck','speed','lighter','cloner','weird'].includes(type)) {
         if (!orb.enchants[type] || enchant.tier > orb.enchants[type].tier) {
             orb.enchants[type] = enchant;
             return true;
@@ -1641,14 +1893,11 @@ function addEnchantToOrb(orb, enchant) {
         return false;
     }
 
-    // curse and joke: keyed by enchant name so multiple different ones can coexist
-    // e.g. greed + sloth + stress all in same orb — none of the same name
     const slotKey = 'e_' + enchant.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
     if (!orb.enchants[slotKey]) {
         orb.enchants[slotKey] = enchant;
         return true;
     }
-    // Same name already exists — replace only if higher tier
     if (enchant.tier > orb.enchants[slotKey].tier) {
         orb.enchants[slotKey] = enchant;
         return true;
@@ -1727,7 +1976,7 @@ function updateActiveEffectsBar() {
 }
 
 // ============================================================
-// PERFORM ROLL (reset secret luck button clicks)
+// PERFORM ROLL (updated slot scaling)
 // ============================================================
 function performRoll() {
     if (gameState.isRolling) return;
@@ -1744,28 +1993,37 @@ function performRoll() {
     const luckMult = getLuckMultiplier() * buttonBoost;
     const enchantLuckMult = getEnchantLuckMultiplier();
     const bulkRolls = getBulkRolls();
-    const rollDuration = getRollDuration();
 
-    // Reset luck buttons
+    if (gameState.equippedOrb && Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'MYTHICAL')) {
+        gameState.mythicalLuck = Math.random() ** -1;
+        gameState.mythicalSecretLuck = 1 + Math.random() ** -1.5;
+        gameState.mythicalBulk = 1 + Math.random() * 9;
+    } else {
+        gameState.mythicalLuck = 1;
+        gameState.mythicalSecretLuck = 1;
+        gameState.mythicalBulk = 1;
+    }
+
     gameState.luckButtonClicks = 0;
     gameState.secretLuckButtonClicks = 0;
     document.getElementById('luckBoostDisplay').textContent = '';
     document.getElementById('secretLuckBoostDisplay').textContent = '';
 
-    // Calculate total track slots and acceptable zone
     const totalSlots = Math.max(20, Math.floor(bulkRolls * 12.5));
     const acceptStart = Math.floor((totalSlots - bulkRolls) / 2);
     const acceptEnd = acceptStart + bulkRolls - 1;
     const centerAcceptable = Math.floor((acceptStart + acceptEnd) / 2);
 
-    // Generate all slots
+    // Shrink slots based on bulk: scale = min(1, max(0.1, 3 / bulkRolls))
+    const scale = Math.min(1, Math.max(0.1, 3 / bulkRolls));
+    document.documentElement.style.setProperty('--slot-scale', scale);
+
     const slots = [];
     for (let i = 0; i < totalSlots; i++) {
         const isAcceptableSlot = (i >= acceptStart && i <= acceptEnd);
         slots.push(generateSlot(luckMult, enchantLuckMult, isAcceptableSlot));
     }
 
-    // Collect pending rolls from acceptable zone
     gameState.pendingRolls = [];
     for (let i = acceptStart; i <= acceptEnd; i++) {
         gameState.pendingRolls.push(slots[i]);
@@ -1773,7 +2031,6 @@ function performRoll() {
 
     gameState.stats.totalRolls++;
 
-    // Render squares (identical to original)
     slots.forEach((slot, idx) => {
         const isAcceptable = (idx >= acceptStart && idx <= acceptEnd);
         const isCenter = (idx === centerAcceptable);
@@ -1783,8 +2040,8 @@ function performRoll() {
         if (isAcceptable) square.classList.add('acceptable');
         if (isCenter) square.classList.add('center-acceptable');
         if (slot.isSecret) square.classList.add('secret-slot');
-
-        const rarityClass = getRarityClass(slot.value);
+        if (slot.imaginary) square.classList.add('imaginary');
+        if (slot.negative) square.classList.add('negative');
 
         let enchantHTML = '';
         if (slot.enchant) {
@@ -1793,15 +2050,19 @@ function performRoll() {
             </div>`;
         }
 
-        const secretBadge = slot.isSecret ? `<div class="rank-secret">🔒 secret</div>` : '';
         let realHTML;
         if (slot.isEpilepsy) {
-            realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>${secretBadge}`;
+            realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+        } else if (slot.isSecret) {
+            const rarityClass = getRarityClass(slot.value);
+            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.secretDisplay || slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else {
-            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>${secretBadge}`;
+            const rarityClass = getRarityClass(slot.value);
+            const displayValue = slot.displayValue !== undefined ? slot.displayValue : slot.value;
+            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${displayValue}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         }
 
-        if (slot.isSecret || slot.isEpilepsy) {
+        if (slot.isSecret && !slot.isDemonicSecret) {
             square.innerHTML = `<div class="secret-mystery-box"><span class="secret-mystery-q">?</span></div>`;
             square.dataset.realContent = realHTML;
             if (slot.isEpilepsy) square.classList.add('epilepsy-slot');
@@ -1812,22 +2073,23 @@ function performRoll() {
         rollTrack.appendChild(square);
     });
 
-    // Force reflow, reset scroll
     rollTrack.offsetHeight;
     rollDisplay.scrollLeft = 0;
 
+    const rollDuration = getRollDuration();
     if (rollDuration === 0) {
-        // Instant: skip animation
-        const targetSquare = rollTrack.children[centerAcceptable];
-        if (targetSquare) {
-            const targetScrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
-            rollDisplay.scrollLeft = targetScrollLeft;
-        }
-        finishRoll();
+        setTimeout(() => {
+            rollTrack.querySelectorAll('.secret-slot').forEach(square => {
+                if (square.dataset.realContent) {
+                    square.innerHTML = square.dataset.realContent;
+                    delete square.dataset.realContent;
+                }
+            });
+            finishRoll();
+        }, 10);
         return;
     }
 
-    // Animate scroll (identical to original)
     setTimeout(() => {
         const targetSquare = rollTrack.children[centerAcceptable];
         if (!targetSquare) { finishRoll(); return; }
@@ -1854,7 +2116,6 @@ function performRoll() {
 }
 
 function finishRoll() {
-    // Reveal all secret mystery boxes
     const rollTrack = document.getElementById('rollTrack');
     rollTrack.querySelectorAll('.secret-slot').forEach(square => {
         if (square.dataset.realContent) {
@@ -1900,20 +2161,21 @@ function renderPendingPanel() {
 }
 
 // ============================================================
-// ACCEPT ROLL (fixed glitch: now properly adds enchants)
+// ACCEPT ROLL (unchanged)
 // ============================================================
 function acceptRoll() {
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
 
-    // Add values to inventory (as many as fit)
     let added = 0;
     for (const slot of gameState.pendingRolls) {
         if (gameState.inventory.length >= MAX_INVENTORY) break;
         const invItem = { value: slot.value, timestamp: Date.now() + added };
         if (slot.isEpilepsy) invItem.isEpilepsy = true;
+        if (slot.imaginary) invItem.imaginary = true;
+        if (slot.negative) invItem.negative = true;
         gameState.inventory.push(invItem);
         gameState.stats.acceptedRanks++;
-        if (!slot.isEpilepsy) {
+        if (!slot.isEpilepsy && !slot.isSecret) {
             gameState.stats.totalValue += slot.value;
             if (gameState.stats.highestRank === null || slot.value > gameState.stats.highestRank) {
                 gameState.stats.highestRank = slot.value;
@@ -1926,32 +2188,27 @@ function acceptRoll() {
         alert('Inventory is full! Some ranks were not accepted.');
     }
 
-    // Process pending enchants
     const pendingEnchants = gameState.pendingRolls.filter(r => r.enchant).map(r => r.enchant);
 
     for (const enchant of pendingEnchants) {
-        // Handle brick: increment global display counter (stats come from equipped orb)
         if (enchant.type === 'joke' && enchant.name === 'Brick') {
             gameState.brickCount++;
             document.getElementById('brickStatBox').style.display = '';
             document.getElementById('brickCount').textContent = gameState.brickCount;
         }
+        if (enchant.name === 'Brick Wall') {
+            gameState.brickCount += 200;
+            document.getElementById('brickStatBox').style.display = '';
+            document.getElementById('brickCount').textContent = gameState.brickCount;
+        }
 
-        // Add to orb system if there's space
         if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
-            let targetOrb;
-            if (gameState.equippedOrb) {
-                targetOrb = gameState.equippedOrb;
-            } else {
-                targetOrb = createEnchantOrb();
-                gameState.enchantOrbs.push(targetOrb);
-                gameState.equippedOrb = targetOrb;
-            }
-            addEnchantToOrb(targetOrb, enchant);
+            const newOrb = createEnchantOrb();
+            addEnchantToOrb(newOrb, enchant);
+            gameState.enchantOrbs.push(newOrb);
         }
     }
 
-    // Clear pending
     gameState.pendingRolls = [];
 
     document.getElementById('acceptBtn').disabled = true;
@@ -1965,7 +2222,7 @@ function acceptRoll() {
 }
 
 // ============================================================
-// RENDER INVENTORY (with bulk delete checkboxes)
+// RENDER INVENTORY (unchanged)
 // ============================================================
 function renderInventory() {
     const grid = document.getElementById('inventoryGrid');
@@ -1979,16 +2236,20 @@ function renderInventory() {
 
         if (actualIndex < gameState.inventory.length) {
             const item = gameState.inventory[actualIndex];
+            let displayValue = item.value;
+            if (item.negative) displayValue = -displayValue;
+            if (item.imaginary) displayValue = displayValue + 'i';
             if (item.isEpilepsy) {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
-                slot.innerHTML = `<div class="slot-value ${rarityClass}">${item.value}</div>`;
+                slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;
             }
+            if (item.imaginary) slot.classList.add('imaginary');
+            if (item.negative) slot.classList.add('negative');
 
             if (gameState.bulkDeleteMode) {
-                // Add checkbox
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.className = 'delete-checkbox';
@@ -2049,7 +2310,7 @@ function sortInventory(method) {
 }
 
 // ============================================================
-// RENDER ENCHANT INVENTORY (with bulk delete checkboxes)
+// RENDER ENCHANT INVENTORY (unchanged)
 // ============================================================
 function renderEnchantInventory() {
     const grid = document.getElementById('enchantGrid');
@@ -2078,7 +2339,6 @@ function renderEnchantInventory() {
             let enchantsHTML = orbEnchantsHTML(orb);
 
             if (gameState.bulkDeleteEnchantMode) {
-                // checkbox for bulk delete
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.className = 'delete-checkbox';
@@ -2195,7 +2455,10 @@ function openDeleteModal(index) {
     gameState.deleteIndex = index;
     gameState.deleteEnchantIndex = null;
     const item = gameState.inventory[index];
-    document.getElementById('deleteRankValue').textContent = `rank ${item.value}`;
+    let display = item.value;
+    if (item.negative) display = -display;
+    if (item.imaginary) display = display + 'i';
+    document.getElementById('deleteRankValue').textContent = `rank ${display}`;
     document.getElementById('deleteModal').classList.add('show');
 }
 
@@ -2227,9 +2490,9 @@ function confirmDelete() {
     } else if (gameState.deleteIndex !== null) {
         gameState.inventory.splice(gameState.deleteIndex, 1);
         gameState.stats.acceptedRanks = gameState.inventory.length;
-        gameState.stats.totalValue = gameState.inventory.reduce((s, it) => s + it.value, 0);
-        gameState.stats.highestRank = gameState.inventory.length > 0
-            ? Math.max(...gameState.inventory.map(it => it.value))
+        gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, it) => s + it.value, 0);
+        gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+            ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(it => it.value))
             : null;
         renderInventory();
         updateStats();
@@ -2280,12 +2543,12 @@ function toggleJokeEnchants(enabled) {
 }
 
 // ============================================================
-// SAVE / LOAD (unchanged, but added new state)
+// SAVE / LOAD (unchanged)
 // ============================================================
 function saveGame() {
     try {
         localStorage.setItem('logmaRNGame', JSON.stringify(gameState));
-    } catch(e) { /* storage full or unavailable */ }
+    } catch(e) { }
 }
 
 function loadGame() {
@@ -2301,13 +2564,11 @@ function loadGame() {
             gameState.currentEnchantPage = d.currentEnchantPage || 1;
             gameState.jokeEnchantsEnabled = d.jokeEnchantsEnabled || false;
             gameState.brickCount = d.brickCount || 0;
-            gameState.luckButtonClicks = 0; // always reset on load
+            gameState.luckButtonClicks = 0;
             gameState.secretLuckButtonClicks = 0;
-            // bulk delete state not saved
         }
-    } catch(e) { /* parse error, start fresh */ }
+    } catch(e) { }
 
-    // Reset transient state
     gameState.pendingRolls = [];
     gameState.mergeSelection = [];
     gameState.mergeModeActive = false;
@@ -2319,7 +2580,6 @@ function loadGame() {
     gameState.deleteIndex = null;
     gameState.deleteEnchantIndex = null;
 
-    // Sync joke toggle UI
     document.getElementById('jokeToggleSwitch').checked = gameState.jokeEnchantsEnabled;
     document.getElementById('jokeToggleStatus').textContent = gameState.jokeEnchantsEnabled ? 'ON' : 'OFF';
     document.getElementById('jokeToggleStatus').style.color = gameState.jokeEnchantsEnabled ? '#ffd700' : '#aaa';
@@ -2328,7 +2588,6 @@ function loadGame() {
         document.getElementById('brickStatBox').style.display = '';
     }
 
-    // Inject Avarice SVG into enchant index
     const avariceOrb = document.getElementById('avariceIndexOrb');
     if (avariceOrb) {
         avariceOrb.style.width = '56px';
@@ -2343,7 +2602,7 @@ function loadGame() {
 }
 
 // ============================================================
-// MERGE LOGIC (updated for horse special unlock)
+// MERGE LOGIC (updated for Alpha)
 // ============================================================
 function toggleMergeMode() {
     gameState.mergeModeActive = !gameState.mergeModeActive;
@@ -2375,7 +2634,6 @@ function selectForMerge(orbId) {
 }
 
 function findMergeCostItem() {
-    // Find lowest inventory item >= 6 logRNG (non-EPILEPSY)
     let best = null;
     let bestIdx = -1;
     gameState.inventory.forEach((item, i) => {
@@ -2454,11 +2712,11 @@ function buildMergedEnchants() {
             if (!merged[key]) {
                 merged[key] = { ...enchant };
             } else {
-                // Brick: sum counts
                 if (key === 'brick') {
                     merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
+                } else if (key === 'brickwall') {
+                    merged[key].count = (merged[key].count || 200) + (enchant.count || 200);
                 } else {
-                    // Duplicate: keep both under a unique key instead of discarding
                     let dupKey = key + '_2';
                     let n = 2;
                     while (merged[dupKey]) { n++; dupKey = key + '_' + n; }
@@ -2475,48 +2733,46 @@ function performMerge() {
     const { item, index } = findMergeCostItem();
     if (!item) return;
 
-    // Check for horse special: if both orbs have the horse enchant, result not locked
-    const horseKey = 'e_h_o_r_s_e'; // from addEnchantToOrb for "h o r s e"
+    const horseKey = 'e_h_o_r_s_e';
+    const alphaKey = 'e_alpha';
     let hasHorseBoth = true;
+    let hasAlphaBoth = true;
     const orb1 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[0]);
     const orb2 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[1]);
     if (!orb1 || !orb2) return;
     if (!orb1.enchants[horseKey] || !orb2.enchants[horseKey]) {
         hasHorseBoth = false;
     }
+    if (!orb1.enchants[alphaKey] || !orb2.enchants[alphaKey]) {
+        hasAlphaBoth = false;
+    }
 
-    // Build merged orb
     const mergedEnchants = buildMergedEnchants();
     const newOrb = {
         id: Date.now() + Math.random(),
         enchants: mergedEnchants,
         timestamp: Date.now(),
-        locked: !hasHorseBoth   // if both have horse, not locked
+        locked: !(hasHorseBoth || hasAlphaBoth)
     };
 
-    // Remove source orbs (by id)
     const removedIds = [...gameState.mergeSelection];
     gameState.enchantOrbs = gameState.enchantOrbs.filter(o => !removedIds.includes(o.id));
 
-    // If equipped orb was one of the merged, unequip
     if (gameState.equippedOrb && removedIds.includes(gameState.equippedOrb.id)) {
         gameState.equippedOrb = null;
     }
 
-    // Add merged orb (if space)
     if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
         gameState.enchantOrbs.push(newOrb);
     }
 
-    // Consume cost item from inventory
     gameState.inventory.splice(index, 1);
     gameState.stats.acceptedRanks = gameState.inventory.length;
-    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
-    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
-        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
         : null;
 
-    // Reset
     gameState.mergeSelection = [];
     gameState.mergeModeActive = false;
     const btn = document.getElementById('mergeModeBtn');
@@ -2532,7 +2788,7 @@ function performMerge() {
 }
 
 // ============================================================
-// BULK DELETE FUNCTIONS
+// BULK DELETE FUNCTIONS (unchanged)
 // ============================================================
 function toggleBulkDeleteMode() {
     gameState.bulkDeleteMode = !gameState.bulkDeleteMode;
@@ -2556,16 +2812,15 @@ function toggleBulkDeleteEnchantMode() {
 
 function deleteSelectedInventory() {
     if (gameState.selectedInventoryIndices.length === 0) return;
-    // Sort descending so splicing doesn't shift indices
     const toDelete = [...gameState.selectedInventoryIndices].sort((a,b) => b - a);
     for (let idx of toDelete) {
         gameState.inventory.splice(idx, 1);
     }
     gameState.selectedInventoryIndices = [];
     gameState.stats.acceptedRanks = gameState.inventory.length;
-    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
-    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
-        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
         : null;
     renderInventory();
     updateStats();
@@ -2579,17 +2834,19 @@ function deleteUnderThreshold() {
     const newInventory = [];
     for (let i = 0; i < gameState.inventory.length; i++) {
         const item = gameState.inventory[i];
-        if (item.value <= threshold && !(excludeSecrets && item.isEpilepsy)) {
-            continue; // delete
+        let effectiveValue = item.value;
+        if (item.negative) effectiveValue = -effectiveValue;
+        if (effectiveValue <= threshold && !(excludeSecrets && (item.isEpilepsy || item.isSecret))) {
+            continue;
         }
         newInventory.push(item);
     }
     gameState.inventory = newInventory;
     gameState.selectedInventoryIndices = [];
     gameState.stats.acceptedRanks = gameState.inventory.length;
-    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy).reduce((s, i) => s + i.value, 0);
-    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy).length > 0
-        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy).map(i => i.value))
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
         : null;
     renderInventory();
     updateStats();

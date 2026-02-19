@@ -1560,12 +1560,16 @@ function getSpeedConfig() {
     let isInstant = false;
     const bricks = getEquippedBrickCount();
     const blessing = getBlessingBonuses();
+    const hasBlessing = gameState.equippedOrb && 
+                        Object.values(gameState.equippedOrb.enchants).some(e => e.name === '✦ Blessing');
+
     if (!gameState.equippedOrb) {
         savedSeconds += bricks * 1;
-        savedSeconds -= 12.5 * (blessing.speed > 0 ? 1 : 0);
+        // No Blessing → no penalty
         savedSeconds += blessing.speed;
         return { savedSeconds, isInstant };
     }
+
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.type === 'speed') {
             if (e.effect === 'instant') isInstant = true;
@@ -1581,9 +1585,14 @@ function getSpeedConfig() {
             savedSeconds += 0.5;
         }
     });
+
     savedSeconds += bricks * 1;
-    savedSeconds -= 12.5;
-    savedSeconds += blessing.speed;
+
+    if (hasBlessing) {
+        savedSeconds -= 12.5;           // Blessing's starting penalty
+    }
+    savedSeconds += blessing.speed;      // positive scaling from rolls
+
     return { savedSeconds, isInstant };
 }
 

@@ -1063,7 +1063,7 @@
                         Secret numbers can replace any slot in the roll track. They always replace that one slot when triggered. If the raw RNG floor for that slot was ≥ 1000, the secret number slot can also carry an enchant.
                     </p>
                     <div class="secret-item">
-                        <div class="secret-value-badge" style="background:url('public/images/brogo.png'); background-size:cover;"></div>
+                        <div class="secret-value-badge" style="background:url('public/images/brogo.png'); background-size:cover; border:none;"></div>
                         <div class="secret-item-info">
                             <div class="secret-item-value">brogo</div>
                             <div class="secret-item-rarity">Chance per slot: 1/650,000 (0.00015%)</div>
@@ -2073,7 +2073,7 @@ function performRoll() {
         if (slot.isEpilepsy) {
             realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isBrogo) {
-            realHTML = `${enchantHTML}<div class="rank-name" style="width:100px; height:80px; background:url('public/images/brogo.png'); background-size:contain; background-repeat:no-repeat; background-position:center; margin:0 auto;"></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isSecret) {
             const rarityClass = getRarityClass(slot.value);
             realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.secretDisplay || slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
@@ -2264,7 +2264,7 @@ function renderInventory() {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
             } else if (item.isBrogo) {
-                slot.innerHTML = `<div class="slot-value" style="width:40px;height:40px;background:url('public/images/brogo.png');background-size:contain;background-repeat:no-repeat;background-position:center;"></div>`;
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
                 slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;

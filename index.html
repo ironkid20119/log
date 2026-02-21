@@ -1063,7 +1063,15 @@
                         Secret numbers can replace any slot in the roll track. They always replace that one slot when triggered. If the raw RNG floor for that slot was ≥ 1000, the secret number slot can also carry an enchant.
                     </p>
                     <div class="secret-item">
-                        <div class="secret-value-badge" style="background:url('public/images/brogo.png'); background-size:cover; border:none;"></div>
+                        <div class="secret-value-badge" style="background:url('public/images/nerd.png'); background-size:cover; border:none; border-radius:4px;"></div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">nerd</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/3,333,333 (0.00003%)</div>
+                            <div class="secret-item-note">Special logRNG: -0.03</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge" style="background:url('public/images/brogo.png'); background-size:cover; border:none; border-radius:4px;"></div>
                         <div class="secret-item-info">
                             <div class="secret-item-value">brogo</div>
                             <div class="secret-item-rarity">Chance per slot: 1/650,000 (0.00015%)</div>
@@ -1408,6 +1416,7 @@ const ENCHANTS = {
 // SECRET NUMBERS (unchanged)
 // ============================================================
 const SECRET_NUMBERS_RAW = [
+    { logValue: -0.03,  rarity: 1/3333333, display: 'nerd', isNerd: true },
     { logValue: -0.02,  rarity: 1/650000, display: 'brogo', isBrogo: true },
     { logValue: -0.69,  rarity: 1/690,     display: '-0.69' },
     { logValue: -2.8,   rarity: 1/1000,    display: '-2.8'  },
@@ -1694,6 +1703,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
                 rawFloor,
                 isSecret: true,
                 isBrogo: !!secret.isBrogo,
+                isNerd: !!secret.isNerd,
                 isEpilepsy: !!secret.isEpilepsy,
                 secretDisplay: secret.display,
                 enchant
@@ -2072,6 +2082,8 @@ function performRoll() {
         let realHTML;
         if (slot.isEpilepsy) {
             realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+        } else if (slot.isNerd) {
+            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isBrogo) {
             realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isSecret) {
@@ -2263,6 +2275,8 @@ function renderInventory() {
             if (item.isEpilepsy) {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
+            } else if (item.isNerd) {
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div>`;
             } else if (item.isBrogo) {
                 slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div>`;
             } else {

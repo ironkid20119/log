@@ -1063,6 +1063,14 @@
                         Secret numbers can replace any slot in the roll track. They always replace that one slot when triggered. If the raw RNG floor for that slot was ≥ 1000, the secret number slot can also carry an enchant.
                     </p>
                     <div class="secret-item">
+                        <div class="secret-value-badge" style="background:url('public/images/brogo.png'); background-size:cover;"></div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">brogo</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/650,000 (0.00015%)</div>
+                            <div class="secret-item-note">Special logRNG: -0.02</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
                         <div class="secret-value-badge">-0.69</div>
                         <div class="secret-item-info">
                             <div class="secret-item-value">logRNG: -0.69</div>
@@ -1400,6 +1408,7 @@ const ENCHANTS = {
 // SECRET NUMBERS (unchanged)
 // ============================================================
 const SECRET_NUMBERS_RAW = [
+    { logValue: -0.02,  rarity: 1/650000, display: 'brogo', isBrogo: true },
     { logValue: -0.69,  rarity: 1/690,     display: '-0.69' },
     { logValue: -2.8,   rarity: 1/1000,    display: '-2.8'  },
     { logValue: -3.5,   rarity: 1/3500,    display: '-3.5'  },
@@ -1684,6 +1693,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
                 value: secret.logValue,
                 rawFloor,
                 isSecret: true,
+                isBrogo: !!secret.isBrogo,
                 isEpilepsy: !!secret.isEpilepsy,
                 secretDisplay: secret.display,
                 enchant
@@ -2062,6 +2072,8 @@ function performRoll() {
         let realHTML;
         if (slot.isEpilepsy) {
             realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+        } else if (slot.isBrogo) {
+            realHTML = `${enchantHTML}<div class="rank-name" style="width:100px; height:80px; background:url('public/images/brogo.png'); background-size:contain; background-repeat:no-repeat; background-position:center; margin:0 auto;"></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isSecret) {
             const rarityClass = getRarityClass(slot.value);
             realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.secretDisplay || slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
@@ -2251,6 +2263,8 @@ function renderInventory() {
             if (item.isEpilepsy) {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
+            } else if (item.isBrogo) {
+                slot.innerHTML = `<div class="slot-value" style="width:40px;height:40px;background:url('public/images/brogo.png');background-size:contain;background-repeat:no-repeat;background-position:center;"></div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
                 slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;

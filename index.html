@@ -52,8 +52,9 @@
         }
 
         .roll-square {
-            min-width: 120px;
-            height: 110px;
+            aspect-ratio: 1 / 1;
+            width: calc(120px * var(--slot-scale, 1));
+            height: auto;
             background: rgba(255,255,255,0.1);
             border-radius: 8px;
             display: flex;
@@ -64,8 +65,6 @@
             border: 2px solid transparent;
             transition: all 0.3s;
             position: relative;
-            width: calc(120px * var(--slot-scale, 1));
-            height: calc(110px * var(--slot-scale, 1));
             font-size: calc(1em * var(--slot-scale, 1));
         }
 
@@ -418,6 +417,7 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; color: #bb88ff; font-size: 0.85em;
             flex-shrink: 0;
+            overflow: hidden;
         }
         .secret-item-info { flex-grow: 1; }
         .secret-item-value { font-weight: bold; color: #ff4444; }
@@ -1416,7 +1416,7 @@ const ENCHANTS = {
 // SECRET NUMBERS (unchanged)
 // ============================================================
 const SECRET_NUMBERS_RAW = [
-    { logValue: -0.03,  rarity: 1/3333333, display: 'nerd', isNerd: true },
+    { logValue: -0.03,  rarity: 1/3333333, display: 'hl3', isNerd: true, isHl3: true },
     { logValue: -0.02,  rarity: 1/650000, display: 'brogo', isBrogo: true },
     { logValue: -0.69,  rarity: 1/690,     display: '-0.69' },
     { logValue: -2.8,   rarity: 1/1000,    display: '-2.8'  },
@@ -1704,6 +1704,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
                 isSecret: true,
                 isBrogo: !!secret.isBrogo,
                 isNerd: !!secret.isNerd,
+                isHl3: !!secret.isHl3,
                 isEpilepsy: !!secret.isEpilepsy,
                 secretDisplay: secret.display,
                 enchant
@@ -2082,7 +2083,7 @@ function performRoll() {
         let realHTML;
         if (slot.isEpilepsy) {
             realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
-        } else if (slot.isNerd) {
+        } else if (slot.isHl3) {
             realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isBrogo) {
             realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
@@ -2275,10 +2276,10 @@ function renderInventory() {
             if (item.isEpilepsy) {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
-            } else if (item.isNerd) {
-                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div>`;
+            } else if (item.isHl3) {
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.03</div>`;
             } else if (item.isBrogo) {
-                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div>`;
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.02</div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
                 slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;

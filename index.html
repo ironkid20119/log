@@ -1202,6 +1202,63 @@
 
 <script>
 // ============================================================
+// SOUND EFFECTS
+// ============================================================
+const SFX = {
+    coinLow: new Audio('public/sfx/pickupCoin.wav'),
+    coinHigh: new Audio('public/sfx/coin_pickup.wav'),
+    explosion: new Audio('public/sfx/explosion.wav'),
+    powerup: new Audio('public/sfx/powerup.wav'),
+    synth: new Audio('public/sfx/synth.wav'),
+    synth1: new Audio('public/sfx/synth1.wav'),
+    cowm: new Audio('public/sfx/cowm.wav'),
+    t100: new Audio('public/sfx/100t.wav'),
+    lobotomy: new Audio('public/sfx/lobotomy.mp3')
+};
+
+function playRankSFX(slot) {
+    if (slot.isSecret) {
+        if (slot.rawFloor > 10000000) {
+            SFX.lobotomy.currentTime = 0;
+            SFX.lobotomy.play().catch(() => {});
+        } else if (slot.rawFloor > 1000000) {
+            SFX.t100.currentTime = 0;
+            SFX.t100.play().catch(() => {});
+        } else if (slot.rawFloor < 1000000 && slot.rawFloor >= 50000) {
+            // No specific sound for this range in request? 
+            // "cowm for secrets under floor = 1,000,000" covers this too.
+            SFX.cowm.currentTime = 0;
+            SFX.cowm.play().catch(() => {});
+        } else if (slot.rawFloor < 50000) {
+            SFX.synth1.currentTime = 0;
+            SFX.synth1.play().catch(() => {});
+        } else {
+            // Fallback for secrets
+            SFX.cowm.currentTime = 0;
+            SFX.cowm.play().catch(() => {});
+        }
+    } else {
+        const val = slot.value;
+        if (val >= 6) {
+            SFX.explosion.currentTime = 0;
+            SFX.explosion.play().catch(() => {});
+        } else if (val >= 5) {
+            SFX.synth.currentTime = 0;
+            SFX.synth.play().catch(() => {});
+        } else if (val >= 4) {
+            SFX.powerup.currentTime = 0;
+            SFX.powerup.play().catch(() => {});
+        } else if (val >= 3) {
+            SFX.coinHigh.currentTime = 0;
+            SFX.coinHigh.play().catch(() => {});
+        } else {
+            SFX.coinLow.currentTime = 0;
+            SFX.coinLow.play().catch(() => {});
+        }
+    }
+}
+
+// ============================================================
 // CONSTANTS
 // ============================================================
 const MAX_INVENTORY = 60;
@@ -2127,6 +2184,9 @@ function performRoll() {
     setTimeout(() => {
         const targetSquare = rollTrack.children[centerAcceptable];
         if (!targetSquare) { finishRoll(); return; }
+
+        const centerSlot = slots[centerAcceptable];
+        playRankSFX(centerSlot);
 
         const targetScrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
         const startScrollLeft = 0;

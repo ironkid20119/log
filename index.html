@@ -1216,45 +1216,54 @@ const SFX = {
     lobotomy: new Audio('public/sfx/lobotomy.mp3')
 };
 
+// Pre-load audio to ensure they're ready and check for errors
+Object.values(SFX).forEach(audio => {
+    audio.load();
+    audio.addEventListener('error', (e) => {
+        console.error("Audio failed to load:", audio.src, e);
+    });
+});
+
 function playRankSFX(slot) {
+    // Force user interaction requirement check
+    // Browsers often block audio until the user clicks something.
+    // Since the user must click "Roll", we should be fine, but we'll add a catch.
+    
+    let audioToPlay = null;
     if (slot.isSecret) {
         if (slot.rawFloor > 10000000) {
-            SFX.lobotomy.currentTime = 0;
-            SFX.lobotomy.play().catch(() => {});
+            audioToPlay = SFX.lobotomy;
         } else if (slot.rawFloor > 1000000) {
-            SFX.t100.currentTime = 0;
-            SFX.t100.play().catch(() => {});
+            audioToPlay = SFX.t100;
         } else if (slot.rawFloor < 1000000 && slot.rawFloor >= 50000) {
-            // No specific sound for this range in request? 
-            // "cowm for secrets under floor = 1,000,000" covers this too.
-            SFX.cowm.currentTime = 0;
-            SFX.cowm.play().catch(() => {});
+            audioToPlay = SFX.cowm;
         } else if (slot.rawFloor < 50000) {
-            SFX.synth1.currentTime = 0;
-            SFX.synth1.play().catch(() => {});
+            audioToPlay = SFX.synth1;
         } else {
-            // Fallback for secrets
-            SFX.cowm.currentTime = 0;
-            SFX.cowm.play().catch(() => {});
+            audioToPlay = SFX.cowm;
         }
     } else {
         const val = slot.value;
         if (val >= 6) {
-            SFX.explosion.currentTime = 0;
-            SFX.explosion.play().catch(() => {});
+            audioToPlay = SFX.explosion;
         } else if (val >= 5) {
-            SFX.synth.currentTime = 0;
-            SFX.synth.play().catch(() => {});
+            audioToPlay = SFX.synth;
         } else if (val >= 4) {
-            SFX.powerup.currentTime = 0;
-            SFX.powerup.play().catch(() => {});
+            audioToPlay = SFX.powerup;
         } else if (val >= 3) {
-            SFX.coinHigh.currentTime = 0;
-            SFX.coinHigh.play().catch(() => {});
+            audioToPlay = SFX.coinHigh;
         } else {
-            SFX.coinLow.currentTime = 0;
-            SFX.coinLow.play().catch(() => {});
+            audioToPlay = SFX.coinLow;
         }
+    }
+
+    if (audioToPlay) {
+        audioToPlay.pause();
+        audioToPlay.currentTime = 0;
+        audioToPlay.play().catch(err => {
+            console.warn("Audio play blocked or failed:", err);
+            // Fallback: try to play on next user interaction if needed
+        });
     }
 }
 

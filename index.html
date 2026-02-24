@@ -1752,6 +1752,11 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     if (rawFloor < 1) rawFloor = 1;
     let logValue = Number(Math.log10(rawFloor).toFixed(2));
 
+    const baseResult = {
+        rawFloor,
+        isAcceptableSlot
+    };
+
     // Special Sandwich Secret: -86.91
     // Requires a -0.69 to be sandwiched between two >= 4 logRNG / >= 10,000 RNG
     if (isAcceptableSlot && prevSlots && prevSlots.length >= 2) {
@@ -1765,8 +1770,8 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
                 const thirdLast = prevSlots[prevSlots.length - 3];
                 if (thirdLast && thirdLast.rawFloor >= 10000) {
                     return {
+                        ...baseResult,
                         value: -86.91,
-                        rawFloor,
                         isSecret: true,
                         secretDisplay: '-86.91',
                         enchant: (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null
@@ -1780,8 +1785,8 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
         if (Math.random() < 1/66666.66) {
             const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
             return {
+                ...baseResult,
                 value: -666,
-                rawFloor,
                 isSecret: true,
                 secretDisplay: '-666',
                 enchant
@@ -1794,8 +1799,8 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
         if (secret) {
             const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
             return {
+                ...baseResult,
                 value: secret.logValue,
-                rawFloor,
                 isSecret: true,
                 isBrogo: !!secret.isBrogo,
                 isNerd: !!secret.isNerd,
@@ -1818,8 +1823,8 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
 
     return {
+        ...baseResult,
         value: logValue,
-        rawFloor,
         isSecret: false,
         imaginary,
         negative,
@@ -2241,7 +2246,9 @@ function performRoll() {
                 requestAnimationFrame(animateScroll);
             } else {
                 const centerSlot = slots[centerAcceptable];
-                playRankSFX(centerSlot);
+                if (centerSlot.isAcceptableSlot) {
+                    playRankSFX(centerSlot);
+                }
                 setTimeout(finishRoll, 100);
             }
         }

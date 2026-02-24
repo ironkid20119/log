@@ -15,7 +15,15 @@
             padding: 20px;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 95vw; margin: 0 auto; padding: 10px; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .game-section { padding: 15px; }
+            .roll-square { width: calc(80px * var(--slot-scale, 1)); }
+            .rank-name { font-size: 1.1em; }
+            .inventory-grid { grid-template-columns: repeat(2, 1fr); }
+        }
 
         h1 {
             text-align: center;
@@ -2384,12 +2392,12 @@ function renderInventory() {
                 slot.classList.add('epilepsy-inv');
                 slot.innerHTML = `<div class="slot-value"><span class="epilepsy-text" style="font-size:0.55em;">!! EPILEPSY !!</span></div>`;
             } else if (item.isHl3) {
-                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.03</div>`;
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">rng: ${item.rawFloor.toLocaleString()}</div>`;
             } else if (item.isBrogo) {
-                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.02</div>`;
+                slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">rng: ${item.rawFloor.toLocaleString()}</div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
-                slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;
+                slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div><div style="font-size:0.5em; opacity:0.6;">rng: ${item.rawFloor.toLocaleString()}</div>`;
             }
             if (item.imaginary) slot.classList.add('imaginary');
             if (item.negative) slot.classList.add('negative');

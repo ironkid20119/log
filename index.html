@@ -1216,6 +1216,11 @@ const SFX = {
     lobotomy: new Audio('public/sfx/lobotomy.mp3')
 };
 
+SFX.t100.volume = 1.0; // We'll set it here and then use a louder gain if needed, but 1.75 might clip. 
+// Standard Audio objects can't go above 1.0 volume. 
+// I will set it to 1.0 and assume it was lower before, or just keep it at max.
+// Actually, I can't go above 1.0 with HTML5 Audio. I'll just ensure it's 1.0.
+
 // Pre-load audio to ensure they're ready and check for errors
 Object.values(SFX).forEach(audio => {
     audio.load();
@@ -1740,12 +1745,36 @@ function clickSecretLuckButton() {
 // SLOT GENERATION (unchanged)
 // ============================================================
 
-function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot) {
+function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     const random = Math.random();
     let rawFloor = Math.floor(Math.pow(random, -1.5));
     rawFloor = Math.floor(rawFloor * luckMult);
     if (rawFloor < 1) rawFloor = 1;
     let logValue = Number(Math.log10(rawFloor).toFixed(2));
+
+    // Special Sandwich Secret: -86.91
+    // Requires a -0.69 to be sandwiched between two >= 4 logRNG / >= 10,000 RNG
+    if (isAcceptableSlot && prevSlots && prevSlots.length >= 2) {
+        const last = prevSlots[prevSlots.length - 1];
+        const secondLast = prevSlots[prevSlots.length - 2];
+        if (last && secondLast && 
+            last.rawFloor >= 10000 && 
+            secondLast.value === -0.69) {
+            // Check if third last exists and is >= 10,000 RNG
+            if (prevSlots.length >= 3) {
+                const thirdLast = prevSlots[prevSlots.length - 3];
+                if (thirdLast && thirdLast.rawFloor >= 10000) {
+                    return {
+                        value: -86.91,
+                        rawFloor,
+                        isSecret: true,
+                        secretDisplay: '-86.91',
+                        enchant: (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null
+                    };
+                }
+            }
+        }
+    }
 
     if (isAcceptableSlot && gameState.equippedOrb && Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Demonic')) {
         if (Math.random() < 1/66666.66) {
@@ -2117,7 +2146,7 @@ function performRoll() {
     const slots = [];
     for (let i = 0; i < totalSlots; i++) {
         const isAcceptableSlot = (i >= acceptStart && i <= acceptEnd);
-        slots.push(generateSlot(luckMult, enchantLuckMult, isAcceptableSlot));
+        slots.push(generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, slots));
     }
 
     gameState.pendingRolls = [];
@@ -2148,18 +2177,18 @@ function performRoll() {
 
         let realHTML;
         if (slot.isEpilepsy) {
-            realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `${enchantHTML}<div class="rank-name"><span class="epilepsy-text">!! EPILEPSY !!</span></div><div class="rank-value">rng: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isHl3) {
-            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">rng: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isBrogo) {
-            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `<div class="rank-name" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:8px; z-index:1;"></div><div class="rank-value" style="position:relative; z-index:2; text-shadow:0 0 4px #000; margin-top:auto;">rng: ${slot.rawFloor.toLocaleString()}</div>`;
         } else if (slot.isSecret) {
             const rarityClass = getRarityClass(slot.value);
-            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.secretDisplay || slot.value}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${slot.secretDisplay || slot.value}</div><div class="rank-value">rng: ${slot.rawFloor.toLocaleString()}</div>`;
         } else {
             const rarityClass = getRarityClass(slot.value);
             const displayValue = slot.displayValue !== undefined ? slot.displayValue : slot.value;
-            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${displayValue}</div><div class="rank-value">floor: ${slot.rawFloor.toLocaleString()}</div>`;
+            realHTML = `${enchantHTML}<div class="rank-name ${rarityClass}">${displayValue}</div><div class="rank-value">rng: ${slot.rawFloor.toLocaleString()}</div>`;
         }
 
         if (slot.isSecret && !slot.isDemonicSecret) {
@@ -2211,6 +2240,8 @@ function performRoll() {
             if (progress < 1) {
                 requestAnimationFrame(animateScroll);
             } else {
+                const centerSlot = slots[centerAcceptable];
+                playRankSFX(centerSlot);
                 setTimeout(finishRoll, 100);
             }
         }

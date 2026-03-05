@@ -1820,7 +1820,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     if (negative) displayValue = -displayValue;
     if (imaginary) displayValue = displayValue + 'i';
 
-    const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
+    const enchant = (rawFloor >= 100) ? rollEnchant(enchantLuckMult) : null;
 
     return {
         ...baseResult,

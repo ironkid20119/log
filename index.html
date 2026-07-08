@@ -239,6 +239,7 @@
         .rarity-7 { color: #00ffff; }
         .rarity-8 { color: #fff; text-shadow: 0 0 10px #fff; }
 
+        .roll-square.acceptable { cursor: pointer; }
         .roll-square.secret-slot { border-color: rgba(187,136,255,0.5) !important; background: rgba(100,0,150,0.2) !important; }
         .roll-square.secret-slot.acceptable { border-color: rgba(187,136,255,0.8) !important; }
         .roll-square.secret-slot.center-acceptable { border-color: #bb88ff !important; box-shadow: 0 0 20px rgba(187,136,255,0.6) !important; }
@@ -518,19 +519,18 @@
         <div class="roll-display" id="rollDisplay">
             <div class="roll-track" id="rollTrack"></div>
         </div>
-        <div class="pending-panel" id="pendingPanel">
-            <h4>⏳ Pending Enchants — press Accept to collect:</h4>
-            <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
-        </div>
         <div class="controls">
             <button class="roll-btn" id="rollBtn">Roll</button>
-            <button class="accept-btn" id="acceptBtn" disabled>Accept</button>
         </div>
         <div style="text-align:center;">
             <button class="luck-btn" id="luckBtn" onclick="clickLuckButton()">please increase my luck for the next roll!</button>
             <div class="luck-boost-display" id="luckBoostDisplay"></div>
             <button class="secret-luck-btn" id="secretLuckBtn" onclick="clickSecretLuckButton()">increase my secret luck for the next roll please!</button>
             <div class="secret-luck-boost-display" id="secretLuckBoostDisplay"></div>
+        </div>
+        <div class="pending-panel" id="pendingPanel">
+            <h4>⏳ Pending Enchants — click a highlighted cell to collect:</h4>
+            <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
         </div>
     </div>
 
@@ -660,7 +660,7 @@
                         <div class="enchant-orb" style="background:#15803d;">IV</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Craziness</div>
-                            <div class="enchant-item-effect">+25x luck multiplier</div>
+                            <div class="enchant-item-effect">+75x luck multiplier</div>
                             <div class="enchant-item-rarity">Rarity: 1/125,000 (0.0008%)</div>
                         </div>
                     </div>
@@ -1172,6 +1172,22 @@
                             <div class="secret-item-value"><span class="epilepsy-text">!! EPILEPSY !!</span></div>
                             <div class="secret-item-rarity">Chance per slot: 1/1,234,567 (0.000081%)</div>
                             <div class="secret-item-note">Can have enchant if raw floor ≥ 1000.</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-777</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -777</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/7,777,777 (0.0000129%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-86.91</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -86.91</div>
+                            <div class="secret-item-rarity">Triggered conditionally — not a random chance</div>
+                            <div class="secret-item-note">Sandwich secret: triggers when a -0.69 slot is flanked by two slots with logRNG ≥ 4 (raw RNG ≥ 10,000)</div>
                         </div>
                     </div>
                     <div class="secret-item">
@@ -2119,7 +2135,6 @@ function performRoll() {
 
     gameState.isRolling = true;
     document.getElementById('rollBtn').disabled = true;
-    document.getElementById('acceptBtn').disabled = true;
 
     const rollTrack = document.getElementById('rollTrack');
     const rollDisplay = document.getElementById('rollDisplay');
@@ -2173,7 +2188,10 @@ function performRoll() {
 
         const square = document.createElement('div');
         square.className = 'roll-square';
-        if (isAcceptable) square.classList.add('acceptable');
+        if (isAcceptable) {
+            square.classList.add('acceptable');
+            square.addEventListener('click', acceptRoll);
+        }
         if (isCenter) square.classList.add('center-acceptable');
         if (slot.isSecret) square.classList.add('secret-slot');
         if (slot.imaginary) square.classList.add('imaginary');
@@ -2273,7 +2291,6 @@ function finishRoll() {
 
     gameState.isRolling = false;
     document.getElementById('rollBtn').disabled = false;
-    document.getElementById('acceptBtn').disabled = false;
     renderPendingPanel();
     saveGame();
     updateStats();
@@ -2311,6 +2328,7 @@ function renderPendingPanel() {
 // ACCEPT ROLL (unchanged)
 // ============================================================
 function acceptRoll() {
+    if (gameState.isRolling) return;
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
 
     let added = 0;
@@ -2358,7 +2376,6 @@ function acceptRoll() {
 
     gameState.pendingRolls = [];
 
-    document.getElementById('acceptBtn').disabled = true;
     document.getElementById('pendingPanel').classList.remove('visible');
 
     saveGame();
@@ -3024,7 +3041,6 @@ function deleteSelectedEnchants() {
 // EVENT LISTENERS
 // ============================================================
 document.getElementById('rollBtn').addEventListener('click', performRoll);
-document.getElementById('acceptBtn').addEventListener('click', acceptRoll);
 
 loadGame();
 </script>

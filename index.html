@@ -1836,7 +1836,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
                         value: -86.91,
                         isSecret: true,
                         secretDisplay: '-86.91',
-                        enchant: (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null
+                        enchants: rollEnchants(enchantLuckMult, rawFloor, 1000)
                     };
                 }
             }
@@ -1845,13 +1845,12 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
 
     if (isAcceptableSlot && gameState.equippedOrb && Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Demonic')) {
         if (Math.random() < 1/66666.66) {
-            const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
             return {
                 ...baseResult,
                 value: -666,
                 isSecret: true,
                 secretDisplay: '-666',
-                enchant
+                enchants: rollEnchants(enchantLuckMult, rawFloor, 1000)
             };
         }
     }
@@ -1859,7 +1858,6 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     if (isAcceptableSlot) {
         const secret = checkSecretNumber();
         if (secret) {
-            const enchant = (rawFloor >= 1000) ? rollEnchant(enchantLuckMult) : null;
             return {
                 ...baseResult,
                 value: secret.logValue,
@@ -1869,7 +1867,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
                 isHl3: !!secret.isHl3,
                 isEpilepsy: !!secret.isEpilepsy,
                 secretDisplay: secret.display,
-                enchant
+                enchants: rollEnchants(enchantLuckMult, rawFloor, 1000)
             };
         }
     }
@@ -1882,8 +1880,6 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     if (negative) displayValue = -displayValue;
     if (imaginary) displayValue = displayValue + 'i';
 
-    const enchant = (rawFloor >= 100) ? rollEnchant(enchantLuckMult) : null;
-
     return {
         ...baseResult,
         value: logValue,
@@ -1891,7 +1887,7 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
         imaginary,
         negative,
         displayValue,
-        enchant
+        enchants: rollEnchants(enchantLuckMult, rawFloor, 100)
     };
 }
 
@@ -1906,12 +1902,13 @@ function checkSecretNumber() {
     return null;
 }
 
-function rollEnchant(enchantLuckMult) {
+function rollEnchant(enchantLuckMult, excludeTypes = new Set()) {
     if (enchantLuckMult <= 0) return null;
     const roll = Math.random();
     const eligible = Object.entries(ENCHANTS)
         .filter(([key, e]) => {
             if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
+            if (excludeTypes.has(e.type)) return false;
             return true;
         })
         .map(([key, e]) => ({ key, ...e }))
@@ -1924,6 +1921,20 @@ function rollEnchant(enchantLuckMult) {
         }
     }
     return null;
+}
+
+function rollEnchants(enchantLuckMult, rawFloor, minRawFloor) {
+    if (rawFloor < minRawFloor) return [];
+    const result = [];
+    const usedTypes = new Set();
+    const divisors = [1, 2.5, 5];
+    for (const divisor of divisors) {
+        const e = rollEnchant(enchantLuckMult / divisor, usedTypes);
+        if (!e) break;
+        result.push(e);
+        usedTypes.add(e.type);
+    }
+    return result;
 }
 
 // ============================================================
@@ -2234,9 +2245,10 @@ function performRoll() {
         if (slot.negative) square.classList.add('negative');
 
         let enchantHTML = '';
-        if (slot.enchant) {
-            enchantHTML = `<div class="enchant-indicator" style="padding:0;overflow:hidden;background:transparent;border:none;">
-                ${enchantOrbHTML(slot.enchant, 25, '', slot.enchant.name)}
+        if (slot.enchants && slot.enchants.length > 0) {
+            const orbsHTML = slot.enchants.map(e => enchantOrbHTML(e, 22, '', e.name)).join('');
+            enchantHTML = `<div class="enchant-indicator" style="padding:0;overflow:hidden;background:transparent;border:none;display:flex;gap:2px;justify-content:center;">
+                ${orbsHTML}
             </div>`;
         }
 
@@ -2344,7 +2356,7 @@ function renderPendingPanel() {
         return;
     }
 
-    const pendingEnchants = gameState.pendingRolls.filter(r => r.enchant).map(r => r.enchant);
+    const pendingEnchants = gameState.pendingRolls.flatMap(r => r.enchants || []);
     if (pendingEnchants.length === 0) {
         panel.classList.remove('visible');
         return;
@@ -2391,7 +2403,7 @@ function acceptRollSlot(slot) {
         }
     }
 
-    const pendingEnchants = slot.enchant ? [slot.enchant] : [];
+    const pendingEnchants = slot.enchants || [];
 
     for (const enchant of pendingEnchants) {
         if (enchant.type === 'joke' && enchant.name === 'Brick') {

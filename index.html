@@ -165,14 +165,14 @@
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
         }
 
         .inventory-slot {
             aspect-ratio: 1;
             background: rgba(0,0,0,0.3);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -180,9 +180,9 @@
             border: 2px solid rgba(255,255,255,0.1);
             cursor: pointer;
             transition: all 0.3s;
-            padding: 10px;
+            padding: 4px;
             position: relative;
-            font-size: clamp(0.8rem, 2vw, 1.5rem);
+            font-size: clamp(0.5rem, 1vw, 1rem);
         }
 
         .inventory-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
@@ -1333,8 +1333,8 @@ function playRankSFX(slot) {
 // ============================================================
 const MAX_INVENTORY = 60;
 const MAX_ENCHANTS = 30;
-const ITEMS_PER_PAGE = 10;
-const TOTAL_PAGES = 6;
+const ITEMS_PER_PAGE = 60;
+const TOTAL_PAGES = 1;
 const ENCHANTS_PER_PAGE = 10;
 const TOTAL_ENCHANT_PAGES = 3;
 const BASE_ROLL_DURATION = 1750;
@@ -2230,7 +2230,7 @@ function performRoll() {
         square.className = 'roll-square';
         if (isAcceptable) {
             square.classList.add('acceptable');
-            square.addEventListener('click', acceptRoll);
+            square.addEventListener('click', () => acceptRollSlot(slot));
         }
         if (isCenter) square.classList.add('center-acceptable');
         if (slot.isSecret) square.classList.add('secret-slot');
@@ -2365,19 +2365,21 @@ function renderPendingPanel() {
 }
 
 // ============================================================
-// ACCEPT ROLL (unchanged)
+// ACCEPT ROLL
 // ============================================================
-function acceptRoll() {
+function acceptRollSlot(slot) {
     if (gameState.isRolling) return;
-    if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
+    if (!gameState.pendingRolls) return;
 
-    const slot = gameState.pendingRolls.shift();
+    const idx = gameState.pendingRolls.indexOf(slot);
+    if (idx === -1) return;
 
     if (gameState.inventory.length >= MAX_INVENTORY) {
         alert('Inventory is full!');
-        gameState.pendingRolls.unshift(slot);
         return;
     }
+
+    gameState.pendingRolls.splice(idx, 1);
 
     const invItem = { value: slot.value, timestamp: Date.now() };
     if (slot.isEpilepsy) invItem.isEpilepsy = true;
@@ -2449,7 +2451,10 @@ function renderInventory() {
                 slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.02</div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
-                slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div>`;
+                const rawRng = item.value <= 15
+                    ? Math.round(Math.pow(10, item.value)).toLocaleString()
+                    : `10^${item.value}`;
+                slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div><div style="font-size:0.6em;opacity:0.5;margin-top:2px;">rng: ${rawRng}</div>`;
             }
             if (item.imaginary) slot.classList.add('imaginary');
             if (item.negative) slot.classList.add('negative');

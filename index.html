@@ -2246,8 +2246,8 @@ function performRoll() {
 
         let enchantHTML = '';
         if (slot.enchants && slot.enchants.length > 0) {
-            const orbsHTML = slot.enchants.map(e => enchantOrbHTML(e, 22, '', e.name)).join('');
-            enchantHTML = `<div class="enchant-indicator" style="padding:0;overflow:hidden;background:transparent;border:none;display:flex;gap:2px;justify-content:center;">
+            const orbsHTML = slot.enchants.map(e => `<div style="flex-shrink:0;">${enchantOrbHTML(e, 22, '', e.name)}</div>`).join('');
+            enchantHTML = `<div class="enchant-indicator" style="padding:0;background:transparent;border:none;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;align-items:center;">
                 ${orbsHTML}
             </div>`;
         }
@@ -2405,23 +2405,22 @@ function acceptRollSlot(slot) {
 
     const pendingEnchants = slot.enchants || [];
 
-    for (const enchant of pendingEnchants) {
-        if (enchant.type === 'joke' && enchant.name === 'Brick') {
-            gameState.brickCount++;
-            document.getElementById('brickStatBox').style.display = '';
-            document.getElementById('brickCount').textContent = gameState.brickCount;
-        }
-        if (enchant.name === 'Brick Wall') {
-            gameState.brickCount += 200;
-            document.getElementById('brickStatBox').style.display = '';
-            document.getElementById('brickCount').textContent = gameState.brickCount;
-        }
-
-        if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
-            const newOrb = createEnchantOrb();
+    if (pendingEnchants.length > 0 && gameState.enchantOrbs.length < MAX_ENCHANTS) {
+        const newOrb = createEnchantOrb();
+        for (const enchant of pendingEnchants) {
+            if (enchant.type === 'joke' && enchant.name === 'Brick') {
+                gameState.brickCount++;
+                document.getElementById('brickStatBox').style.display = '';
+                document.getElementById('brickCount').textContent = gameState.brickCount;
+            }
+            if (enchant.name === 'Brick Wall') {
+                gameState.brickCount += 200;
+                document.getElementById('brickStatBox').style.display = '';
+                document.getElementById('brickCount').textContent = gameState.brickCount;
+            }
             addEnchantToOrb(newOrb, enchant);
-            gameState.enchantOrbs.push(newOrb);
         }
+        gameState.enchantOrbs.push(newOrb);
     }
 
     renderPendingPanel();

@@ -1500,7 +1500,13 @@ const SECRET_NUMBERS_RAW = [
     { logValue: -1.23,  rarity: 1/50000,   display: '-1.23' },
     { logValue: -7,     rarity: 1/77777,   display: '-7'    },
     { logValue: -101,   rarity: 1/101000,  display: '-101'  },
+    { logValue: -69420, rarity; 1/694200, display: '-69420'},
     { logValue: -9999,  rarity: 1/1234567, display: 'EPILEPSY', isEpilepsy: true },
+    { logValue: -0.5, rarity: 1/2e6, display: '-0.5'},
+    { logValue: -0.01, rarity: 1/1e7, display: '🐟'},
+    { logValue: -777, rarity: 1/7777777, display: '-777.777'},
+    { logValue: -9.99, rarity: 1/2.5e7, display: '-9.99'},
+    { logValue: -696969, rarity: 1/1e9, display: 'poly'},
     { logValue: -666,   rarity: 0,          display: '-666', isDemonicSecret: true }
 ];
 const SECRET_NUMBERS = [...SECRET_NUMBERS_RAW].sort((a, b) => a.rarity - b.rarity);

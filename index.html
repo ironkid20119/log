@@ -2382,6 +2382,7 @@ function acceptRollSlot(slot) {
     gameState.pendingRolls.splice(idx, 1);
 
     const invItem = { value: slot.value, timestamp: Date.now() };
+    if (slot.rawFloor !== undefined) invItem.rawFloor = slot.rawFloor;
     if (slot.isEpilepsy) invItem.isEpilepsy = true;
     if (slot.imaginary) invItem.imaginary = true;
     if (slot.negative) invItem.negative = true;
@@ -2451,9 +2452,9 @@ function renderInventory() {
                 slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.02</div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
-                const rawRng = item.value <= 15
-                    ? Math.round(Math.pow(10, item.value)).toLocaleString()
-                    : `10^${item.value}`;
+                const rawRng = item.rawFloor !== undefined
+                    ? item.rawFloor.toLocaleString()
+                    : (item.value <= 15 ? Math.round(Math.pow(10, item.value)).toLocaleString() : `~10^${item.value}`);
                 slot.innerHTML = `<div class="slot-value ${rarityClass}">${displayValue}</div><div style="font-size:0.6em;opacity:0.5;margin-top:2px;">rng: ${rawRng}</div>`;
             }
             if (item.imaginary) slot.classList.add('imaginary');

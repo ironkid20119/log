@@ -1175,10 +1175,50 @@
                         </div>
                     </div>
                     <div class="secret-item">
-                        <div class="secret-value-badge">-777</div>
+                        <div class="secret-value-badge">-69420</div>
                         <div class="secret-item-info">
-                            <div class="secret-item-value">logRNG: -777</div>
+                            <div class="secret-item-value">logRNG: -69420</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/694,200 (0.000144%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-0.5</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -0.5</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/2,000,000 (0.00005%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">🐟</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">🐟 (logRNG: -0.01)</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/10,000,000 (0.00001%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-777.777</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -777 (displays as -777.777)</div>
                             <div class="secret-item-rarity">Chance per slot: 1/7,777,777 (0.0000129%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">-9.99</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">logRNG: -9.99</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/25,000,000 (0.000004%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
+                        <div class="secret-value-badge">poly</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">poly (logRNG: -696969)</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/1,000,000,000 (0.0000001%)</div>
                             <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
                         </div>
                     </div>
@@ -2331,29 +2371,28 @@ function acceptRoll() {
     if (gameState.isRolling) return;
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
 
-    let added = 0;
-    for (const slot of gameState.pendingRolls) {
-        if (gameState.inventory.length >= MAX_INVENTORY) break;
-        const invItem = { value: slot.value, timestamp: Date.now() + added };
-        if (slot.isEpilepsy) invItem.isEpilepsy = true;
-        if (slot.imaginary) invItem.imaginary = true;
-        if (slot.negative) invItem.negative = true;
-        gameState.inventory.push(invItem);
-        gameState.stats.acceptedRanks++;
-        if (!slot.isEpilepsy && !slot.isSecret) {
-            gameState.stats.totalValue += slot.value;
-            if (gameState.stats.highestRank === null || slot.value > gameState.stats.highestRank) {
-                gameState.stats.highestRank = slot.value;
-            }
+    const slot = gameState.pendingRolls.shift();
+
+    if (gameState.inventory.length >= MAX_INVENTORY) {
+        alert('Inventory is full!');
+        gameState.pendingRolls.unshift(slot);
+        return;
+    }
+
+    const invItem = { value: slot.value, timestamp: Date.now() };
+    if (slot.isEpilepsy) invItem.isEpilepsy = true;
+    if (slot.imaginary) invItem.imaginary = true;
+    if (slot.negative) invItem.negative = true;
+    gameState.inventory.push(invItem);
+    gameState.stats.acceptedRanks++;
+    if (!slot.isEpilepsy && !slot.isSecret) {
+        gameState.stats.totalValue += slot.value;
+        if (gameState.stats.highestRank === null || slot.value > gameState.stats.highestRank) {
+            gameState.stats.highestRank = slot.value;
         }
-        added++;
     }
 
-    if (gameState.inventory.length >= MAX_INVENTORY && added < gameState.pendingRolls.length) {
-        alert('Inventory is full! Some ranks were not accepted.');
-    }
-
-    const pendingEnchants = gameState.pendingRolls.filter(r => r.enchant).map(r => r.enchant);
+    const pendingEnchants = slot.enchant ? [slot.enchant] : [];
 
     for (const enchant of pendingEnchants) {
         if (enchant.type === 'joke' && enchant.name === 'Brick') {
@@ -2374,9 +2413,7 @@ function acceptRoll() {
         }
     }
 
-    gameState.pendingRolls = [];
-
-    document.getElementById('pendingPanel').classList.remove('visible');
+    renderPendingPanel();
 
     saveGame();
     renderInventory();

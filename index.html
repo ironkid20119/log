@@ -1816,13 +1816,13 @@ function getRollDuration() {
 // LUCK BUTTONS (unchanged)
 // ============================================================
 function getButtonLuckBoost() {
-    return 1 + (gameState.luckButtonBoostAccum || 0);
+    return 1 + (gameState.luckButtonBoostAccum || 0) / 1.25;
 }
 
 function clickLuckButton() {
     gameState.luckButtonClicks++;
     const clicks = gameState.luckButtonClicks;
-    gameState.luckButtonBoostAccum = (gameState.luckButtonBoostAccum || 0) + Math.pow(clicks, 1.2) / Math.pow(clicks, 1.75);
+    gameState.luckButtonBoostAccum = (gameState.luckButtonBoostAccum || 0) + Math.pow(clicks, 0.85) / Math.pow(clicks, 1.75);
     const boost = getButtonLuckBoost();
     document.getElementById('luckBoostDisplay').textContent =
         `Luck boost: ×${boost.toFixed(3)} (click ${gameState.luckButtonClicks})`;
@@ -2239,6 +2239,7 @@ function performRoll() {
     }
 
     gameState.luckButtonClicks = 0;
+    gameState.luckButtonBoostAccum = 0;
     gameState.secretLuckButtonClicks = 0;
     document.getElementById('luckBoostDisplay').textContent = '';
     document.getElementById('secretLuckBoostDisplay').textContent = '';
@@ -2946,6 +2947,7 @@ function loadGame() {
             gameState.jokeEnchantsEnabled = d.jokeEnchantsEnabled || false;
             gameState.brickCount = d.brickCount || 0;
             gameState.luckButtonClicks = 0;
+            gameState.luckButtonBoostAccum = 0;
             gameState.secretLuckButtonClicks = 0;
         }
     } catch(e) { }

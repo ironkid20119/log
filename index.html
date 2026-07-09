@@ -2503,15 +2503,15 @@ function performRoll() {
 
     const rollDuration = getRollDuration();
     if (rollDuration === 0) {
-        setTimeout(() => {
-            rollTrack.querySelectorAll('.secret-slot').forEach(square => {
-                if (square.dataset.realContent) {
-                    square.innerHTML = square.dataset.realContent;
-                    delete square.dataset.realContent;
-                }
-            });
-            finishRoll();
-        }, 10);
+        rollTrack.querySelectorAll('.secret-slot').forEach(square => {
+            if (square.dataset.realContent) {
+                square.innerHTML = square.dataset.realContent;
+                delete square.dataset.realContent;
+            }
+        });
+        const centerSlot = slots[centerAcceptable];
+        playRankSFX(centerSlot);
+        finishRoll();
         return;
     }
 
@@ -2685,7 +2685,7 @@ function doAutoAccept() {
             continue;
         }
         if (secretKeys.length > 0 && slot.isSecret) {
-            const secretMatch = SECRET_NUMBERS_RAW.find(s => s.logValue === slot.rawFloor);
+            const secretMatch = SECRET_NUMBERS_RAW.find(s => s.logValue === slot.value);
             if (secretMatch && secretKeys.includes(secretMatch.display)) {
                 toFullAccept.push(slot);
                 continue;

@@ -472,6 +472,14 @@
         .secret-luck-btn { background: linear-gradient(135deg, #bb88ff 0%, #9f67ff 100%); color: white; font-size: 0.85em !important; padding: 8px 18px !important; margin-top: 8px; }
         .secret-luck-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(187,136,255,0.4); }
         .secret-luck-boost-display { font-size: 0.8em; color: #bb88ff; margin-top: 4px; min-height: 1.2em; }
+        .autoroll-btn { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 8px 18px; font-size: 0.85em; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
+        .autoroll-btn.active { background: linear-gradient(135deg, #166534, #22c55e); }
+        .autoroll-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+        .autoroll-settings-panel { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; font-size: 0.9em; }
+        .autoroll-settings-panel label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .autoroll-settings-panel input[type=number] { width: 110px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 3px 7px; border-radius: 4px; }
+        .autoaccept-enchants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 3px; max-height: 180px; overflow-y: auto; margin-top: 4px; }
+        .autoaccept-enchants-grid label { font-size: 0.8em; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .merge-mode-btn { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 0.85em !important; padding: 8px 16px !important; }
         .merge-mode-btn.active { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 0 15px rgba(239,68,68,0.5); }
         .enchant-slot.selected-for-merge { border-color: #f59e0b !important; box-shadow: 0 0 20px rgba(245,158,11,0.6) !important; }
@@ -531,6 +539,24 @@
         <div class="pending-panel" id="pendingPanel">
             <h4>⏳ Pending Enchants — click a highlighted cell to collect:</h4>
             <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
+        </div>
+        <div style="text-align:center;margin-top:8px;">
+            <button class="autoroll-btn" id="autorollBtn" onclick="toggleAutoRoll()">⏱ Autoroll: OFF</button>
+            <button class="sort-btn" onclick="toggleAutorollSettings()" style="font-size:0.8em;margin-left:6px;">⚙ Settings</button>
+            <div id="autorollSettings" style="display:none;" class="autoroll-settings-panel">
+                <label>Autoaccept above rng:
+                    <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
+                        oninput="gameState.autoAcceptMinRng = Number(this.value) || 0">
+                </label>
+                <label>
+                    <input type="checkbox" id="autoAcceptSecrets" onchange="gameState.autoAcceptSecrets = this.checked">
+                    Autoaccept secret slots
+                </label>
+                <div>
+                    <div style="margin-bottom:4px;">Autoaccept enchants <span style="opacity:0.5;font-size:0.85em;">(collects enchant only, not rank)</span>:</div>
+                    <div id="autoAcceptEnchantsContainer" class="autoaccept-enchants-grid"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -612,7 +638,7 @@
             <button class="sort-btn" onclick="toggleBulkDeleteEnchantMode()" id="bulkDeleteEnchantModeBtn">🗑️ Bulk Delete Ench: OFF</button>
             <div class="pagination">
                 <button class="page-btn" onclick="changeEnchantPage(-1)" id="prevEnchantBtn">◀</button>
-                <span class="page-info">Page <span id="currentEnchantPage">1</span> / 3</span>
+                <span class="page-info">Page <span id="currentEnchantPage">1</span> / 1</span>
                 <button class="page-btn" onclick="changeEnchantPage(1)" id="nextEnchantBtn">▶</button>
             </div>
         </div>
@@ -1335,8 +1361,8 @@ const MAX_INVENTORY = 60;
 const MAX_ENCHANTS = 30;
 const ITEMS_PER_PAGE = 60;
 const TOTAL_PAGES = 1;
-const ENCHANTS_PER_PAGE = 10;
-const TOTAL_ENCHANT_PAGES = 3;
+const ENCHANTS_PER_PAGE = 30;
+const TOTAL_ENCHANT_PAGES = 1;
 const BASE_ROLL_DURATION = 1750;
 const MIN_ROLL_DURATION = 100;
 
@@ -1371,7 +1397,11 @@ let gameState = {
     currentEnchantPage: 1,
     mythicalLuck: 1,
     mythicalSecretLuck: 1,
-    mythicalBulk: 1
+    mythicalBulk: 1,
+    autoRollEnabled: false,
+    autoAcceptMinRng: 0,
+    autoAcceptSecrets: false,
+    autoAcceptEnchants: [],
 };
 
 // ============================================================
@@ -1786,7 +1816,8 @@ function getRollDuration() {
 // ============================================================
 function getButtonLuckBoost() {
     if (gameState.luckButtonClicks <= 0) return 1;
-    return 1 + Math.max(1, Math.pow(Math.log(gameState.luckButtonClicks) / Math.log(5), 0.75));
+    const clicks = gameState.luckButtonClicks;
+    return 1 + Math.pow(clicks, 1.2) / Math.pow(clicks, 1.75);
 }
 
 function clickLuckButton() {
@@ -2247,7 +2278,7 @@ function performRoll() {
         let enchantHTML = '';
         if (slot.enchants && slot.enchants.length > 0) {
             const orbsHTML = slot.enchants.map(e => `<div style="flex-shrink:0;">${enchantOrbHTML(e, 22, '', e.name)}</div>`).join('');
-            enchantHTML = `<div class="enchant-indicator" style="padding:0;background:transparent;border:none;display:flex;flex-wrap:wrap;gap:3px;justify-content:center;align-items:center;">
+            enchantHTML = `<div class="enchant-indicator" style="padding:0;background:transparent;border:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;justify-content:center;align-items:center;">
                 ${orbsHTML}
             </div>`;
         }
@@ -2342,6 +2373,137 @@ function finishRoll() {
     renderPendingPanel();
     saveGame();
     updateStats();
+    doAutoAccept();
+    scheduleAutoRoll();
+}
+
+// ============================================================
+// AUTOROLL
+// ============================================================
+let autoRollTimer = null;
+
+function toggleAutoRoll() {
+    gameState.autoRollEnabled = !gameState.autoRollEnabled;
+    const btn = document.getElementById('autorollBtn');
+    btn.textContent = `⏱ Autoroll: ${gameState.autoRollEnabled ? 'ON' : 'OFF'}`;
+    btn.classList.toggle('active', gameState.autoRollEnabled);
+    if (!gameState.autoRollEnabled) {
+        clearTimeout(autoRollTimer);
+        autoRollTimer = null;
+    } else if (!gameState.isRolling) {
+        scheduleAutoRoll();
+    }
+}
+
+function toggleAutorollSettings() {
+    const panel = document.getElementById('autorollSettings');
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : '';
+    if (!isOpen) buildAutoAcceptEnchantUI();
+}
+
+function buildAutoAcceptEnchantUI() {
+    const container = document.getElementById('autoAcceptEnchantsContainer');
+    container.innerHTML = '';
+    const byType = {};
+    Object.entries(ENCHANTS).forEach(([key, e]) => {
+        if (!byType[e.type]) byType[e.type] = [];
+        byType[e.type].push({ key, ...e });
+    });
+    Object.entries(byType).forEach(([type, list]) => {
+        const typeLabel = document.createElement('div');
+        typeLabel.style.cssText = 'grid-column:1/-1;font-size:0.75em;opacity:0.55;text-transform:uppercase;margin-top:4px;';
+        typeLabel.textContent = type;
+        container.appendChild(typeLabel);
+        list.forEach(e => {
+            const lbl = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = gameState.autoAcceptEnchants.includes(e.key);
+            cb.addEventListener('change', () => {
+                if (cb.checked) {
+                    if (!gameState.autoAcceptEnchants.includes(e.key)) gameState.autoAcceptEnchants.push(e.key);
+                } else {
+                    gameState.autoAcceptEnchants = gameState.autoAcceptEnchants.filter(k => k !== e.key);
+                }
+            });
+            const dot = document.createElement('span');
+            dot.style.cssText = `display:inline-block;width:10px;height:10px;border-radius:50%;background:${e.color || '#888'};flex-shrink:0;`;
+            lbl.appendChild(cb);
+            lbl.appendChild(dot);
+            lbl.appendChild(document.createTextNode(' ' + e.name));
+            container.appendChild(lbl);
+        });
+    });
+}
+
+function scheduleAutoRoll() {
+    if (!gameState.autoRollEnabled) return;
+    clearTimeout(autoRollTimer);
+    const delay = Math.max(getRollDuration() * 1.5, 300);
+    autoRollTimer = setTimeout(() => {
+        if (gameState.autoRollEnabled && !gameState.isRolling) {
+            document.getElementById('rollBtn').click();
+        }
+    }, delay);
+}
+
+function doAutoAccept() {
+    if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
+    const minRng = gameState.autoAcceptMinRng || 0;
+    const acceptSecrets = gameState.autoAcceptSecrets || false;
+    const enchantKeys = gameState.autoAcceptEnchants || [];
+
+    const toFullAccept = [];
+    const toEnchantOnly = [];
+
+    for (const slot of [...gameState.pendingRolls]) {
+        if (minRng > 0 && slot.rawFloor >= minRng) {
+            toFullAccept.push(slot);
+            continue;
+        }
+        if (acceptSecrets && slot.isSecret) {
+            toFullAccept.push(slot);
+            continue;
+        }
+        if (enchantKeys.length > 0 && slot.enchants && slot.enchants.some(e => enchantKeys.includes(e.key))) {
+            toEnchantOnly.push(slot);
+        }
+    }
+
+    toFullAccept.forEach(slot => acceptRollSlot(slot));
+    toEnchantOnly.forEach(slot => {
+        if (!gameState.pendingRolls.includes(slot)) return;
+        const idx = gameState.pendingRolls.indexOf(slot);
+        if (idx === -1) return;
+        gameState.pendingRolls.splice(idx, 1);
+        const enchants = slot.enchants || [];
+        if (enchants.length > 0 && gameState.enchantOrbs.length < MAX_ENCHANTS) {
+            const newOrb = createEnchantOrb();
+            for (const enchant of enchants) {
+                if (enchant.type === 'joke' && enchant.name === 'Brick') {
+                    gameState.brickCount++;
+                    document.getElementById('brickStatBox').style.display = '';
+                    document.getElementById('brickCount').textContent = gameState.brickCount;
+                }
+                if (enchant.name === 'Brick Wall') {
+                    gameState.brickCount += 200;
+                    document.getElementById('brickStatBox').style.display = '';
+                    document.getElementById('brickCount').textContent = gameState.brickCount;
+                }
+                addEnchantToOrb(newOrb, enchant);
+            }
+            gameState.enchantOrbs.push(newOrb);
+        }
+    });
+
+    if (toEnchantOnly.length > 0) {
+        renderPendingPanel();
+        renderEnchantInventory();
+        updateStats();
+        updateActiveEffectsBar();
+        saveGame();
+    }
 }
 
 // ============================================================

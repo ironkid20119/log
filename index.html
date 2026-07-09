@@ -2280,7 +2280,7 @@ function performRoll() {
         let enchantHTML = '';
         if (slot.enchants && slot.enchants.length > 0) {
             const orbsHTML = slot.enchants.map(e => `<div style="flex-shrink:0;">${enchantOrbHTML(e, 22, '', e.name)}</div>`).join('');
-            enchantHTML = `<div class="enchant-indicator" style="padding:0;background:transparent;border:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;justify-content:center;align-items:center;">
+            enchantHTML = `<div style="padding:0;background:transparent;border:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;justify-content:center;align-items:center;">
                 ${orbsHTML}
             </div>`;
         }

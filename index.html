@@ -1398,6 +1398,7 @@ let gameState = {
     mythicalLuck: 1,
     mythicalSecretLuck: 1,
     mythicalBulk: 1,
+    luckButtonBoostAccum: 0,
     autoRollEnabled: false,
     autoAcceptMinRng: 0,
     autoAcceptSecrets: false,
@@ -1815,13 +1816,13 @@ function getRollDuration() {
 // LUCK BUTTONS (unchanged)
 // ============================================================
 function getButtonLuckBoost() {
-    if (gameState.luckButtonClicks <= 0) return 1;
-    const clicks = gameState.luckButtonClicks;
-    return 1 + Math.pow(clicks, 1.2) / Math.pow(clicks, 1.75);
+    return 1 + (gameState.luckButtonBoostAccum || 0);
 }
 
 function clickLuckButton() {
     gameState.luckButtonClicks++;
+    const clicks = gameState.luckButtonClicks;
+    gameState.luckButtonBoostAccum = (gameState.luckButtonBoostAccum || 0) + Math.pow(clicks, 1.2) / Math.pow(clicks, 1.75);
     const boost = getButtonLuckBoost();
     document.getElementById('luckBoostDisplay').textContent =
         `Luck boost: ×${boost.toFixed(3)} (click ${gameState.luckButtonClicks})`;

@@ -698,6 +698,8 @@
         </div>
         <div class="inventory-controls">
             <button class="merge-mode-btn" id="mergeModeBtn" onclick="toggleMergeMode()">🔀 Merge Mode: OFF</button>
+            <button class="merge-mode-btn" id="unmergeModeBtn" onclick="toggleUnmergeMode()" style="background:linear-gradient(135deg,#0891b2,#0e7490);">🔓 Unmerger: OFF</button>
+            <button class="merge-mode-btn" id="unlockModeBtn" onclick="toggleUnlockMode()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);">🔐 Unlocker: OFF</button>
             <button class="sort-btn" onclick="sortEnchants('tier-desc')">Sort: Highest Tier</button>
             <button class="sort-btn" onclick="sortEnchants('tier-asc')">Sort: Lowest Tier</button>
             <button class="sort-btn" onclick="sortEnchants('type')">Sort: By Type</button>
@@ -939,11 +941,27 @@
                         </div>
                     </div>
                     <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#15803d 0%,#166534 100%);color:#bbf7d0;">E</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Envy</div>
+                            <div class="enchant-item-effect">+100x luck, -1000x secret luck, +50 bulk, +25s roll time (this penalty overrides even Kugelblitz's instant roll)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/186,289 (0.00054%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#92400e 0%,#c2410c 100%);color:#fed7aa;">Gl</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Gluttony</div>
+                            <div class="enchant-item-effect">+1.5x luck, -1000x enchant luck, +100 bulk, +75x secret luck, +0.5s roll time</div>
+                            <div class="enchant-item-rarity">Rarity: 1/348,449 (0.00029%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
                         <div class="enchant-orb" style="background:#4c1d95;color:#a78bfa;">H</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Heresy</div>
                             <div class="enchant-item-effect">-10,000,000x luck, +15 bulk rolls, +3s roll time, +15x enchant luck</div>
-                            <div class="enchant-item-rarity">Rarity: 1/273,627,171.6 (0.00000037%)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/2,189,017.37 (0.0000456826%)</div>
                         </div>
                     </div>
                     <div class="enchant-item">
@@ -951,7 +969,7 @@
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Avarice</div>
                             <div class="enchant-item-effect">+50 bulk rolls, -100,000,000x luck, +20s roll time, +1.5x enchant luck</div>
-                            <div class="enchant-item-rarity">Rarity: 1/12,725,284,173.51 (0.0000000079%)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/101,802,273.39 (0.0000009823%)</div>
                         </div>
                     </div>
                     <div class="enchant-item">
@@ -959,7 +977,7 @@
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">nilihilism</div>
                             <div class="enchant-item-effect">-1e303 luck, +1000 enchant luck, +10 secret luck, -7.5s roll time</div>
-                            <div class="enchant-item-rarity">Rarity: 1/582,715,271,825 (1.716e-10%)</div>
+                            <div class="enchant-item-rarity">Rarity: 1/4,661,722,174.6 (0.0000000215%)</div>
                         </div>
                     </div>
                 </div>
@@ -1494,6 +1512,8 @@ let gameState = {
     secretLuckButtonClicks: 0,
     mergeSelection: [],
     mergeModeActive: false,
+    unmergeModeActive: false,
+    unlockModeActive: false,
     bulkDeleteMode: false,
     bulkDeleteEnchantMode: false,
     selectedInventoryIndices: [],
@@ -1582,18 +1602,28 @@ const ENCHANTS = {
         effects: { luck: -10, secretLuck: 25, speed: -2, lighter: 4, cloner: 3 },
         display: 'P', color: 'linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787)', textColor: '#ffffff'
     },
+    envy: {
+        name: 'Envy', type: 'curse', tier: 6, rarity: 1/186289,
+        effects: { luck: 100, secretLuck: -1000, cloner: 50, speed: -25 },
+        display: 'E', color: 'linear-gradient(135deg,#15803d 0%,#166534 100%)', textColor: '#bbf7d0'
+    },
+    gluttony: {
+        name: 'Gluttony', type: 'curse', tier: 6, rarity: 1/348449,
+        effects: { luck: 1.5, secretLuck: 75, cloner: 100, speed: -0.5, lighter: -1000 },
+        display: 'Gl', color: 'linear-gradient(135deg,#92400e 0%,#c2410c 100%)', textColor: '#fed7aa'
+    },
     heresy: {
-        name: 'Heresy', type: 'curse', tier: 6, rarity: 1/273627171.6,
+        name: 'Heresy', type: 'curse', tier: 6, rarity: 1/2189017.3728,
         effects: { luck: -10000000, cloner: 15, speed: -3, lighter: 15 },
         display: 'H', color: '#4c1d95', textColor: '#a78bfa'
     },
     avarice: {
-        name: 'Avarice', type: 'curse', tier: 7, rarity: 1/12725284173.51,
+        name: 'Avarice', type: 'curse', tier: 7, rarity: 1/101802273.38808,
         effects: { luck: -100000000, cloner: 50, speed: -20, lighter: 1.5 },
         display: 'A', color: 'avarice', textColor: '#fff', isAvarice: true
     },
     nihilism: {
-        name: 'nilihilism', type: 'curse', tier: 8, rarity: 1/582715271825,
+        name: 'nilihilism', type: 'curse', tier: 8, rarity: 1/4661722174.6,
         effects: { luck: -1e303, lighter: 1000, speed: -7.5, secretLuck: 10 },
         display: 'N', color: '#000000', textColor: '#ff4444'
     },
@@ -1903,6 +1933,10 @@ function getSpeedConfig() {
             savedSeconds += e.effects.speed;
         }
     });
+
+    // Envy's roll-time penalty is inescapable — it overrides even Kugelblitz/MULTITUDE's instant-roll bypass.
+    const hasEnvy = Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Envy');
+    if (hasEnvy) isInstant = false;
 
     savedSeconds += bricks * 1;
 
@@ -2511,6 +2545,10 @@ function performRoll() {
         });
         const centerSlot = slots[centerAcceptable];
         playRankSFX(centerSlot);
+        const targetSquare = rollTrack.children[centerAcceptable];
+        if (targetSquare) {
+            rollDisplay.scrollLeft = targetSquare.offsetLeft - (rollDisplay.offsetWidth / 2) + (targetSquare.offsetWidth / 2);
+        }
         finishRoll();
         return;
     }
@@ -2656,6 +2694,8 @@ function scheduleAutoRoll() {
     if (gameState.cooldownTriggered && gameState.cooldownMinRng > 0) {
         delay = (gameState.cooldownTime || 2) * 1000;
         gameState.cooldownTriggered = false;
+    } else if (getRollDuration() === 0) {
+        delay = 0;
     } else {
         delay = Math.max(getRollDuration() * 1.5, 300);
     }
@@ -2979,6 +3019,22 @@ function renderEnchantInventory() {
                         slot.style.cursor = 'not-allowed';
                         slot.title = 'Merged orbs cannot be merged again';
                     }
+                } else if (gameState.unmergeModeActive) {
+                    if (isLocked) {
+                        slot.onclick = () => { event.stopPropagation(); performUnmerge(orb.id); };
+                        slot.title = 'Click to unmerge (splits into separate orbs)';
+                    } else {
+                        slot.style.cursor = 'not-allowed';
+                        slot.title = 'Only locked/merged orbs can be unmerged';
+                    }
+                } else if (gameState.unlockModeActive) {
+                    if (isLocked) {
+                        slot.onclick = () => { event.stopPropagation(); performUnlock(orb.id); };
+                        slot.title = 'Click to unlock (keeps merged enchants together)';
+                    } else {
+                        slot.style.cursor = 'not-allowed';
+                        slot.title = 'Orb is already unlocked';
+                    }
                 } else {
                     slot.onclick = () => toggleEquipOrb(actualIndex);
                 }
@@ -3228,6 +3284,14 @@ function loadGame() {
 // ============================================================
 function toggleMergeMode() {
     gameState.mergeModeActive = !gameState.mergeModeActive;
+    if (gameState.mergeModeActive) {
+        gameState.unmergeModeActive = false;
+        gameState.unlockModeActive = false;
+        document.getElementById('unmergeModeBtn').textContent = '🔓 Unmerger: OFF';
+        document.getElementById('unmergeModeBtn').classList.remove('active');
+        document.getElementById('unlockModeBtn').textContent = '🔐 Unlocker: OFF';
+        document.getElementById('unlockModeBtn').classList.remove('active');
+    }
     if (!gameState.mergeModeActive) {
         gameState.mergeSelection = [];
         renderMergePanel();
@@ -3236,6 +3300,132 @@ function toggleMergeMode() {
     btn.textContent = '🔀 Merge Mode: ' + (gameState.mergeModeActive ? 'ON' : 'OFF');
     btn.classList.toggle('active', gameState.mergeModeActive);
     renderEnchantInventory();
+}
+
+function toggleUnmergeMode() {
+    gameState.unmergeModeActive = !gameState.unmergeModeActive;
+    if (gameState.unmergeModeActive) {
+        gameState.mergeModeActive = false;
+        gameState.unlockModeActive = false;
+        gameState.mergeSelection = [];
+        renderMergePanel();
+        document.getElementById('mergeModeBtn').textContent = '🔀 Merge Mode: OFF';
+        document.getElementById('mergeModeBtn').classList.remove('active');
+        document.getElementById('unlockModeBtn').textContent = '🔐 Unlocker: OFF';
+        document.getElementById('unlockModeBtn').classList.remove('active');
+    }
+    const btn = document.getElementById('unmergeModeBtn');
+    btn.textContent = '🔓 Unmerger: ' + (gameState.unmergeModeActive ? 'ON' : 'OFF');
+    btn.classList.toggle('active', gameState.unmergeModeActive);
+    renderEnchantInventory();
+}
+
+function toggleUnlockMode() {
+    gameState.unlockModeActive = !gameState.unlockModeActive;
+    if (gameState.unlockModeActive) {
+        gameState.mergeModeActive = false;
+        gameState.unmergeModeActive = false;
+        gameState.mergeSelection = [];
+        renderMergePanel();
+        document.getElementById('mergeModeBtn').textContent = '🔀 Merge Mode: OFF';
+        document.getElementById('mergeModeBtn').classList.remove('active');
+        document.getElementById('unmergeModeBtn').textContent = '🔓 Unmerger: OFF';
+        document.getElementById('unmergeModeBtn').classList.remove('active');
+    }
+    const btn = document.getElementById('unlockModeBtn');
+    btn.textContent = '🔐 Unlocker: ' + (gameState.unlockModeActive ? 'ON' : 'OFF');
+    btn.classList.toggle('active', gameState.unlockModeActive);
+    renderEnchantInventory();
+}
+
+// Cost: a non-secret roll with the negative flag and magnitude >= 6 (i.e. displayed as -6 or lower)
+function findUnmergeCostItem() {
+    let best = null;
+    let bestIdx = -1;
+    gameState.inventory.forEach((item, i) => {
+        if (item.isEpilepsy || item.isSecret) return;
+        if (item.negative && item.value >= 6) {
+            if (best === null || item.value < best.value) {
+                best = item; bestIdx = i;
+            }
+        }
+    });
+    return { item: best, index: bestIdx };
+}
+
+// Cost: an imaginary roll with magnitude >= 7 (displayed as e.g. "7.xxi")
+function findUnlockCostItem() {
+    let best = null;
+    let bestIdx = -1;
+    gameState.inventory.forEach((item, i) => {
+        if (item.isEpilepsy || item.isSecret) return;
+        if (item.imaginary && item.value >= 7) {
+            if (best === null || item.value < best.value) {
+                best = item; bestIdx = i;
+            }
+        }
+    });
+    return { item: best, index: bestIdx };
+}
+
+function performUnmerge(orbId) {
+    const orb = gameState.enchantOrbs.find(o => o.id === orbId);
+    if (!orb || !orb.locked) return;
+    const { item, index } = findUnmergeCostItem();
+    if (!item) {
+        alert('Need a negative roll of magnitude ≥ 6 (e.g. -6, -7.5, ...) in your inventory to unmerge!');
+        return;
+    }
+    gameState.inventory.splice(index, 1);
+
+    // Remove the merged orb, spit each of its enchants back out as its own single-enchant orb
+    gameState.enchantOrbs = gameState.enchantOrbs.filter(o => o.id !== orbId);
+    if (gameState.equippedOrb && gameState.equippedOrb.id === orbId) {
+        gameState.equippedOrb = null;
+    }
+    Object.values(orb.enchants).forEach(enchant => {
+        if (gameState.enchantOrbs.length >= MAX_ENCHANTS) return;
+        const newOrb = createEnchantOrb();
+        const { count, ...cleanEnchant } = enchant;
+        addEnchantToOrb(newOrb, cleanEnchant);
+        gameState.enchantOrbs.push(newOrb);
+    });
+
+    gameState.stats.acceptedRanks = gameState.inventory.length;
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
+        : null;
+
+    saveGame();
+    renderInventory();
+    renderEnchantInventory();
+    updateStats();
+    updateActiveEffectsBar();
+}
+
+function performUnlock(orbId) {
+    const orb = gameState.enchantOrbs.find(o => o.id === orbId);
+    if (!orb || !orb.locked) return;
+    const { item, index } = findUnlockCostItem();
+    if (!item) {
+        alert('Need an imaginary roll of magnitude ≥ 7 (e.g. 7i, 8.2i, ...) in your inventory to unlock!');
+        return;
+    }
+    gameState.inventory.splice(index, 1);
+    orb.locked = false;
+
+    gameState.stats.acceptedRanks = gameState.inventory.length;
+    gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+    gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+        ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
+        : null;
+
+    saveGame();
+    renderInventory();
+    renderEnchantInventory();
+    updateStats();
+    updateActiveEffectsBar();
 }
 
 function cancelMerge() {
@@ -3330,24 +3520,29 @@ function buildMergedEnchants() {
     gameState.mergeSelection.forEach(id => {
         const orb = gameState.enchantOrbs.find(o => o.id === id);
         if (!orb) return;
-        Object.entries(orb.enchants).forEach(([key, enchant]) => {
-            if (!merged[key]) {
-                merged[key] = { ...enchant };
+        Object.entries(orb.enchants).forEach(([rawKey, enchant]) => {
+            // Always resolve to the true base key so repeated merges keep stacking
+            // into the same group instead of creating orphaned sub-groups
+            // (e.g. "e_h_o_r_s_e_2" must dedup against "e_h_o_r_s_e", not spawn "e_h_o_r_s_e_2_2").
+            const baseKey = rawKey.replace(/_\d+$/, '');
+            const existingKey = Object.keys(merged).find(k => k.replace(/_\d+$/, '') === baseKey);
+            if (!existingKey) {
+                merged[baseKey] = { ...enchant };
             } else {
-                if (key === 'brick') {
-                    merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
-                } else if (key === 'brickwall') {
-                    merged[key].count = (merged[key].count || 200) + (enchant.count || 200);
-                } else if (key === 'e_mooncrystal') {
-                    merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
-                    if (merged[key].count >= 100) {
-                        merged[key].isSuperMooncrystal = true;
-                        merged[key].effects = { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 };
+                if (baseKey === 'brick') {
+                    merged['brick'].count = (merged['brick'].count || 1) + (enchant.count || 1);
+                } else if (baseKey === 'brickwall') {
+                    merged['brickwall'].count = (merged['brickwall'].count || 200) + (enchant.count || 200);
+                } else if (baseKey === 'e_mooncrystal') {
+                    merged['e_mooncrystal'].count = (merged['e_mooncrystal'].count || 1) + (enchant.count || 1);
+                    if (merged['e_mooncrystal'].count >= 100) {
+                        merged['e_mooncrystal'].isSuperMooncrystal = true;
+                        merged['e_mooncrystal'].effects = { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 };
                     }
                 } else {
-                    let dupKey = key + '_2';
                     let n = 2;
-                    while (merged[dupKey]) { n++; dupKey = key + '_' + n; }
+                    let dupKey = baseKey + '_' + n;
+                    while (merged[dupKey]) { n++; dupKey = baseKey + '_' + n; }
                     merged[dupKey] = { ...enchant };
                 }
             }

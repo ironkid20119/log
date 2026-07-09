@@ -1056,6 +1056,16 @@
                             <div class="enchant-item-rarity">Rarity: 1/10,000,000 (0.00001%)</div>
                         </div>
                     </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg, #c8e6ff, #89cff0);">
+                            <span style="font-size:1.1em;">🌙</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Mooncrystal</div>
+                            <div class="enchant-item-effect">Does nothing alone. Merge 100 Mooncrystals together (via orb merging) to awaken: +50 luck, +75 secret luck, +25 bulk, +0.01s speed, +10 enchant luck.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/5,000 (0.02%)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1579,6 +1589,11 @@ const ENCHANTS = {
         effects: { }, // dynamic per roll
         color: 'rainbow', specialDesign: 'mythical'
     },
+    mooncrystal: {
+        name: 'Mooncrystal', type: 'special', tier: 5, rarity: 1/5000,
+        effects: {}, // nothing until 100 merged → super
+        color: 'linear-gradient(135deg, #c8e6ff, #89cff0)', display: '🌙'
+    },
 
     // --- Weird Enchants ---
     weird1: {
@@ -1717,6 +1732,8 @@ function getLuckMultiplier() {
             luck += 6.66;
         } else if (e.type === 'special' && e.name === 'MYTHICAL') {
             luck += gameState.mythicalLuck;
+        } else if (e.isSuperMooncrystal && e.effects && e.effects.luck != null) {
+            luck += e.effects.luck;
         }
     });
     luck += bricks * 5 + blessing.luck;
@@ -1739,6 +1756,8 @@ function getEnchantLuckMultiplier() {
             mult += e.effects.lighter;
         } else if (e.type === 'special' && e.name === 'Alpha') {
             mult += 0.125;
+        } else if (e.isSuperMooncrystal && e.effects && e.effects.lighter != null) {
+            mult += e.effects.lighter;
         }
     });
     mult += bricks * 1.5 + blessing.enchantLuck;
@@ -1760,6 +1779,8 @@ function getBulkRolls() {
             total += e.effects.cloner;
         } else if (e.type === 'special' && e.name === 'MYTHICAL') {
             total += gameState.mythicalBulk;
+        } else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) {
+            total += e.effects.cloner;
         }
     });
     total += blessing.bulk;
@@ -1794,6 +1815,8 @@ function getSpeedConfig() {
             savedSeconds += e.effects.speed;
         } else if (e.type === 'special' && e.name === 'Alpha') {
             savedSeconds += 0.5;
+        } else if (e.isSuperMooncrystal && e.effects && e.effects.speed != null) {
+            savedSeconds += e.effects.speed;
         }
     });
 
@@ -1823,6 +1846,8 @@ function getSecretLuckMultiplier() {
         } else if (e.type === 'special' && e.name === 'MYTHICAL') {
             mult += gameState.mythicalSecretLuck;
         } else if (e.type === 'allinone' && e.effects && e.effects.secretLuck != null) {
+            mult += e.effects.secretLuck;
+        } else if (e.isSuperMooncrystal && e.effects && e.effects.secretLuck != null) {
             mult += e.effects.secretLuck;
         }
     });
@@ -2097,12 +2122,42 @@ function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
 }
 
 function orbEnchantsHTML(orb) {
-    const enchantTypes = Object.keys(orb.enchants);
-    if (enchantTypes.length === 0) return '<span style="opacity:0.5;font-size:0.8em;">Empty orb</span>';
+    const entries = Object.entries(orb.enchants);
+    if (entries.length === 0) return '<span style="opacity:0.5;font-size:0.8em;">Empty orb</span>';
+
+    // Group by base key (strip _2, _3 suffixes from merge-duplicates) to detect stacked enchants
+    const groups = {};
+    const groupOrder = [];
+    entries.forEach(([key, enchant]) => {
+        const baseKey = key.replace(/_\d+$/, '');
+        if (!groups[baseKey]) {
+            groups[baseKey] = { enchant, count: 1 };
+            groupOrder.push(baseKey);
+        } else {
+            groups[baseKey].count++;
+        }
+    });
+
+    // For counted enchants (brick, mooncrystal) use their explicit count property
+    entries.forEach(([key, e]) => {
+        if (e.count && e.count > 1) {
+            const baseKey = key.replace(/_\d+$/, '');
+            if (groups[baseKey]) groups[baseKey].count = e.count;
+        }
+    });
+
     let html = '<div class="orb-enchants-display">';
-    enchantTypes.forEach(t => {
-        const e = orb.enchants[t];
-        html += enchantOrbHTML(e, 35, '', e.name);
+    groupOrder.forEach(baseKey => {
+        const { enchant, count } = groups[baseKey];
+        const orbHtml = enchantOrbHTML(enchant, 35, '', enchant.name);
+        if (count > 1) {
+            html += `<div style="position:relative;display:inline-block;">
+                ${orbHtml}
+                <span style="position:absolute;top:-5px;right:-6px;font-size:0.58em;font-weight:bold;color:#ffd700;transform:rotate(15deg);transform-origin:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.9);background:rgba(0,0,0,0.65);border-radius:3px;padding:0 2px;line-height:1.3;pointer-events:none;">x${count}</span>
+            </div>`;
+        } else {
+            html += orbHtml;
+        }
     });
     html += '</div>';
     return html;
@@ -2155,6 +2210,20 @@ function addEnchantToOrb(orb, enchant) {
             return true;
         }
         return false;
+    }
+
+    if (enchant.name === 'Mooncrystal' || (enchant.name && enchant.name.startsWith('Mooncrystal'))) {
+        const key = 'e_mooncrystal';
+        if (!orb.enchants[key]) {
+            orb.enchants[key] = { ...enchant, count: enchant.count || 1 };
+        } else {
+            orb.enchants[key].count = (orb.enchants[key].count || 1) + (enchant.count || 1);
+        }
+        if (orb.enchants[key].count >= 100) {
+            orb.enchants[key].isSuperMooncrystal = true;
+            orb.enchants[key].effects = { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 };
+        }
+        return true;
     }
 
     const slotKey = 'e_' + enchant.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
@@ -3015,6 +3084,11 @@ function loadGame() {
             gameState.luckButtonClicks = 0;
             gameState.luckButtonBoostAccum = 0;
             gameState.secretLuckButtonClicks = 0;
+            gameState.autoAcceptMinRng = d.autoAcceptMinRng || 0;
+            gameState.autoAcceptSecretKeys = d.autoAcceptSecretKeys || [];
+            gameState.autoAcceptEnchants = d.autoAcceptEnchants || [];
+            gameState.cooldownMinRng = d.cooldownMinRng || 0;
+            gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
         }
     } catch(e) { }
 
@@ -3036,6 +3110,15 @@ function loadGame() {
     if (gameState.brickCount > 0) {
         document.getElementById('brickStatBox').style.display = '';
     }
+
+    const arMinEl = document.getElementById('autoAcceptMinRng');
+    if (arMinEl) arMinEl.value = gameState.autoAcceptMinRng;
+    const cdMinEl = document.getElementById('cooldownMinRng');
+    if (cdMinEl) cdMinEl.value = gameState.cooldownMinRng;
+    const cdRangeEl = document.getElementById('cooldownTimeRange');
+    const cdLabelEl = document.getElementById('cooldownTimeLabel');
+    if (cdRangeEl) cdRangeEl.value = gameState.cooldownTime;
+    if (cdLabelEl) cdLabelEl.textContent = gameState.cooldownTime + 's';
 
     const avariceOrb = document.getElementById('avariceIndexOrb');
     if (avariceOrb) {
@@ -3165,6 +3248,12 @@ function buildMergedEnchants() {
                     merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
                 } else if (key === 'brickwall') {
                     merged[key].count = (merged[key].count || 200) + (enchant.count || 200);
+                } else if (key === 'e_mooncrystal') {
+                    merged[key].count = (merged[key].count || 1) + (enchant.count || 1);
+                    if (merged[key].count >= 100) {
+                        merged[key].isSuperMooncrystal = true;
+                        merged[key].effects = { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 };
+                    }
                 } else {
                     let dupKey = key + '_2';
                     let n = 2;

@@ -288,7 +288,7 @@
             padding: 4px; position: relative;
             min-width: 0; overflow: hidden;
         }
-        .enchant-slot .enchant-orb { width: 75%; height: auto; aspect-ratio: 1; max-width: 60px; font-size: clamp(0.5rem, 1.2vw, 1.1rem); }
+        .enchant-slot .enchant-orb { width: 62%; height: auto; aspect-ratio: 1; max-width: 60px; font-size: clamp(0.4rem, 1vw, 0.95rem); }
         .enchant-slot:hover { border-color: rgba(255,87,108,0.5); transform: scale(1.05); }
         .enchant-slot.equipped { border-color: #00d4ff; box-shadow: 0 0 15px rgba(0,212,255,0.4); }
         .enchant-slot.empty { opacity: 0.3; cursor: default; }
@@ -550,14 +550,25 @@
                     <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
                         oninput="gameState.autoAcceptMinRng = Number(this.value) || 0">
                 </label>
-                <label>
-                    <input type="checkbox" id="autoAcceptSecrets" onchange="gameState.autoAcceptSecrets = this.checked">
-                    Autoaccept secret slots
-                </label>
+                <div>
+                    <div style="margin-bottom:4px;">Autoaccept secrets:</div>
+                    <div id="autoAcceptSecretsContainer" class="autoaccept-enchants-grid"></div>
+                </div>
                 <div>
                     <div style="margin-bottom:4px;">Autoaccept enchants <span style="opacity:0.5;font-size:0.85em;">(collects enchant only, not rank)</span>:</div>
                     <div id="autoAcceptEnchantsContainer" class="autoaccept-enchants-grid"></div>
                 </div>
+                <hr style="border-color:rgba(255,255,255,0.1);margin:4px 0;">
+                <label>Cooldown trigger rng ≥:
+                    <input type="number" id="cooldownMinRng" min="0" value="0" placeholder="0 = off"
+                        oninput="gameState.cooldownMinRng = Number(this.value) || 0">
+                </label>
+                <label style="gap:6px;">Cooldown time:
+                    <input type="range" id="cooldownTimeRange" min="0.5" max="5" step="0.5" value="2"
+                        oninput="gameState.cooldownTime = Number(this.value); document.getElementById('cooldownTimeLabel').textContent = this.value + 's';"
+                        style="width:90px;">
+                    <span id="cooldownTimeLabel">2s</span>
+                </label>
             </div>
         </div>
     </div>
@@ -863,6 +874,14 @@
                             <div class="enchant-item-name">Insanity</div>
                             <div class="enchant-item-effect">-1000x luck, +10 bulk rolls, +1.5x enchant luck, +1.5s roll time</div>
                             <div class="enchant-item-rarity">Rarity: 1/1,725 (0.058%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787);color:#ffffff;">P</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Pride</div>
+                            <div class="enchant-item-effect">-10x luck, +25x secret luck, +2s roll time, +4x enchant luck, +3 bulk</div>
+                            <div class="enchant-item-rarity">Rarity: 1/8,725 (0.011%)</div>
                         </div>
                     </div>
                     <div class="enchant-item">
@@ -1274,7 +1293,7 @@
 </div><!-- /container -->
 
 <div class="modal" id="deleteModal">
-    <div class="modal-content">
+    <div class="modal-content" draggable="false" style="user-select:none;">
         <h2>Delete?</h2>
         <p>Are you sure you want to delete <span id="deleteRankValue"></span>?</p>
         <div class="modal-buttons">
@@ -1403,8 +1422,11 @@ let gameState = {
     luckButtonBoostAccum: 0,
     autoRollEnabled: false,
     autoAcceptMinRng: 0,
-    autoAcceptSecrets: false,
+    autoAcceptSecretKeys: [],
     autoAcceptEnchants: [],
+    cooldownMinRng: 0,
+    cooldownTime: 2,
+    cooldownTriggered: false,
 };
 
 // ============================================================
@@ -1460,6 +1482,11 @@ const ENCHANTS = {
         name: 'Insanity', type: 'curse', tier: 5, rarity: 1/1725,
         effects: { luck: -1000, cloner: 10, lighter: 1.5, speed: -1.5 },
         display: 'HELP', color: '#ffffff', textColor: '#000000', shake: true
+    },
+    pride: {
+        name: 'Pride', type: 'curse', tier: 6, rarity: 1/8725,
+        effects: { luck: -10, secretLuck: 25, speed: -2, lighter: 4, cloner: 3 },
+        display: 'P', color: 'linear-gradient(90deg,#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787)', textColor: '#ffffff'
     },
     heresy: {
         name: 'Heresy', type: 'curse', tier: 6, rarity: 1/273627171.6,
@@ -2403,7 +2430,31 @@ function toggleAutorollSettings() {
     const panel = document.getElementById('autorollSettings');
     const isOpen = panel.style.display !== 'none';
     panel.style.display = isOpen ? 'none' : '';
-    if (!isOpen) buildAutoAcceptEnchantUI();
+    if (!isOpen) {
+        buildAutoAcceptSecretsUI();
+        buildAutoAcceptEnchantUI();
+    }
+}
+
+function buildAutoAcceptSecretsUI() {
+    const container = document.getElementById('autoAcceptSecretsContainer');
+    container.innerHTML = '';
+    SECRET_NUMBERS_RAW.filter(s => !s.isDemonicSecret).forEach(s => {
+        const lbl = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = gameState.autoAcceptSecretKeys.includes(s.display);
+        cb.addEventListener('change', () => {
+            if (cb.checked) {
+                if (!gameState.autoAcceptSecretKeys.includes(s.display)) gameState.autoAcceptSecretKeys.push(s.display);
+            } else {
+                gameState.autoAcceptSecretKeys = gameState.autoAcceptSecretKeys.filter(k => k !== s.display);
+            }
+        });
+        lbl.appendChild(cb);
+        lbl.appendChild(document.createTextNode(' ' + s.display));
+        container.appendChild(lbl);
+    });
 }
 
 function buildAutoAcceptEnchantUI() {
@@ -2432,7 +2483,7 @@ function buildAutoAcceptEnchantUI() {
                 }
             });
             const dot = document.createElement('span');
-            dot.style.cssText = `display:inline-block;width:10px;height:10px;border-radius:50%;background:${e.color || '#888'};flex-shrink:0;`;
+            dot.style.cssText = `display:inline-block;width:10px;height:10px;border-radius:50%;background:${(e.color && !e.color.includes('gradient')) ? e.color : '#888'};flex-shrink:0;`;
             lbl.appendChild(cb);
             lbl.appendChild(dot);
             lbl.appendChild(document.createTextNode(' ' + e.name));
@@ -2444,7 +2495,13 @@ function buildAutoAcceptEnchantUI() {
 function scheduleAutoRoll() {
     if (!gameState.autoRollEnabled) return;
     clearTimeout(autoRollTimer);
-    const delay = Math.max(getRollDuration() * 1.5, 300);
+    let delay;
+    if (gameState.cooldownTriggered && gameState.cooldownMinRng > 0) {
+        delay = (gameState.cooldownTime || 2) * 1000;
+        gameState.cooldownTriggered = false;
+    } else {
+        delay = Math.max(getRollDuration() * 1.5, 300);
+    }
     autoRollTimer = setTimeout(() => {
         if (gameState.autoRollEnabled && !gameState.isRolling) {
             document.getElementById('rollBtn').click();
@@ -2455,8 +2512,12 @@ function scheduleAutoRoll() {
 function doAutoAccept() {
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
     const minRng = gameState.autoAcceptMinRng || 0;
-    const acceptSecrets = gameState.autoAcceptSecrets || false;
+    const secretKeys = gameState.autoAcceptSecretKeys || [];
     const enchantKeys = gameState.autoAcceptEnchants || [];
+
+    if (gameState.cooldownMinRng > 0) {
+        gameState.cooldownTriggered = gameState.pendingRolls.some(s => s.rawFloor >= gameState.cooldownMinRng);
+    }
 
     const toFullAccept = [];
     const toEnchantOnly = [];
@@ -2466,9 +2527,12 @@ function doAutoAccept() {
             toFullAccept.push(slot);
             continue;
         }
-        if (acceptSecrets && slot.isSecret) {
-            toFullAccept.push(slot);
-            continue;
+        if (secretKeys.length > 0 && slot.isSecret) {
+            const secretMatch = SECRET_NUMBERS_RAW.find(s => s.logValue === slot.rawFloor);
+            if (secretMatch && secretKeys.includes(secretMatch.display)) {
+                toFullAccept.push(slot);
+                continue;
+            }
         }
         if (enchantKeys.length > 0 && slot.enchants && slot.enchants.some(e => enchantKeys.includes(e.key))) {
             toEnchantOnly.push(slot);

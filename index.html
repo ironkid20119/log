@@ -238,6 +238,11 @@
         .rarity-6 { color: #ff1493; }
         .rarity-7 { color: #00ffff; }
         .rarity-8 { color: #fff; text-shadow: 0 0 10px #fff; }
+        .rarity-9 { color: #ff9d00; text-shadow: 0 0 10px #ff9d00; }
+        .rarity-10 { color: #ff2d55; text-shadow: 0 0 12px #ff2d55; }
+        .rarity-11 { color: #a020f0; text-shadow: 0 0 14px #a020f0, 0 0 4px #fff; }
+        .rarity-12 { background: linear-gradient(90deg,#ff0000,#ff9900,#ffee00,#33ff00,#00fff2,#0033ff,#cc00ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 16px rgba(255,255,255,0.6); animation: rarity12Shift 3s linear infinite; background-size: 400% 100%; }
+        @keyframes rarity12Shift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
         .roll-square.acceptable { cursor: pointer; }
         .roll-square.secret-slot { border-color: rgba(187,136,255,0.5) !important; background: rgba(100,0,150,0.2) !important; }
@@ -545,6 +550,55 @@
         <div style="text-align:center;margin-top:8px;">
             <button class="autoroll-btn" id="autorollBtn" onclick="toggleAutoRoll()">⏱ Autoroll: OFF</button>
             <button class="sort-btn" onclick="toggleAutorollSettings()" style="font-size:0.8em;margin-left:6px;">⚙ Settings</button>
+            <button class="sort-btn" onclick="toggleSoundSettings()" style="font-size:0.8em;margin-left:6px;">🔊 Sound</button>
+            <div id="soundSettings" style="display:none;" class="autoroll-settings-panel">
+                <div style="margin-bottom:2px;font-weight:bold;">Roll Sound Volumes</div>
+                <label style="gap:6px;">0normal (logRNG 0–3):
+                    <input type="range" class="sfx-volume-slider" data-sfx="0normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('0normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_0normal">100%</span>
+                </label>
+                <label style="gap:6px;">3normal (logRNG 3–4):
+                    <input type="range" class="sfx-volume-slider" data-sfx="3normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('3normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_3normal">100%</span>
+                </label>
+                <label style="gap:6px;">4normal (logRNG 4–5):
+                    <input type="range" class="sfx-volume-slider" data-sfx="4normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('4normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_4normal">100%</span>
+                </label>
+                <label style="gap:6px;">5normal (logRNG 5–6):
+                    <input type="range" class="sfx-volume-slider" data-sfx="5normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('5normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_5normal">100%</span>
+                </label>
+                <label style="gap:6px;">6normal (logRNG 6+):
+                    <input type="range" class="sfx-volume-slider" data-sfx="6normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('6normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_6normal">100%</span>
+                </label>
+                <label style="gap:6px;">0secret (raw &lt; 50k):
+                    <input type="range" class="sfx-volume-slider" data-sfx="0secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('0secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_0secret">100%</span>
+                </label>
+                <label style="gap:6px;">4.7secret (raw 50k–1M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="4.7secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('4.7secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_4.7secret">100%</span>
+                </label>
+                <label style="gap:6px;">6secret (raw 1M–10M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="6secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('6secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_6secret">100%</span>
+                </label>
+                <label style="gap:6px;">7secret (raw &gt; 10M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="7secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('7secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_7secret">100%</span>
+                </label>
+            </div>
             <div id="autorollSettings" style="display:none;" class="autoroll-settings-panel">
                 <label>Autoaccept above rng:
                     <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
@@ -1062,7 +1116,7 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Mooncrystal</div>
-                            <div class="enchant-item-effect">Does nothing alone. Merge 100 Mooncrystals together (via orb merging) to awaken: +50 luck, +75 secret luck, +25 bulk, +0.01s speed, +10 enchant luck.</div>
+                            <div class="enchant-item-effect">Does nothing alone. Merge 100 Mooncrystals together (via orb merging) to awaken: +50 luck, +75 secret luck, +25 bulk, +0.01s speed, +10 enchant luck. If both merged orbs have Mooncrystal, result not locked.</div>
                             <div class="enchant-item-rarity">Rarity: 1/5,000 (0.02%)</div>
                         </div>
                     </div>
@@ -1318,21 +1372,50 @@
 // SOUND EFFECTS
 // ============================================================
 const SFX = {
-    coinLow: new Audio('public/sfx/pickupCoin.wav'),
-    coinHigh: new Audio('public/sfx/coin_pickup.wav'),
-    explosion: new Audio('public/sfx/explosion.wav'),
-    powerup: new Audio('public/sfx/powerup.wav'),
-    synth: new Audio('public/sfx/synth.wav'),
-    synth1: new Audio('public/sfx/synth1.wav'),
-    cowm: new Audio('public/sfx/cowm.wav'),
-    t100: new Audio('public/sfx/100t.wav'),
-    lobotomy: new Audio('public/sfx/lobotomy.mp3')
+    '0normal': new Audio('public/sfx/pickupCoin.wav'),      // was coinLow  — plays for logRNG 0 up to <3
+    '3normal': new Audio('public/sfx/coin_pickup.wav'),      // was coinHigh — plays for logRNG 3 up to <4
+    '4normal': new Audio('public/sfx/powerup.wav'),          // was powerup  — plays for logRNG 4 up to <5
+    '5normal': new Audio('public/sfx/synth.wav'),            // was synth    — plays for logRNG 5 up to <6
+    '6normal': new Audio('public/sfx/explosion.wav'),        // was explosion— plays for logRNG 6+
+    '0secret': new Audio('public/sfx/synth1.wav'),           // was synth1   — secret roll, raw floor < 50,000
+    '4.7secret': new Audio('public/sfx/cowm.wav'),           // was cowm     — secret roll, raw floor 50,000–999,999 (log10(50000)≈4.7)
+    '6secret': new Audio('public/sfx/100t.wav'),              // was t100     — secret roll, raw floor > 1,000,000 (log10=6)
+    '7secret': new Audio('public/sfx/lobotomy.mp3')           // was lobotomy — secret roll, raw floor > 10,000,000 (log10=7)
 };
 
-SFX.t100.volume = 1.0; // We'll set it here and then use a louder gain if needed, but 1.75 might clip. 
+SFX['6secret'].volume = 1.0; // We'll set it here and then use a louder gain if needed, but 1.75 might clip. 
 // Standard Audio objects can't go above 1.0 volume. 
 // I will set it to 1.0 and assume it was lower before, or just keep it at max.
 // Actually, I can't go above 1.0 with HTML5 Audio. I'll just ensure it's 1.0.
+
+// ============================================================
+// PER-SOUND VOLUME CONTROLS
+// ============================================================
+function setSfxVolume(key, value) {
+    const vol = Math.max(0, Math.min(1, Number(value)));
+    if (SFX[key]) SFX[key].volume = vol;
+    gameState.sfxVolumes = gameState.sfxVolumes || {};
+    gameState.sfxVolumes[key] = vol;
+    const label = document.getElementById('sfxVolLabel_' + key);
+    if (label) label.textContent = Math.round(vol * 100) + '%';
+}
+
+function applySfxVolumesToUI() {
+    gameState.sfxVolumes = gameState.sfxVolumes || {};
+    Object.keys(SFX).forEach(key => {
+        const vol = gameState.sfxVolumes[key] !== undefined ? gameState.sfxVolumes[key] : 1;
+        SFX[key].volume = vol;
+        const slider = document.querySelector('.sfx-volume-slider[data-sfx="' + key + '"]');
+        if (slider) slider.value = vol;
+        const label = document.getElementById('sfxVolLabel_' + key);
+        if (label) label.textContent = Math.round(vol * 100) + '%';
+    });
+}
+
+function toggleSoundSettings() {
+    const panel = document.getElementById('soundSettings');
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+}
 
 // Pre-load audio to ensure they're ready and check for errors
 Object.values(SFX).forEach(audio => {
@@ -1350,28 +1433,28 @@ function playRankSFX(slot) {
     let audioToPlay = null;
     if (slot.isSecret) {
         if (slot.rawFloor > 10000000) {
-            audioToPlay = SFX.lobotomy;
+            audioToPlay = SFX['7secret'];
         } else if (slot.rawFloor > 1000000) {
-            audioToPlay = SFX.t100;
+            audioToPlay = SFX['6secret'];
         } else if (slot.rawFloor < 1000000 && slot.rawFloor >= 50000) {
-            audioToPlay = SFX.cowm;
+            audioToPlay = SFX['4.7secret'];
         } else if (slot.rawFloor < 50000) {
-            audioToPlay = SFX.synth1;
+            audioToPlay = SFX['0secret'];
         } else {
-            audioToPlay = SFX.cowm;
+            audioToPlay = SFX['4.7secret'];
         }
     } else {
         const val = slot.value;
         if (val >= 6) {
-            audioToPlay = SFX.explosion;
+            audioToPlay = SFX['6normal'];
         } else if (val >= 5) {
-            audioToPlay = SFX.synth;
+            audioToPlay = SFX['5normal'];
         } else if (val >= 4) {
-            audioToPlay = SFX.powerup;
+            audioToPlay = SFX['4normal'];
         } else if (val >= 3) {
-            audioToPlay = SFX.coinHigh;
+            audioToPlay = SFX['3normal'];
         } else {
-            audioToPlay = SFX.coinLow;
+            audioToPlay = SFX['0normal'];
         }
     }
 
@@ -1415,6 +1498,7 @@ let gameState = {
     bulkDeleteEnchantMode: false,
     selectedInventoryIndices: [],
     selectedEnchantIndices: [],
+    sfxVolumes: {},
     stats: {
         totalRolls: 0,
         acceptedRanks: 0,
@@ -2028,6 +2112,10 @@ function rollEnchants(enchantLuckMult, rawFloor, minRawFloor) {
 // ============================================================
 function getRarityClass(v) {
     if (v < 0)  return 'rarity-neg';
+    if (v >= 12) return 'rarity-12';
+    if (v >= 11) return 'rarity-11';
+    if (v >= 10) return 'rarity-10';
+    if (v >= 9) return 'rarity-9';
     if (v >= 8) return 'rarity-8';
     if (v >= 7) return 'rarity-7';
     if (v >= 6) return 'rarity-6';
@@ -3089,6 +3177,7 @@ function loadGame() {
             gameState.autoAcceptEnchants = d.autoAcceptEnchants || [];
             gameState.cooldownMinRng = d.cooldownMinRng || 0;
             gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
+            gameState.sfxVolumes = d.sfxVolumes || {};
         }
     } catch(e) { }
 
@@ -3119,6 +3208,7 @@ function loadGame() {
     const cdLabelEl = document.getElementById('cooldownTimeLabel');
     if (cdRangeEl) cdRangeEl.value = gameState.cooldownTime;
     if (cdLabelEl) cdLabelEl.textContent = gameState.cooldownTime + 's';
+    applySfxVolumesToUI();
 
     const avariceOrb = document.getElementById('avariceIndexOrb');
     if (avariceOrb) {
@@ -3273,8 +3363,10 @@ function performMerge() {
 
     const horseKey = 'e_h_o_r_s_e';
     const alphaKey = 'e_alpha';
+    const mooncrystalKey = 'e_mooncrystal';
     let hasHorseBoth = true;
     let hasAlphaBoth = true;
+    let hasMooncrystalBoth = true;
     const orb1 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[0]);
     const orb2 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[1]);
     if (!orb1 || !orb2) return;
@@ -3284,13 +3376,16 @@ function performMerge() {
     if (!orb1.enchants[alphaKey] || !orb2.enchants[alphaKey]) {
         hasAlphaBoth = false;
     }
+    if (!orb1.enchants[mooncrystalKey] || !orb2.enchants[mooncrystalKey]) {
+        hasMooncrystalBoth = false;
+    }
 
     const mergedEnchants = buildMergedEnchants();
     const newOrb = {
         id: Date.now() + Math.random(),
         enchants: mergedEnchants,
         timestamp: Date.now(),
-        locked: !(hasHorseBoth || hasAlphaBoth)
+        locked: !(hasHorseBoth || hasAlphaBoth || hasMooncrystalBoth)
     };
 
     const removedIds = [...gameState.mergeSelection];

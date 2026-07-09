@@ -543,10 +543,6 @@
             <button class="secret-luck-btn" id="secretLuckBtn" onclick="clickSecretLuckButton()">increase my secret luck for the next roll please!</button>
             <div class="secret-luck-boost-display" id="secretLuckBoostDisplay"></div>
         </div>
-        <div class="pending-panel" id="pendingPanel">
-            <h4>⏳ Pending Enchants — click a highlighted cell to collect:</h4>
-            <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
-        </div>
         <div style="text-align:center;margin-top:8px;">
             <button class="autoroll-btn" id="autorollBtn" onclick="toggleAutoRoll()">⏱ Autoroll: OFF</button>
             <button class="sort-btn" onclick="toggleAutorollSettings()" style="font-size:0.8em;margin-left:6px;">⚙ Settings</button>
@@ -625,6 +621,10 @@
                 </label>
             </div>
         </div>
+        <div class="pending-panel" id="pendingPanel">
+            <h4>⏳ Pending Enchants — click a highlighted cell to collect:</h4>
+            <div class="pending-panel-orbs" id="pendingPanelOrbs"></div>
+        </div>
     </div>
 
     <div class="game-section stats-section">
@@ -663,7 +663,7 @@
             <button class="sort-btn" onclick="toggleBulkDeleteMode()" id="bulkDeleteModeBtn">🗑️ Bulk Delete: OFF</button>
             <div class="pagination">
                 <button class="page-btn" onclick="changePage(-1)" id="prevBtn">◀</button>
-                <span class="page-info">Page <span id="currentPage">1</span> / 6</span>
+                <span class="page-info">Page <span id="currentPage">1</span> / <span id="totalPagesLabel">12</span></span>
                 <button class="page-btn" onclick="changePage(1)" id="nextBtn">▶</button>
             </div>
         </div>
@@ -707,7 +707,7 @@
             <button class="sort-btn" onclick="toggleBulkDeleteEnchantMode()" id="bulkDeleteEnchantModeBtn">🗑️ Bulk Delete Ench: OFF</button>
             <div class="pagination">
                 <button class="page-btn" onclick="changeEnchantPage(-1)" id="prevEnchantBtn">◀</button>
-                <span class="page-info">Page <span id="currentEnchantPage">1</span> / 1</span>
+                <span class="page-info">Page <span id="currentEnchantPage">1</span> / <span id="totalEnchantPagesLabel">3</span></span>
                 <button class="page-btn" onclick="changeEnchantPage(1)" id="nextEnchantBtn">▶</button>
             </div>
         </div>
@@ -1491,10 +1491,10 @@ function playRankSFX(slot) {
 // ============================================================
 const MAX_INVENTORY = 60;
 const MAX_ENCHANTS = 30;
-const ITEMS_PER_PAGE = 60;
-const TOTAL_PAGES = 1;
-const ENCHANTS_PER_PAGE = 30;
-const TOTAL_ENCHANT_PAGES = 1;
+const ITEMS_PER_PAGE = 5;
+const TOTAL_PAGES = Math.ceil(MAX_INVENTORY / ITEMS_PER_PAGE);
+const ENCHANTS_PER_PAGE = 10;
+const TOTAL_ENCHANT_PAGES = Math.ceil(MAX_ENCHANTS / ENCHANTS_PER_PAGE);
 const BASE_ROLL_DURATION = 1750;
 const MIN_ROLL_DURATION = 100;
 
@@ -2930,6 +2930,7 @@ function renderInventory() {
 
 function updatePaginationControls() {
     document.getElementById('currentPage').textContent = gameState.currentPage;
+    document.getElementById('totalPagesLabel').textContent = TOTAL_PAGES;
     document.getElementById('prevBtn').disabled = gameState.currentPage === 1;
     document.getElementById('nextBtn').disabled = gameState.currentPage === TOTAL_PAGES;
 }
@@ -3052,6 +3053,7 @@ function renderEnchantInventory() {
 
 function updateEnchantPaginationControls() {
     document.getElementById('currentEnchantPage').textContent = gameState.currentEnchantPage;
+    document.getElementById('totalEnchantPagesLabel').textContent = TOTAL_ENCHANT_PAGES;
     document.getElementById('prevEnchantBtn').disabled = gameState.currentEnchantPage === 1;
     document.getElementById('nextEnchantBtn').disabled = gameState.currentEnchantPage === TOTAL_ENCHANT_PAGES;
 }

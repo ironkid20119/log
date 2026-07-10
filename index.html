@@ -133,11 +133,12 @@
             border-radius: 10px;
             padding: 12px 18px;
             margin: 10px 0;
-            display: none;
+            display: block;
+            min-height: 59px;
+            box-sizing: border-box;
         }
-        .pending-panel.visible { display: block; }
         .pending-panel h4 { color: #ffd700; margin-bottom: 8px; font-size: 0.9em; }
-        .pending-panel-orbs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .pending-panel-orbs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; min-height: 35px; }
 
         .bulk-info {
             font-size: 0.85em;
@@ -654,7 +655,7 @@
     </div>
 
     <div class="game-section inventory-section">
-        <h2>Inventory (60 Slots)</h2>
+        <h2>Inventory (300 Slots)</h2>
         <div class="inventory-controls">
             <button class="sort-btn" onclick="sortInventory('value-desc')">Sort: Highest First</button>
             <button class="sort-btn" onclick="sortInventory('value-asc')">Sort: Lowest First</button>
@@ -688,7 +689,7 @@
     </div>
 
     <div class="game-section inventory-section">
-        <h2>Enchant Orb Inventory (30 Slots) — Click to Equip/Unequip</h2>
+        <h2>Enchant Orb Inventory (300 Slots) — Click to Equip/Unequip</h2>
         <div class="merge-panel" id="mergePanel">
             <h4>🔀 Merge Orbs</h4>
             <div class="merge-orbs-preview" id="mergeOrbsPreview"></div>
@@ -1344,6 +1345,14 @@
                         </div>
                     </div>
                     <div class="secret-item">
+                        <div class="secret-value-badge">∞</div>
+                        <div class="secret-item-info">
+                            <div class="secret-item-value">∞ (logRNG: -0.08)</div>
+                            <div class="secret-item-rarity">Chance per slot: 1/725,000,000 (0.00000014%)</div>
+                            <div class="secret-item-note">Can have enchant if raw floor ≥ 1000</div>
+                        </div>
+                    </div>
+                    <div class="secret-item">
                         <div class="secret-value-badge">poly</div>
                         <div class="secret-item-info">
                             <div class="secret-item-value">poly (logRNG: -696969)</div>
@@ -1751,6 +1760,7 @@ const SECRET_NUMBERS_RAW = [
     { logValue: -0.01, rarity: 1/1e7, display: '🐟'},
     { logValue: -777, rarity: 1/7777777, display: '-777.777'},
     { logValue: -9.99, rarity: 1/2.5e7, display: '-9.99'},
+    { logValue: -0.08, rarity: 1/725000000, display: '∞'},
     { logValue: -696969, rarity: 1/1e9, display: 'poly'},
     { logValue: -666,   rarity: 0,          display: '-666', isDemonicSecret: true }
 ];
@@ -2775,17 +2785,12 @@ function doAutoAccept() {
 // PENDING PANEL (unchanged)
 // ============================================================
 function renderPendingPanel() {
-    const panel = document.getElementById('pendingPanel');
     const orbsDiv = document.getElementById('pendingPanelOrbs');
 
-    if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) {
-        panel.classList.remove('visible');
-        return;
-    }
+    const pendingEnchants = (gameState.pendingRolls || []).flatMap(r => r.enchants || []);
 
-    const pendingEnchants = gameState.pendingRolls.flatMap(r => r.enchants || []);
     if (pendingEnchants.length === 0) {
-        panel.classList.remove('visible');
+        orbsDiv.innerHTML = '<span style="font-size:0.85em;color:rgba(255,215,0,0.5);font-style:italic;">No pending enchants right now.</span>';
         return;
     }
 
@@ -2796,7 +2801,6 @@ function renderPendingPanel() {
     });
 
     orbsDiv.innerHTML = html;
-    panel.classList.add('visible');
 }
 
 // ============================================================
@@ -2821,6 +2825,11 @@ function acceptRollSlot(slot) {
     if (slot.isEpilepsy) invItem.isEpilepsy = true;
     if (slot.imaginary) invItem.imaginary = true;
     if (slot.negative) invItem.negative = true;
+    if (slot.isSecret) invItem.isSecret = true;
+    if (slot.secretDisplay !== undefined) invItem.secretDisplay = slot.secretDisplay;
+    if (slot.isBrogo) invItem.isBrogo = true;
+    if (slot.isHl3) invItem.isHl3 = true;
+    if (slot.isDemonicSecret) invItem.isDemonicSecret = true;
     gameState.inventory.push(invItem);
     gameState.stats.acceptedRanks++;
     if (!slot.isEpilepsy && !slot.isSecret) {
@@ -2884,6 +2893,10 @@ function renderInventory() {
                 slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/nerd.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.03</div>`;
             } else if (item.isBrogo) {
                 slot.innerHTML = `<div class="slot-value" style="position:absolute; top:0; left:0; width:100%; height:100%; background:url('public/images/brogo.png'); background-size:cover; background-repeat:no-repeat; background-position:center; border-radius:6px;"></div><div style="position:relative; z-index:2; font-size:0.5em; margin-top:auto; text-shadow:0 0 2px #000;">-0.02</div>`;
+            } else if (item.isSecret) {
+                const rarityClass = getRarityClass(item.value);
+                const rawRng = item.rawFloor !== undefined ? item.rawFloor.toLocaleString() : '';
+                slot.innerHTML = `<div class="slot-value ${rarityClass}">${item.secretDisplay !== undefined ? item.secretDisplay : item.value}</div><div style="font-size:0.6em;opacity:0.5;margin-top:2px;">rng: ${rawRng}</div>`;
             } else {
                 const rarityClass = getRarityClass(item.value);
                 const rawRng = item.rawFloor !== undefined
@@ -3118,9 +3131,14 @@ function openDeleteModal(index) {
     gameState.deleteIndex = index;
     gameState.deleteEnchantIndex = null;
     const item = gameState.inventory[index];
-    let display = item.value;
-    if (item.negative) display = -display;
-    if (item.imaginary) display = display + 'i';
+    let display;
+    if (item.isSecret) {
+        display = item.secretDisplay !== undefined ? item.secretDisplay : item.value;
+    } else {
+        display = item.value;
+        if (item.negative) display = -display;
+        if (item.imaginary) display = display + 'i';
+    }
     document.getElementById('deleteRankValue').textContent = `rank ${display}`;
     document.getElementById('deleteModal').classList.add('show');
 }
@@ -3236,6 +3254,31 @@ function loadGame() {
             gameState.cooldownMinRng = d.cooldownMinRng || 0;
             gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
             gameState.sfxVolumes = d.sfxVolumes || {};
+
+            // Migration: older saves never persisted isSecret/secretDisplay/isBrogo/isHl3 on inventory
+            // items, which broke both their display (fell back to raw signed number) and every stat
+            // recalculation that filters on isSecret (deflating/negating Average Rank). Backfill by
+            // matching against the known secret value table — real secrets never carry the
+            // negative/imaginary flags, so that combination is a safe signal.
+            let migrated = false;
+            gameState.inventory.forEach(item => {
+                if (item.isSecret || item.negative || item.imaginary || item.isEpilepsy) return;
+                const match = SECRET_NUMBERS_RAW.find(s => s.logValue === item.value);
+                if (match) {
+                    item.isSecret = true;
+                    item.secretDisplay = match.display;
+                    if (match.isBrogo) item.isBrogo = true;
+                    if (match.isHl3) item.isHl3 = true;
+                    migrated = true;
+                }
+            });
+            if (migrated) {
+                gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, i) => s + i.value, 0);
+                gameState.stats.highestRank = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).length > 0
+                    ? Math.max(...gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).map(i => i.value))
+                    : null;
+                saveGame();
+            }
         }
     } catch(e) { }
 

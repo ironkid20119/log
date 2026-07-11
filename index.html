@@ -638,18 +638,26 @@
             position: absolute; bottom: -170px; left: -170px; width: 340px; height: 340px;
             border-radius: 50%; pointer-events: auto; cursor: grab;
             background: radial-gradient(circle at 68% 32%, #8fd3ff 0%, #3a7bd5 28%, #22336b 62%, #10152e 100%);
-            box-shadow: 0 0 40px rgba(0,150,255,0.45), inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.25);
+            /* Fixed glow: use filter drop-shadow so glow follows the circle boundary exactly */
+            filter: drop-shadow(0 0 22px rgba(0,150,255,0.55));
+            transition: filter 0.3s ease;
             overflow: hidden;
-            transition: box-shadow 0.3s ease;
         }
-        .nav-sphere:hover { box-shadow: 0 0 55px rgba(0,180,255,0.65), inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.3); }
+        .nav-sphere:hover { filter: drop-shadow(0 0 32px rgba(0,180,255,0.8)); }
+        /* Inner shading stays as inset box-shadow on a pseudo-element to not conflict with filter */
+        .nav-sphere::before {
+            content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+            box-shadow: inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.25);
+        }
         .nav-sphere-sheen {
             position: absolute; top: 22%; left: 58%; width: 34%; height: 20%;
             background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%);
             border-radius: 50%; transform: rotate(-25deg); pointer-events: none;
         }
         .nav-sphere-items {
-            position: absolute; top: 50%; left: 68%; transform: translate(-50%, -50%);
+            /* Shifted to the visible corner of the sphere (top-right quadrant visible at 0,0) */
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(20%, -50%);
             display: flex; flex-direction: column; align-items: center; gap: 18px;
             transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -696,6 +704,40 @@
         .tutorial-dialog-text { font-size: 1.05em; margin-bottom: 14px; line-height: 1.5; }
         .tutorial-dialog-buttons { display: flex; gap: 10px; justify-content: center; }
 
+        /* ============ UI SCHEMES ============ */
+
+        /* Legacy: single scrollframe, no sphere background */
+        body.scheme-legacy .app-page { display: block !important; }
+        body.scheme-legacy #page-inventory,
+        body.scheme-legacy #page-index,
+        body.scheme-legacy #page-events,
+        body.scheme-legacy #page-settings { display: block !important; }
+        body.scheme-legacy .nav-sphere-wrap { display: none !important; }
+        body.scheme-legacy .container { max-width: 900px; }
+        body.scheme-legacy .game-section { border-radius: 4px; margin-bottom: 12px; }
+
+        /* Cali2: square iframe-style panels */
+        body.scheme-cali2 .game-section {
+            border-radius: 0 !important; border: 2px solid rgba(0,212,255,0.4) !important;
+            box-shadow: none !important; backdrop-filter: none !important;
+        }
+        body.scheme-cali2 .container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 1400px; }
+        body.scheme-cali2 .app-page { padding-bottom: 20px; }
+        body.scheme-cali2 h1 { grid-column: 1/-1; }
+        @media (max-width: 768px) { body.scheme-cali2 .container { grid-template-columns: 1fr; } }
+
+        /* Compact: minimal buttons-only layout */
+        body.scheme-compact .game-section {
+            background: rgba(0,0,0,0.5) !important; backdrop-filter: none !important;
+            border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 4px !important;
+            box-shadow: none !important; padding: 10px !important;
+        }
+        body.scheme-compact button { border-radius: 2px !important; box-shadow: none !important; padding: 6px 14px !important; font-size: 0.9em !important; }
+        body.scheme-compact button::after { display: none; }
+        body.scheme-compact .roll-square { border-radius: 2px !important; }
+        body.scheme-compact .inventory-slot, body.scheme-compact .enchant-slot { border-radius: 2px !important; }
+        body.scheme-compact .nav-sphere { box-shadow: 0 0 15px rgba(0,150,255,0.3) !important; }
+
         /* ============ ACCESSIBILITY / PERFORMANCE TOGGLES ============ */
         body.low-fx * { animation: none !important; text-shadow: none !important; }
         body.low-fx [class*="rarity-"] {
@@ -713,7 +755,7 @@
         }
         body.fps-booster .game-section { padding: 14px; border-radius: 6px; }
         body.fps-booster .roll-square, body.fps-booster .inventory-slot, body.fps-booster .enchant-slot { transform: none !important; }
-        body.fps-booster .nav-sphere { background: #22336b !important; }
+        body.fps-booster .nav-sphere { background: #22336b !important; filter: none !important; }
         body.fps-booster .nav-sphere-sheen { display: none; }
 
         /* ============================================================
@@ -761,7 +803,7 @@
             .nav-sphere-wrap { width: 64px; height: 64px; }
             .nav-sphere { width: 190px; height: 190px; bottom: -124px; left: -124px; }
             .nav-sphere-item { width: 34px; height: 34px; font-size: 1.1em; }
-            .nav-sphere-items { gap: 14px; }
+            .nav-sphere-items { gap: 14px; transform: translate(22%, -50%); }
             .nav-sphere-label { left: 74px; font-size: 0.75em; padding: 3px 10px; }
 
             .event-banner { flex-direction: column; gap: 4px; text-align: center; padding: 8px 12px; }
@@ -787,7 +829,7 @@
             .nav-sphere-wrap { width: 52px; height: 52px; }
             .nav-sphere { width: 150px; height: 150px; bottom: -98px; left: -98px; }
             .nav-sphere-item { width: 28px; height: 28px; font-size: 0.95em; }
-            .nav-sphere-items { gap: 11px; }
+            .nav-sphere-items { gap: 11px; transform: translate(22%, -50%); }
             .nav-sphere-label { left: 58px; font-size: 0.7em; padding: 2px 8px; }
         }
 
@@ -1302,12 +1344,15 @@
                 </div>
             </div>
 
-            <!-- Special Enchants (updated demonic without extra line) -->
+            <!-- Alpha Category -->
             <div class="enchant-type-section">
-                <div class="enchant-type-header" onclick="toggleEnchantType('special')">
-                    <h3>✨ Special Enchants</h3><span id="special-toggle">▼</span>
+                <div class="enchant-type-header" onclick="toggleEnchantType('alphacategory')">
+                    <h3>✦ Alpha Category</h3><span id="alphacategory-toggle">▼</span>
                 </div>
-                <div class="enchant-type-content" id="special-content">
+                <div class="enchant-type-content" id="alphacategory-content">
+                    <p style="font-size:0.85em;opacity:0.7;margin-bottom:10px;">
+                        Alpha category enchants share a merge rule: if <em>both</em> merged orbs have any Alpha-category enchant, the result is not locked. This persists through further merges. Alpha is capped at 25 effective enchants per orb — further alphas won't add stats.
+                    </p>
                     <div class="enchant-item">
                         <div class="enchant-orb" style="background:#808080; position:relative;">
                             <span style="position:relative; z-index:2; font-size:1.2em; color:white; text-shadow:0 0 2px black;">α</span>
@@ -1315,7 +1360,7 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Alpha</div>
-                            <div class="enchant-item-effect">+1 luck, +0.5s speed reduction, +0.25 secret luck, +0.125 enchant luck (all boosted by Beta/Delta/Epsilon on the same orb). Alpha category: if both merged orbs have any Alpha-category enchant, result not locked.</div>
+                            <div class="enchant-item-effect">+1 luck, +0.5s speed reduction, +0.25 secret luck, +0.125 enchant luck (all boosted by Beta/Delta/Epsilon on the same orb).</div>
                             <div class="enchant-item-rarity">Rarity: 1/75,000 (0.00133%)</div>
                         </div>
                     </div>
@@ -1326,7 +1371,7 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Beta</div>
-                            <div class="enchant-item-effect">Alpha category. Makes Alpha +0.1x more effective on this orb per Beta (capped at +4x / 5x total). No effect without Alpha.</div>
+                            <div class="enchant-item-effect">Makes Alpha +0.1x more effective on this orb per Beta (capped at +4x / 5x total). No effect without Alpha.</div>
                             <div class="enchant-item-rarity">Rarity: 1/925,000 (0.000108%)</div>
                         </div>
                     </div>
@@ -1337,7 +1382,7 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Delta</div>
-                            <div class="enchant-item-effect">Alpha category. Makes Beta +1x more effective on this orb per Delta (capped at +4x / x5 total). No effect without Beta.</div>
+                            <div class="enchant-item-effect">Makes Beta +1x more effective on this orb per Delta (capped at +4x / x5 total). No effect without Beta.</div>
                             <div class="enchant-item-rarity">Rarity: 1/78,000,000 (0.00000128%)</div>
                         </div>
                     </div>
@@ -1348,10 +1393,19 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Epsilon</div>
-                            <div class="enchant-item-effect">Alpha category. Makes Delta +0.25x more effective on this orb per Epsilon (capped at +1.5x / 2.5x total). No effect without Delta.</div>
+                            <div class="enchant-item-effect">Makes Delta +0.25x more effective on this orb per Epsilon (capped at +1.5x / 2.5x total). No effect without Delta.</div>
                             <div class="enchant-item-rarity">Rarity: 1/2,500,000,000 (0.00000004%)</div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Special Enchants (updated demonic without extra line) -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('special')">
+                    <h3>✨ Special Enchants</h3><span id="special-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="special-content">
                     <div class="enchant-item">
                         <div class="enchant-orb" style="background:linear-gradient(135deg, #ff69b4, #800080);">
                             <span style="color:black; font-size:1.2em; font-weight:bold;">↑</span>
@@ -1410,6 +1464,31 @@
                             <div class="enchant-item-name">Plant</div>
                             <div class="enchant-item-effect">+1 luck, +2.5 secret luck, +0.2 enchant luck, +0.1s speed — permanently multiplies x1.5 for every real-world hour continuously equipped, capped at 24 hours (up to ~1283x).</div>
                             <div class="enchant-item-rarity">Rarity: 1/425,000 (0.00024%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collectible Enchants -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('collectible')">
+                    <h3>🎯 Collectible Enchants</h3><span id="collectible-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="collectible-content">
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#ffffff,#d4d4d4);color:#1a1a2e;">⛳</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Golf Ball</div>
+                            <div class="enchant-item-effect">Scales enchant luck based on your best logRNG in inventory: +(1.3^bestLogRNG)x enchant luck. The rarer your best roll, the better.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/50,000,000 (0.000002%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#f59e0b,#d97706);">🍕</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Pizza Slice</div>
+                            <div class="enchant-item-effect">+1.7x all stats (luck, secret luck, enchant luck, bulk). Collect 8 slices to form a full pizza — one pizza grants +17x all stats instead.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/1,700,000,000 (5.9e-8%)</div>
                         </div>
                     </div>
                 </div>
@@ -1786,6 +1865,40 @@
         </div>
 
         <div class="settings-block">
+            <h3>📦 Bulk Roll Cap</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Limit how many bulk rolls activate per roll. Must be between 1 and your current max bulk. Set to 0 to disable (no cap).</p>
+            <label class="settings-stat-row">
+                Cap bulk at:
+                <input type="number" id="bulkRollCapInput" min="0" step="1" placeholder="0 = disabled"
+                    oninput="applyBulkRollCap(this.value)">
+                <span id="bulkRollCapMax" class="settings-toggle-desc"></span>
+            </label>
+        </div>
+
+        <div class="settings-block">
+            <h3>🎨 UI Scheme</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Change the visual layout of the game.</p>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <label class="settings-toggle-row" style="cursor:pointer;">
+                    <input type="radio" name="uiScheme" value="current" onchange="applyUIScheme('current')" style="accent-color:#00d4ff;"> Current
+                    <span class="settings-toggle-desc">Default — floating card sections with sphere nav.</span>
+                </label>
+                <label class="settings-toggle-row" style="cursor:pointer;">
+                    <input type="radio" name="uiScheme" value="legacy" onchange="applyUIScheme('legacy')" style="accent-color:#00d4ff;"> Legacy
+                    <span class="settings-toggle-desc">All sections in one scrollable frame, no sphere.</span>
+                </label>
+                <label class="settings-toggle-row" style="cursor:pointer;">
+                    <input type="radio" name="uiScheme" value="cali2" onchange="applyUIScheme('cali2')" style="accent-color:#00d4ff;"> Cali2
+                    <span class="settings-toggle-desc">Square iframe-style panels side by side.</span>
+                </label>
+                <label class="settings-toggle-row" style="cursor:pointer;">
+                    <input type="radio" name="uiScheme" value="compact" onchange="applyUIScheme('compact')" style="accent-color:#00d4ff;"> Compact
+                    <span class="settings-toggle-desc">Minimal — just plain buttons with simplified CSS.</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-block">
             <h3>📘 Tutorial</h3>
             <button class="sort-btn" onclick="startTutorial(true)">Replay Tutorial</button>
             <span class="settings-toggle-desc" id="tutorialRewardNote"></span>
@@ -1945,6 +2058,8 @@ let gameState = {
     pendingRolls: [],
     jokeEnchantsEnabled: false,
     brickCount: 0,
+    pizzaSlicesCollected: 0,
+    pizzasCompleted: 0,
     luckButtonClicks: 0,
     secretLuckButtonClicks: 0,
     mergeSelection: [],
@@ -1958,6 +2073,8 @@ let gameState = {
     selectedInventoryIndices: [],
     selectedEnchantIndices: [],
     sfxVolumes: {},
+    bulkRollCap: 0, // 0 = no cap/disabled
+    uiScheme: 'current',
     stats: {
         totalRolls: 0,
         acceptedRanks: 0,
@@ -2187,6 +2304,20 @@ const ENCHANTS = {
         color: 'linear-gradient(135deg, #16a34a 0%, #166534 100%)', display: '🌱'
     },
 
+    // --- Collectible Enchants ---
+    golfball: {
+        name: 'Golf Ball', type: 'collectible', tier: 1, rarity: 1/50000000,
+        effects: {}, // dynamic — scales with best logRNG in inventory
+        display: '⛳', color: 'linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%)', textColor: '#1a1a2e',
+        isGolfball: true
+    },
+    pizzaslice: {
+        name: 'Pizza Slice', type: 'collectible', tier: 2, rarity: 1/1700000000,
+        effects: { luck: 1.7, secretLuck: 1.7, cloner: 1.7, lighter: 1.7 }, // +1.7x all stats
+        display: '🍕', color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', textColor: '#fff',
+        isPizzaSlice: true
+    },
+
     // --- Weird Enchants ---
     weird1: {
         name: 'Weird I', type: 'weird', tier: 1, rarity: 1/75,
@@ -2392,12 +2523,20 @@ setInterval(() => {
 
 // Alpha category: Beta amplifies Alpha's own bonuses, Delta amplifies Beta's amplification,
 // Epsilon amplifies Delta's amplification. Each letter stacks (multiple copies) up to its own cap.
+const ALPHA_CAP = 25; // max effective alpha count per orb
+
 function getAlphaCategoryMultiplier() {
     if (!gameState.equippedOrb) return 1;
     const enchants = Object.values(gameState.equippedOrb.enchants);
-    const betaCount = enchants.filter(e => e.name === 'Beta').length;
-    const deltaCount = enchants.filter(e => e.name === 'Delta').length;
-    const epsilonCount = enchants.filter(e => e.name === 'Epsilon').length;
+    // Count all alpha-category enchants, capped at 25 total across the orb
+    const alphaCatTotal = enchants.filter(e => e.isAlphaCategory).length;
+    const cappedTotal = Math.min(alphaCatTotal, ALPHA_CAP);
+
+    // Distribute proportionally if over cap
+    const scale = alphaCatTotal > ALPHA_CAP ? cappedTotal / alphaCatTotal : 1;
+    const betaCount = Math.round(enchants.filter(e => e.name === 'Beta').length * scale);
+    const deltaCount = Math.round(enchants.filter(e => e.name === 'Delta').length * scale);
+    const epsilonCount = Math.round(enchants.filter(e => e.name === 'Epsilon').length * scale);
 
     const epsilonBonus = Math.min(1.5, 0.25 * epsilonCount);
     const deltaBonusBase = Math.min(4.0, 1.0 * deltaCount);
@@ -2443,6 +2582,43 @@ function getUltraAirMultiplier() {
     return hasUltraAir ? 10 : 1;
 }
 
+function getBestLogRngInInventory() {
+    let best = 0;
+    gameState.inventory.forEach(item => {
+        if (!item.isEpilepsy && !item.isSecret && !item.negative && !item.imaginary) {
+            if (item.value > best) best = item.value;
+        }
+    });
+    return best;
+}
+
+function getGolfballEnchantLuckBonus() {
+    if (!gameState.equippedOrb) return 0;
+    const hasGolfball = Object.values(gameState.equippedOrb.enchants).some(e => e.isGolfball || e.name === 'Golf Ball');
+    if (!hasGolfball) return 0;
+    const bestLog = getBestLogRngInInventory();
+    return Math.pow(1.3, bestLog); // +(1.3^bestLog)x enchant luck
+}
+
+function getPizzaMultiplier() {
+    // Each full pizza: +17x all stats. Each incomplete slice: +1.7x.
+    const pizzas = gameState.pizzasCompleted || 0;
+    const slices = (gameState.pizzaSlicesCollected || 0) % 8; // leftover slices after full pizzas
+    // We treat pizzas as multiplicative bonus to all stats
+    const pizzaMult = Math.pow(17, pizzas);
+    const sliceMult = Math.pow(1.7, slices);
+    return pizzaMult * sliceMult;
+}
+
+function getPizzaSliceCountOnEquippedOrb() {
+    if (!gameState.equippedOrb) return 0;
+    let count = 0;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.isPizzaSlice || e.name === 'Pizza Slice') count += (e.count || 1);
+    });
+    return count;
+}
+
 function getRawLuckMultiplier() {
     let luck = 1;
     const bricks = getEquippedBrickCount();
@@ -2469,6 +2645,8 @@ function getRawLuckMultiplier() {
             luck += 1 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.luck != null) {
             luck += e.effects.luck;
+        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.luck != null) {
+            luck += e.effects.luck * (e.count || 1);
         }
     });
     luck += bricks * 5 + blessing.luck;
@@ -2477,7 +2655,7 @@ function getRawLuckMultiplier() {
 
 function getNaturalLuckMultiplier() {
     const base = isEventActive('takeback') ? getRawSecretLuckMultiplier() : getRawLuckMultiplier();
-    return Math.max(1, base) * getEventStatMultiplier('luck') * getUltraAirMultiplier() * getTutorialLuckBoostMultiplier();
+    return Math.max(1, base) * getEventStatMultiplier('luck') * getUltraAirMultiplier() * getTutorialLuckBoostMultiplier() * getPizzaMultiplier();
 }
 
 function getLuckMultiplier() {
@@ -2504,10 +2682,13 @@ function getNaturalEnchantLuckMultiplier() {
             mult += 0.2 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.lighter != null) {
             mult += e.effects.lighter;
+        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.lighter != null) {
+            mult += e.effects.lighter * (e.count || 1);
         }
     });
     mult += bricks * 1.5 + blessing.enchantLuck;
-    return mult * getEventStatMultiplier('enchantLuck') * getUltraAirMultiplier();
+    mult += getGolfballEnchantLuckBonus();
+    return mult * getEventStatMultiplier('enchantLuck') * getUltraAirMultiplier() * getPizzaMultiplier();
 }
 
 function getEnchantLuckMultiplier() {
@@ -2531,11 +2712,17 @@ function getBulkRolls() {
             total += gameState.mythicalBulk;
         } else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) {
             total += e.effects.cloner;
+        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.cloner != null) {
+            total += e.effects.cloner * (e.count || 1);
         }
     });
     total += blessing.bulk;
-    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier();
-    return Math.max(1, Math.round(total)); // ensure at least 1
+    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
+    let result = Math.max(1, Math.round(total));
+    // Apply bulk roll cap from settings (0 = disabled)
+    const cap = gameState.bulkRollCap || 0;
+    if (cap > 0) result = Math.min(result, cap);
+    return result;
 }
 
 function getSpeedConfig() {
@@ -2614,6 +2801,8 @@ function getRawSecretLuckMultiplier() {
             mult += e.effects.secretLuck;
         } else if (e.isSuperMooncrystal && e.effects && e.effects.secretLuck != null) {
             mult += e.effects.secretLuck;
+        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.secretLuck != null) {
+            mult += e.effects.secretLuck * (e.count || 1);
         }
     });
     mult += blessing.secretLuck;
@@ -2622,7 +2811,7 @@ function getRawSecretLuckMultiplier() {
 
 function getNaturalSecretLuckMultiplier() {
     const base = isEventActive('takeback') ? getRawLuckMultiplier() : getRawSecretLuckMultiplier();
-    return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getUltraAirMultiplier();
+    return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getUltraAirMultiplier() * getPizzaMultiplier();
 }
 
 function getSecretLuckMultiplier() {
@@ -3005,6 +3194,16 @@ function addEnchantToOrb(orb, enchant) {
             return true;
         }
         return false;
+    }
+
+    if (enchant.name === 'Pizza Slice' || enchant.isPizzaSlice) {
+        const key = 'e_pizza_slice';
+        if (!orb.enchants[key]) {
+            orb.enchants[key] = { ...enchant, count: 1 };
+        } else {
+            orb.enchants[key].count = (orb.enchants[key].count || 1) + 1;
+        }
+        return true;
     }
 
     if (enchant.name === 'Mooncrystal' || (enchant.name && enchant.name.startsWith('Mooncrystal'))) {
@@ -3527,6 +3726,13 @@ function acceptRollSlot(slot) {
                 document.getElementById('brickStatBox').style.display = '';
                 document.getElementById('brickCount').textContent = gameState.brickCount;
             }
+            if (enchant.isPizzaSlice || enchant.name === 'Pizza Slice') {
+                gameState.pizzaSlicesCollected = (gameState.pizzaSlicesCollected || 0) + 1;
+                if (gameState.pizzaSlicesCollected % 8 === 0) {
+                    gameState.pizzasCompleted = (gameState.pizzasCompleted || 0) + 1;
+                    setTimeout(() => alert(`🍕 PIZZA COMPLETE! You now have ${gameState.pizzasCompleted} pizza${gameState.pizzasCompleted>1?'s':''}! (+17x all stats)`), 100);
+                }
+            }
             addEnchantToOrb(newOrb, enchant);
         }
         gameState.enchantOrbs.push(newOrb);
@@ -3927,6 +4133,10 @@ function loadGame() {
             gameState.cooldownMinRng = d.cooldownMinRng || 0;
             gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
             gameState.sfxVolumes = d.sfxVolumes || {};
+            gameState.bulkRollCap = d.bulkRollCap || 0;
+            gameState.uiScheme = d.uiScheme || 'current';
+            gameState.pizzaSlicesCollected = d.pizzaSlicesCollected || 0;
+            gameState.pizzasCompleted = d.pizzasCompleted || 0;
 
             gameState.activeEvent = d.activeEvent || null;
             if (gameState.activeEvent && Date.now() >= gameState.activeEvent.endsAt) {
@@ -4297,6 +4507,7 @@ function performMerge() {
     }
     // Alpha category (Alpha, Beta, Delta, Epsilon): merging skips the lock if BOTH orbs have
     // any member of the category — doesn't need to be the same letter on each side.
+    // The merged result also preserves isAlphaCategory so further merges remain unlocked.
     const orb1HasAlphaCategory = Object.values(orb1.enchants).some(e => e.isAlphaCategory);
     const orb2HasAlphaCategory = Object.values(orb2.enchants).some(e => e.isAlphaCategory);
     const hasAlphaCategoryBoth = orb1HasAlphaCategory && orb2HasAlphaCategory;
@@ -4472,7 +4683,7 @@ function updateNavSphereDisplay() {
             const gap = parseFloat(getComputedStyle(container).gap) || 0;
             itemStep = itemHeight + gap;
         }
-        container.style.transform = `translate(-50%, calc(-50% - ${idx * itemStep}px))`;
+        container.style.transform = `translate(20%, calc(-50% - ${idx * itemStep}px))`;
     }
     const label = document.querySelector('.nav-sphere-label');
     if (label) label.textContent = PAGE_LABELS[current];
@@ -4586,6 +4797,57 @@ function toggleStatOverrideEnabled(stat, enabled) {
     updateActiveEffectsBar();
 }
 
+function applyBulkRollCap(value) {
+    const v = parseInt(value) || 0;
+    gameState.bulkRollCap = Math.max(0, v);
+    saveGame();
+    renderBulkRollCapMax();
+}
+
+function renderBulkRollCapMax() {
+    const el = document.getElementById('bulkRollCapMax');
+    const capInput = document.getElementById('bulkRollCapInput');
+    if (!el) return;
+    const natural = getBulkRollsUncapped();
+    el.textContent = gameState.bulkRollCap > 0
+        ? `capped at ${gameState.bulkRollCap} (natural: ${natural})`
+        : `disabled — natural bulk: ${natural}`;
+    if (capInput && document.activeElement !== capInput) {
+        capInput.value = gameState.bulkRollCap || '';
+    }
+}
+
+function getBulkRollsUncapped() {
+    // Same as getBulkRolls but without cap applied
+    let total = 1;
+    const blessing = getBlessingBonuses();
+    if (!gameState.equippedOrb) return Math.max(1, Math.round((total + blessing.bulk) * getEventStatMultiplier('bulk')));
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.type === 'cloner') total += e.effect;
+        else if (e.type === 'allinone' && e.effects && e.effects.cloner != null) total += e.effects.cloner;
+        else if (e.type === 'curse' && e.effects && e.effects.cloner != null) total += e.effects.cloner;
+        else if (e.type === 'joke' && e.effects && e.effects.cloner != null) total += e.effects.cloner;
+        else if (e.type === 'special' && e.name === 'MYTHICAL') total += gameState.mythicalBulk;
+        else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) total += e.effects.cloner;
+        else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.cloner != null) total += e.effects.cloner * (e.count || 1);
+    });
+    total += blessing.bulk;
+    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
+    return Math.max(1, Math.round(total));
+}
+
+// UI Scheme — applies CSS class to body and saves preference
+function applyUIScheme(scheme) {
+    gameState.uiScheme = scheme;
+    document.body.classList.remove('scheme-legacy', 'scheme-cali2', 'scheme-compact', 'scheme-current');
+    document.body.classList.add('scheme-' + scheme);
+    // Update radio buttons
+    document.querySelectorAll('input[name="uiScheme"]').forEach(r => { r.checked = (r.value === scheme); });
+    const sphere = document.getElementById('navSphereWrap');
+    if (sphere) sphere.style.display = (scheme === 'legacy') ? 'none' : '';
+    saveGame();
+}
+
 function renderSettingsStatCaps() {
     const mythical = hasMythicalEquipped();
     const luckNatural = getNaturalLuckMultiplier();
@@ -4605,6 +4867,8 @@ function renderSettingsStatCaps() {
 
     const enchantMaxLabel = document.getElementById('setEnchantLuckMax');
     if (enchantMaxLabel) enchantMaxLabel.textContent = `max: ${enchantNatural.toFixed(2)}`;
+
+    renderBulkRollCapMax();
 }
 
 // ============================================================
@@ -4851,6 +5115,13 @@ if (setEnchantInput) {
 
 renderTutorialSettingsNote();
 renderEventBanner();
+
+// Restore bulk roll cap UI
+const bulkCapInput = document.getElementById('bulkRollCapInput');
+if (bulkCapInput && gameState.bulkRollCap) bulkCapInput.value = gameState.bulkRollCap;
+
+// Restore UI scheme
+applyUIScheme(gameState.uiScheme || 'current');
 
 // Periodic refresh for anything time-sensitive shown on the currently open page
 setInterval(() => {

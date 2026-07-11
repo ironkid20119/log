@@ -1358,7 +1358,7 @@
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">✦ Blessing</div>
-                            <div class="enchant-item-effect">Gains scaling bonuses with total rolls: +0.001 bulk/roll (cap +19), +0.01 luck/roll (cap +750), +0.05s speed reduction/roll (capped at instant), +0.0025 secret luck/roll (cap +15), +0.001 enchant luck/roll (cap +5). Starts with -12.5s speed reduction.</div>
+                            <div class="enchant-item-effect">Gains scaling bonuses with total rolls: +0.001 bulk/roll (cap +19), +0.01 luck/roll (cap +750), +0.05s speed reduction/roll (capped at instant), +0.0025 secret luck/roll (cap +15), +0.001 enchant luck/roll (cap +15). Starts with -12.5s speed reduction.</div>
                             <div class="enchant-item-rarity">Rarity: 1/750,000 (0.000133%)</div>
                         </div>
                     </div>
@@ -1999,10 +1999,10 @@ const ENCHANTS = {
     kugelblitz:  { name: 'KUGELBLITZ', type: 'speed',   tier: 4, rarity: 1/10000,       effect: 'instant',color: '#1e40af' },
 
     // --- Lighter ---
-    lighter1:    { name: 'Lighter I',  type: 'lighter', tier: 1, rarity: 1/100,         effect: 0.5,      color: '#a78bfa' },
-    lighter2:    { name: 'Lighter II', type: 'lighter', tier: 2, rarity: 1/2500,        effect: 1.25,     color: '#8b5cf6' },
-    magician:    { name: 'Magician',   type: 'lighter', tier: 3, rarity: 1/172565,      effect: 4,        color: '#7c3aed' },
-    unnatural:   { name: 'Unnatural',  type: 'lighter', tier: 4, rarity: 1/91625715,    effect: 10,       color: '#6d28d9' },
+    lighter1:    { name: 'Lighter I',  type: 'lighter', tier: 1, rarity: 1/100,         effect: 2.5,      color: '#a78bfa' },
+    lighter2:    { name: 'Lighter II', type: 'lighter', tier: 2, rarity: 1/2500,        effect: 5,     color: '#8b5cf6' },
+    magician:    { name: 'Magician',   type: 'lighter', tier: 3, rarity: 1/172565,      effect: 12,        color: '#7c3aed' },
+    unnatural:   { name: 'Unnatural',  type: 'lighter', tier: 4, rarity: 1/91625715,    effect: 50,       color: '#6d28d9' },
 
     // --- Cloner ---
     cloner1:     { name: 'Cloner I',   type: 'cloner',  tier: 1, rarity: 1/75,          effect: 1,        color: '#fb923c' },
@@ -2303,7 +2303,7 @@ function getBlessingBonuses() {
     luck = Math.min(750 * blessingCount, rolls * 0.01 * blessingCount);
     speed = Math.min(12.5 * blessingCount, rolls * 0.05 * blessingCount);
     secretLuck = Math.min(15 * blessingCount, rolls * 0.0025 * blessingCount);
-    enchantLuck = Math.min(5 * blessingCount, rolls * 0.001 * blessingCount);
+    enchantLuck = Math.min(15 * blessingCount, rolls * 0.001 * blessingCount);
     return { bulk, luck, speed, secretLuck, enchantLuck, count: blessingCount };
 }
 
@@ -2319,8 +2319,8 @@ const GAME_EVENTS = [
     { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 10,  desc: 'x1.5 enchant luck' },
     { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 120, desc: 'x1.5 luck, secret luck, and enchant luck' },
     { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 20,  desc: 'x5 luck & secret luck, instant rolls' },
-    { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 40,  desc: 'Negative chance boosted to 1/12.5, colors inverted' },
-    { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 20,  desc: 'Imaginary chance boosted to 1/25, colors hue-shifted' }
+    { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 40,  desc: 'Negative chance boosted to 1/12.5' },
+    { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 20,  desc: 'Imaginary chance boosted to 1/25' }
 ];
 
 function isEventActive(key) {

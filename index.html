@@ -7,9 +7,16 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #667eea, #764ba2); border-radius: 10px; border: 2px solid rgba(0,0,0,0.2); background-clip: padding-box; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #764ba2, #667eea); background-clip: padding-box; }
+        * { scrollbar-width: thin; scrollbar-color: #764ba2 rgba(255,255,255,0.03); }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-attachment: fixed;
             color: #eee;
             min-height: 100vh;
             padding: 20px;
@@ -21,8 +28,9 @@
             text-align: center;
             margin-bottom: 30px;
             color: #00d4ff;
-            text-shadow: 0 0 20px rgba(0,212,255,0.5);
+            text-shadow: 0 0 20px rgba(0,212,255,0.5), 0 0 45px rgba(118,75,162,0.25);
             font-size: 2.5em;
+            letter-spacing: 0.02em;
         }
 
         .game-section {
@@ -32,6 +40,12 @@
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .game-section:hover {
+            border-color: rgba(255,255,255,0.16);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.09);
         }
 
         .roll-container { text-align: center; }
@@ -43,6 +57,7 @@
             margin: 20px 0;
             overflow-x: auto;
             overflow-y: hidden;
+            box-shadow: inset 0 2px 12px rgba(0,0,0,0.4);
         }
 
         .roll-track {
@@ -114,16 +129,18 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
             font-weight: 600;
             touch-action: manipulation;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
         }
+        button:active:not(:disabled) { transform: translateY(0) scale(0.97); }
 
         .roll-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .roll-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102,126,234,0.4); }
+        .roll-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(102,126,234,0.5); }
 
         .accept-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
-        .accept-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(245,87,108,0.4); }
+        .accept-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(245,87,108,0.5); }
 
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -211,12 +228,14 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        .modal.show { display: flex; }
+        .modal.show { display: flex; animation: modalFadeIn 0.2s ease; }
+        @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-content {
             background: #1a1a2e;
             padding: 30px;
@@ -224,7 +243,10 @@
             border: 2px solid #00d4ff;
             text-align: center;
             max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,212,255,0.15);
+            animation: modalPopIn 0.25s cubic-bezier(0.22, 1, 0.36, 1);
         }
+        @keyframes modalPopIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
         .confirm-btn { background: #f5576c; color: white; padding: 10px 25px; }
         .cancel-btn { background: rgba(255,255,255,0.1); color: white; padding: 10px 25px; }
@@ -244,6 +266,23 @@
         .rarity-11 { color: #a020f0; text-shadow: 0 0 14px #a020f0, 0 0 4px #fff; }
         .rarity-12 { background: linear-gradient(90deg,#ff0000,#ff9900,#ffee00,#33ff00,#00fff2,#0033ff,#cc00ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 16px rgba(255,255,255,0.6); animation: rarity12Shift 3s linear infinite; background-size: 400% 100%; }
         @keyframes rarity12Shift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        .rarity-13 { color: #cd7f32; text-shadow: 0 0 10px #cd7f32, 0 0 20px rgba(205,127,50,0.4); }
+        .rarity-14 { color: #e5e4e2; text-shadow: 0 0 10px #e5e4e2, 0 0 20px rgba(229,228,226,0.5); }
+        .rarity-15 { color: #ffd966; text-shadow: 0 0 12px #ffd700, 0 0 24px rgba(255,215,0,0.6); animation: rarity15Pulse 1.6s ease-in-out infinite; }
+        @keyframes rarity15Pulse { 0%,100% { text-shadow: 0 0 12px #ffd700, 0 0 24px rgba(255,215,0,0.6); } 50% { text-shadow: 0 0 20px #ffd700, 0 0 40px rgba(255,215,0,0.9); } }
+        .rarity-16 { color: #e0f7ff; text-shadow: 0 0 14px #7dd3fc, 0 0 28px rgba(125,211,252,0.7); animation: rarity16Pulse 1.4s ease-in-out infinite; }
+        @keyframes rarity16Pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+        .rarity-17 { color: #1a0033; text-shadow: 0 0 6px #c084fc, 0 0 16px #7c3aed, 0 0 30px rgba(124,58,237,0.8); background: radial-gradient(circle, #2e1065 0%, #000 100%); -webkit-background-clip: text; background-clip: text; animation: rarity17Void 2.5s ease-in-out infinite; }
+        @keyframes rarity17Void { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.8); } }
+        .rarity-18 { background: linear-gradient(120deg,#0f2027,#2c5364,#c31432,#240b36,#0f2027); background-size: 500% 500%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 18px rgba(200,200,255,0.5); animation: rarity18Cosmic 5s ease infinite; }
+        @keyframes rarity18Cosmic { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        .rarity-19 { color: #fff; text-shadow: -2px 0 #ff0044, 2px 0 #00e5ff, 0 0 12px rgba(255,255,255,0.8); animation: rarity19Glitch 0.35s steps(2) infinite; }
+        @keyframes rarity19Glitch { 0% { text-shadow: -2px 0 #ff0044, 2px 0 #00e5ff, 0 0 12px rgba(255,255,255,0.8); } 50% { text-shadow: 2px 0 #ff0044, -2px 0 #00e5ff, 0 0 16px rgba(255,255,255,0.9); } 100% { text-shadow: -1px 1px #ff0044, 1px -1px #00e5ff, 0 0 12px rgba(255,255,255,0.8); } }
+        .rarity-20 { color: #fffbe6; text-shadow: 0 0 10px #fff, 0 0 22px #ffe066, 0 0 40px rgba(255,224,102,0.8); animation: rarity20Divine 1.8s ease-in-out infinite; }
+        @keyframes rarity20Divine { 0%,100% { text-shadow: 0 0 10px #fff, 0 0 22px #ffe066, 0 0 40px rgba(255,224,102,0.8); } 50% { text-shadow: 0 0 18px #fff, 0 0 36px #ffe066, 0 0 60px rgba(255,224,102,1); } }
+        .rarity-21 { background: linear-gradient(90deg,#ff0000,#ff9900,#ffee00,#33ff00,#00fff2,#0033ff,#cc00ff,#ff0000); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 300% 100%; animation: rarity21Shift 1.4s linear infinite, rarity21Pulse 0.9s ease-in-out infinite; text-shadow: 0 0 24px rgba(255,255,255,0.9); }
+        @keyframes rarity21Shift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        @keyframes rarity21Pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 
         .roll-square.acceptable { cursor: pointer; }
         .roll-square.secret-slot { border-color: rgba(187,136,255,0.5) !important; background: rgba(100,0,150,0.2) !important; }
@@ -323,7 +362,7 @@
         .equipped-slot.empty { opacity: 0.3; border-style: dashed; cursor: default; }
         .equipped-slot.empty:hover { transform: none; }
 
-        .orb-enchants-display { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 8px; }
+        .orb-enchants-display { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 8px; padding-bottom: 22px; }
 
         .mini-enchant-orb {
             width: 35px; height: 35px;
@@ -350,9 +389,13 @@
         }
 
         .delete-orb-btn {
-            padding: 6px 12px; background: #f5576c; color: white;
-            border: none; border-radius: 5px; cursor: pointer;
-            font-size: 0.85em; margin-top: 8px;
+            position: absolute; bottom: 4px; right: 4px; z-index: 5;
+            width: 22px; height: 22px; padding: 0;
+            background: #f5576c; color: white;
+            border: none; border-radius: 50%; cursor: pointer;
+            font-size: 0.85em; line-height: 1; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 6px rgba(0,0,0,0.6);
         }
         .delete-orb-btn:hover { background: #e04555; }
 
@@ -523,13 +566,244 @@
         .imaginary { filter: hue-rotate(75deg); }
         .negative { filter: hue-rotate(-100deg); }
         .imaginary.negative { filter: hue-rotate(75deg) hue-rotate(-100deg); }
+
+        body.event-reversal { filter: invert(1); transition: filter 0.4s ease; }
+        body.event-weird-world { filter: hue-rotate(75deg); transition: filter 0.4s ease; }
+
+        .event-banner {
+            display: none; align-items: center; justify-content: space-between; gap: 12px;
+            background: linear-gradient(90deg, rgba(245,87,108,0.18), rgba(0,212,255,0.18));
+            border: 1px solid rgba(255,255,255,0.25); border-radius: 10px;
+            padding: 10px 16px; margin: 10px 0;
+            animation: eventBannerPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes eventBannerPulse {
+            0%,100% { box-shadow: 0 0 8px rgba(255,255,255,0.15); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+        }
+        .event-banner-name { font-weight: bold; font-size: 0.95em; }
+        .event-banner-desc { font-size: 0.85em; opacity: 0.85; flex: 1; text-align: center; }
+        .event-banner-timer { font-weight: bold; font-variant-numeric: tabular-nums; background: rgba(0,0,0,0.35); padding: 2px 10px; border-radius: 20px; font-size: 0.85em; }
+
+        /* ============ PAGE SYSTEM ============ */
+        .app-page { animation: pageFadeIn 0.3s cubic-bezier(0.22,1,0.36,1); padding-bottom: 100px; }
+        @keyframes pageFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ============ GLOSSY / LIQUID POLISH ============ */
+        button, .game-section, .roll-display, .enchant-slot, .inventory-slot, .modal-content {
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 40%);
+        }
+        button { position: relative; overflow: hidden; }
+        button::after {
+            content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg); transition: left 0.5s ease;
+        }
+        button:hover:not(:disabled)::after { left: 130%; }
+
+        /* ============ SETTINGS PAGE ============ */
+        .settings-block {
+            background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .settings-block h3 { margin-bottom: 10px; color: #00d4ff; font-size: 1.05em; }
+        .settings-toggle-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 0; cursor: pointer; font-size: 0.95em; }
+        .settings-toggle-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00d4ff; cursor: pointer; }
+        .settings-toggle-desc { opacity: 0.55; font-size: 0.8em; flex-basis: 100%; margin-left: 28px; }
+        .settings-stat-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.95em; flex-wrap: wrap; }
+        .settings-stat-row input[type="number"] {
+            width: 120px; padding: 6px 10px; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,212,255,0.4); border-radius: 6px; color: white;
+        }
+        .settings-stat-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00d4ff; cursor: pointer; }
+
+        /* ============ EVENTS PAGE ============ */
+        .events-index { display: flex; flex-direction: column; gap: 10px; }
+        .event-index-item {
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            padding: 12px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+            transition: border-color 0.25s ease;
+        }
+        .event-index-item.active-now { border-color: #ffd700; box-shadow: 0 0 16px rgba(255,215,0,0.35); }
+        .event-index-name { font-weight: bold; min-width: 160px; }
+        .event-index-desc { flex: 1; opacity: 0.85; font-size: 0.9em; }
+        .event-index-odds { font-size: 0.8em; opacity: 0.6; white-space: nowrap; }
+
+        /* ============ NAV SPHERE ============ */
+        .nav-sphere-wrap {
+            position: fixed; bottom: 0; left: 0; width: 90px; height: 90px;
+            z-index: 500; pointer-events: none;
+        }
+        .nav-sphere {
+            position: absolute; bottom: -170px; left: -170px; width: 260px; height: 260px;
+            border-radius: 50%; pointer-events: auto; cursor: grab;
+            background: radial-gradient(circle at 68% 32%, #8fd3ff 0%, #3a7bd5 28%, #22336b 62%, #10152e 100%);
+            box-shadow: 0 0 40px rgba(0,150,255,0.45), inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.25);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .nav-sphere:hover { box-shadow: 0 0 55px rgba(0,180,255,0.65), inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.3); }
+        .nav-sphere-sheen {
+            position: absolute; top: 22%; left: 58%; width: 34%; height: 20%;
+            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%; transform: rotate(-25deg); pointer-events: none;
+        }
+        .nav-sphere-items {
+            position: absolute; top: 50%; left: 68%; transform: translate(-50%, -50%);
+            display: flex; flex-direction: column; align-items: center; gap: 18px;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .nav-sphere-item {
+            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em; opacity: 0.35; transform: scale(0.75);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            cursor: pointer; user-select: none;
+        }
+        .nav-sphere-item.current {
+            opacity: 1; transform: scale(1.15);
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 0 16px rgba(255,255,255,0.5);
+        }
+        .nav-sphere-label {
+            position: absolute; bottom: 6px; left: 100px;
+            background: rgba(10,15,30,0.85); border: 1px solid rgba(0,212,255,0.4);
+            padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+        .nav-sphere-wrap.show-label .nav-sphere-label { opacity: 1; }
+
+        /* ============ TUTORIAL ============ */
+        .tutorial-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            pointer-events: none;
+        }
+        .tutorial-spotlight {
+            position: fixed; border-radius: 14px;
+            box-shadow: 0 0 0 6000px rgba(0,0,0,0.6), 0 0 0 4px #ff4444, 0 0 24px 6px rgba(255,68,68,0.6);
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+            pointer-events: none; display: none;
+        }
+        .tutorial-dialog {
+            position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
+            max-width: 480px; width: 90%;
+            background: linear-gradient(160deg, #1e2749, #131a33);
+            border: 2px solid #00d4ff; border-radius: 14px; padding: 18px 22px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,212,255,0.25);
+            text-align: center;
+            pointer-events: auto;
+        }
+        .tutorial-dialog-text { font-size: 1.05em; margin-bottom: 14px; line-height: 1.5; }
+        .tutorial-dialog-buttons { display: flex; gap: 10px; justify-content: center; }
+
+        /* ============ ACCESSIBILITY / PERFORMANCE TOGGLES ============ */
+        body.low-fx * { animation: none !important; text-shadow: none !important; }
+        body.low-fx [class*="rarity-"] {
+            filter: none !important; -webkit-text-fill-color: initial !important;
+            background: none !important; color: #cbd5e1 !important;
+        }
+        body.low-fx .rarity-neg { color: #ef8888 !important; }
+        body.low-fx.event-reversal, body.low-fx.event-weird-world { filter: none !important; }
+        body.low-fx .event-banner, body.low-fx .imaginary, body.low-fx .negative { filter: none !important; animation: none !important; }
+
+        body.fps-booster * {
+            animation: none !important; transition: none !important;
+            backdrop-filter: none !important; box-shadow: none !important;
+            text-shadow: none !important; background-image: none !important;
+        }
+        body.fps-booster .game-section { padding: 14px; border-radius: 6px; }
+        body.fps-booster .roll-square, body.fps-booster .inventory-slot, body.fps-booster .enchant-slot { transform: none !important; }
+        body.fps-booster .nav-sphere { background: #22336b !important; }
+        body.fps-booster .nav-sphere-sheen { display: none; }
+
+        /* ============================================================
+           MOBILE / RESPONSIVE
+           ============================================================ */
+        @media (max-width: 768px) {
+            body { padding: 10px; padding-bottom: 90px; }
+            h1 { font-size: 1.7em; margin-bottom: 18px; }
+            .game-section { padding: 14px; border-radius: 12px; }
+
+            button { padding: 10px 18px; font-size: 0.95em; }
+            .roll-btn, .accept-btn { padding: 12px 22px; }
+
+            .roll-square { width: 92px; padding: 6px; }
+            .roll-display { padding: 12px; }
+
+            .inventory-grid { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+            .stat-box { padding: 10px; }
+            .stat-value { font-size: 1.3em; }
+
+            .inventory-controls, .events-controls { gap: 6px; }
+            .sort-btn, .page-btn { padding: 7px 12px; font-size: 0.82em; }
+            .pagination { margin-left: 0; width: 100%; justify-content: center; margin-top: 6px; }
+
+            .enchant-item { flex-wrap: wrap; }
+            .enchant-item .enchant-orb { width: 34px; height: 34px; }
+            .enchant-item-effect { font-size: 0.8em; }
+
+            .settings-block { padding: 12px 14px; }
+            .settings-stat-row, .settings-toggle-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .settings-stat-row input[type="number"] { width: 100%; }
+            .settings-toggle-desc { margin-left: 0; }
+
+            .autoroll-settings-panel label { width: 100%; justify-content: space-between; }
+
+            .event-index-item { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .event-index-name { min-width: 0; }
+
+            .modal-content { padding: 20px; max-width: 92vw; }
+            .tutorial-dialog { padding: 14px 16px; bottom: 18px; }
+            .tutorial-dialog-text { font-size: 0.95em; }
+
+            .nav-sphere-wrap { width: 64px; height: 64px; }
+            .nav-sphere { width: 190px; height: 190px; bottom: -124px; left: -124px; }
+            .nav-sphere-item { width: 34px; height: 34px; font-size: 1.1em; }
+            .nav-sphere-items { gap: 14px; }
+            .nav-sphere-label { left: 74px; font-size: 0.75em; padding: 3px 10px; }
+
+            .event-banner { flex-direction: column; gap: 4px; text-align: center; padding: 8px 12px; }
+            .event-banner-desc { text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 6px; padding-bottom: 80px; }
+            h1 { font-size: 1.35em; }
+            .game-section { padding: 10px; }
+
+            .roll-square { width: 74px; font-size: 0.85em; }
+            .roll-display { padding: 8px; }
+
+            .inventory-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+            .inventory-slot { font-size: clamp(0.45rem, 3vw, 0.8rem); }
+
+            button { padding: 9px 14px; font-size: 0.88em; }
+            .controls { gap: 8px; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+
+            .nav-sphere-wrap { width: 52px; height: 52px; }
+            .nav-sphere { width: 150px; height: 150px; bottom: -98px; left: -98px; }
+            .nav-sphere-item { width: 28px; height: 28px; font-size: 0.95em; }
+            .nav-sphere-items { gap: 11px; }
+            .nav-sphere-label { left: 58px; font-size: 0.7em; padding: 2px 8px; }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .nav-sphere-wrap.show-label .nav-sphere-label { opacity: 1; }
+            button::after { display: none; } /* skip the hover-sweep shine on touch devices */
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>poly's logmaRNGame</h1>
 
+    <div class="app-page" id="page-rolling">
     <div class="game-section roll-container">
+        <div id="eventBanner" class="event-banner"></div>
         <div id="activeEffectsBar" class="active-effects-bar" style="display:none;"></div>
         <div id="bulkInfoLabel" class="bulk-info" style="display:none;"></div>
         <div class="roll-display" id="rollDisplay">
@@ -546,81 +820,7 @@
         </div>
         <div style="text-align:center;margin-top:8px;">
             <button class="autoroll-btn" id="autorollBtn" onclick="toggleAutoRoll()">⏱ Autoroll: OFF</button>
-            <button class="sort-btn" onclick="toggleAutorollSettings()" style="font-size:0.8em;margin-left:6px;">⚙ Settings</button>
-            <button class="sort-btn" onclick="toggleSoundSettings()" style="font-size:0.8em;margin-left:6px;">🔊 Sound</button>
-            <div id="soundSettings" style="display:none;" class="autoroll-settings-panel">
-                <div style="margin-bottom:2px;font-weight:bold;">Roll Sound Volumes</div>
-                <label style="gap:6px;">0normal (logRNG 0–3):
-                    <input type="range" class="sfx-volume-slider" data-sfx="0normal" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('0normal', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_0normal">100%</span>
-                </label>
-                <label style="gap:6px;">3normal (logRNG 3–4):
-                    <input type="range" class="sfx-volume-slider" data-sfx="3normal" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('3normal', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_3normal">100%</span>
-                </label>
-                <label style="gap:6px;">4normal (logRNG 4–5):
-                    <input type="range" class="sfx-volume-slider" data-sfx="4normal" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('4normal', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_4normal">100%</span>
-                </label>
-                <label style="gap:6px;">5normal (logRNG 5–6):
-                    <input type="range" class="sfx-volume-slider" data-sfx="5normal" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('5normal', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_5normal">100%</span>
-                </label>
-                <label style="gap:6px;">6normal (logRNG 6+):
-                    <input type="range" class="sfx-volume-slider" data-sfx="6normal" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('6normal', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_6normal">100%</span>
-                </label>
-                <label style="gap:6px;">0secret (raw &lt; 50k):
-                    <input type="range" class="sfx-volume-slider" data-sfx="0secret" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('0secret', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_0secret">100%</span>
-                </label>
-                <label style="gap:6px;">4.7secret (raw 50k–1M):
-                    <input type="range" class="sfx-volume-slider" data-sfx="4.7secret" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('4.7secret', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_4.7secret">100%</span>
-                </label>
-                <label style="gap:6px;">6secret (raw 1M–10M):
-                    <input type="range" class="sfx-volume-slider" data-sfx="6secret" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('6secret', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_6secret">100%</span>
-                </label>
-                <label style="gap:6px;">7secret (raw &gt; 10M):
-                    <input type="range" class="sfx-volume-slider" data-sfx="7secret" min="0" max="1" step="0.01" value="1"
-                        oninput="setSfxVolume('7secret', this.value)" style="width:110px;">
-                    <span id="sfxVolLabel_7secret">100%</span>
-                </label>
-            </div>
-            <div id="autorollSettings" style="display:none;" class="autoroll-settings-panel">
-                <label>Autoaccept above rng:
-                    <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
-                        oninput="gameState.autoAcceptMinRng = Number(this.value) || 0">
-                </label>
-                <div>
-                    <div style="margin-bottom:4px;">Autoaccept secrets:</div>
-                    <div id="autoAcceptSecretsContainer" class="autoaccept-enchants-grid"></div>
-                </div>
-                <div>
-                    <div style="margin-bottom:4px;">Autoaccept enchants <span style="opacity:0.5;font-size:0.85em;">(collects enchant only, not rank)</span>:</div>
-                    <div id="autoAcceptEnchantsContainer" class="autoaccept-enchants-grid"></div>
-                </div>
-                <hr style="border-color:rgba(255,255,255,0.1);margin:4px 0;">
-                <label>Cooldown trigger rng ≥:
-                    <input type="number" id="cooldownMinRng" min="0" value="0" placeholder="0 = off"
-                        oninput="gameState.cooldownMinRng = Number(this.value) || 0">
-                </label>
-                <label style="gap:6px;">Cooldown time:
-                    <input type="range" id="cooldownTimeRange" min="0.5" max="5" step="0.5" value="2"
-                        oninput="gameState.cooldownTime = Number(this.value); document.getElementById('cooldownTimeLabel').textContent = this.value + 's';"
-                        style="width:90px;">
-                    <span id="cooldownTimeLabel">2s</span>
-                </label>
-            </div>
+            <span style="opacity:0.6;font-size:0.8em;margin-left:8px;">Autoroll &amp; sound options are in ⚙ Settings</span>
         </div>
         <div class="pending-panel" id="pendingPanel">
             <h4>⏳ Pending Enchants — click a highlighted cell to collect:</h4>
@@ -653,7 +853,9 @@
             </div>
         </div>
     </div>
+    </div><!-- /page-rolling -->
 
+    <div class="app-page" id="page-inventory" style="display:none;">
     <div class="game-section inventory-section">
         <h2>Inventory (300 Slots)</h2>
         <div class="inventory-controls">
@@ -717,7 +919,9 @@
         </div>
         <div class="inventory-grid" id="enchantGrid"></div>
     </div>
+    </div><!-- /page-inventory -->
 
+    <div class="app-page" id="page-index" style="display:none;">
     <div class="game-section">
         <h2>Enchant Index</h2>
         <div class="enchant-index">
@@ -958,6 +1162,14 @@
                         </div>
                     </div>
                     <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#000000 0%,#1a0033 100%);color:#7c3aed;">D</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Despair</div>
+                            <div class="enchant-item-effect">+6666x luck, -50x secret luck, -50x enchant luck, +66.66s roll time — overrides even Kugelblitz's instant roll</div>
+                            <div class="enchant-item-rarity">Rarity: 1/681,111,000 (0.00000015%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
                         <div class="enchant-orb" style="background:#4c1d95;color:#a78bfa;">H</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Heresy</div>
@@ -1056,6 +1268,14 @@
                         </div>
                     </div>
                     <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#fef9c3 0%,#fde047 100%);color:#78350f;">💨</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Ultra Air</div>
+                            <div class="enchant-item-effect">Turns out Air was hiding something. x10 luck, secret luck, enchant luck, and bulk.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/500,000,000 (0.0000002%) — requires joke enchants ON</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
                         <div class="enchant-orb" style="background:linear-gradient(135deg,#9e9e9e 0%,#000000 100%);">💥</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Bomber</div>
@@ -1090,13 +1310,46 @@
                 <div class="enchant-type-content" id="special-content">
                     <div class="enchant-item">
                         <div class="enchant-orb" style="background:#808080; position:relative;">
-                            <span style="position:relative; z-index:2; font-size:1.2em; color:black; text-shadow:0 0 2px white;">α</span>
+                            <span style="position:relative; z-index:2; font-size:1.2em; color:white; text-shadow:0 0 2px black;">α</span>
                             <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:1.5em; opacity:0.6;">✦</span>
                         </div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Alpha</div>
-                            <div class="enchant-item-effect">+1 luck, +0.5s speed reduction, +0.25 secret luck, +0.125 enchant luck. If both merged orbs have Alpha, result not locked.</div>
+                            <div class="enchant-item-effect">+1 luck, +0.5s speed reduction, +0.25 secret luck, +0.125 enchant luck (all boosted by Beta/Delta/Epsilon on the same orb). Alpha category: if both merged orbs have any Alpha-category enchant, result not locked.</div>
                             <div class="enchant-item-rarity">Rarity: 1/75,000 (0.00133%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#57606f; position:relative;">
+                            <span style="position:relative; z-index:2; font-size:1.2em; color:white; text-shadow:0 0 2px black;">β</span>
+                            <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:1.5em; opacity:0.6;">✦</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Beta</div>
+                            <div class="enchant-item-effect">Alpha category. Makes Alpha +0.1x more effective on this orb per Beta (capped at +4x / 5x total). No effect without Alpha.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/925,000 (0.000108%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#2f3542; position:relative;">
+                            <span style="position:relative; z-index:2; font-size:1.2em; color:white; text-shadow:0 0 2px black;">δ</span>
+                            <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:1.5em; opacity:0.6;">✦</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Delta</div>
+                            <div class="enchant-item-effect">Alpha category. Makes Beta +1x more effective on this orb per Delta (capped at +4x / x5 total). No effect without Beta.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/78,000,000 (0.00000128%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:#1e272e; position:relative;">
+                            <span style="position:relative; z-index:2; font-size:1.2em; color:white; text-shadow:0 0 2px black;">ε</span>
+                            <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:1.5em; opacity:0.6;">✦</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Epsilon</div>
+                            <div class="enchant-item-effect">Alpha category. Makes Delta +0.25x more effective on this orb per Epsilon (capped at +1.5x / 2.5x total). No effect without Delta.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/2,500,000,000 (0.00000004%)</div>
                         </div>
                     </div>
                     <div class="enchant-item">
@@ -1137,6 +1390,26 @@
                             <div class="enchant-item-name">Mooncrystal</div>
                             <div class="enchant-item-effect">Does nothing alone. Merge 100 Mooncrystals together (via orb merging) to awaken: +50 luck, +75 secret luck, +25 bulk, +0.01s speed, +10 enchant luck. If both merged orbs have Mooncrystal, result not locked.</div>
                             <div class="enchant-item-rarity">Rarity: 1/5,000 (0.02%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg, #fbbf24 0%, #92400e 100%);">
+                            <span style="font-size:1.1em;">🕐</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Clock</div>
+                            <div class="enchant-item-effect">+[2.4 × (current hour × 2.4)]x luck and secret luck. Scales with the real-world hour of day (0 at midnight, peaks near 132x at 11pm).</div>
+                            <div class="enchant-item-rarity">Rarity: 1/24,000,000 (0.0000042%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg, #16a34a 0%, #166534 100%);">
+                            <span style="font-size:1.1em;">🌱</span>
+                        </div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Plant</div>
+                            <div class="enchant-item-effect">+1 luck, +2.5 secret luck, +0.2 enchant luck, +0.1s speed — permanently multiplies x1.5 for every real-world hour continuously equipped, capped at 24 hours (up to ~1283x).</div>
+                            <div class="enchant-item-rarity">Rarity: 1/425,000 (0.00024%)</div>
                         </div>
                     </div>
                 </div>
@@ -1381,7 +1654,162 @@
 
         </div><!-- /enchant-index -->
     </div>
+    </div><!-- /page-index -->
+
+    <div class="app-page" id="page-events" style="display:none;">
+    <div class="game-section">
+        <h2>Events</h2>
+        <p style="opacity:0.7;font-size:0.9em;margin-bottom:14px;">Every 10 seconds, if no event is currently active, there's a chance one triggers automatically. Only one event can be active at a time.</p>
+        <div class="events-index" id="eventsIndexList"></div>
+    </div>
+    </div><!-- /page-events -->
+
+    <div class="app-page" id="page-settings" style="display:none;">
+    <div class="game-section">
+        <h2>Settings</h2>
+
+        <div class="settings-block">
+            <h3>🔊 Sound</h3>
+            <div id="soundSettings" class="autoroll-settings-panel" style="display:flex;">
+                <div style="margin-bottom:2px;font-weight:bold;width:100%;">Roll Sound Volumes</div>
+                <label style="gap:6px;">0normal (logRNG 0–3):
+                    <input type="range" class="sfx-volume-slider" data-sfx="0normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('0normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_0normal">100%</span>
+                </label>
+                <label style="gap:6px;">3normal (logRNG 3–4):
+                    <input type="range" class="sfx-volume-slider" data-sfx="3normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('3normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_3normal">100%</span>
+                </label>
+                <label style="gap:6px;">4normal (logRNG 4–5):
+                    <input type="range" class="sfx-volume-slider" data-sfx="4normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('4normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_4normal">100%</span>
+                </label>
+                <label style="gap:6px;">5normal (logRNG 5–6):
+                    <input type="range" class="sfx-volume-slider" data-sfx="5normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('5normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_5normal">100%</span>
+                </label>
+                <label style="gap:6px;">6normal (logRNG 6+):
+                    <input type="range" class="sfx-volume-slider" data-sfx="6normal" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('6normal', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_6normal">100%</span>
+                </label>
+                <label style="gap:6px;">0secret (raw &lt; 50k):
+                    <input type="range" class="sfx-volume-slider" data-sfx="0secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('0secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_0secret">100%</span>
+                </label>
+                <label style="gap:6px;">4.7secret (raw 50k–1M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="4.7secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('4.7secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_4.7secret">100%</span>
+                </label>
+                <label style="gap:6px;">6secret (raw 1M–10M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="6secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('6secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_6secret">100%</span>
+                </label>
+                <label style="gap:6px;">7secret (raw &gt; 10M):
+                    <input type="range" class="sfx-volume-slider" data-sfx="7secret" min="0" max="1" step="0.01" value="1"
+                        oninput="setSfxVolume('7secret', this.value)" style="width:110px;">
+                    <span id="sfxVolLabel_7secret">100%</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-block">
+            <h3>⏱ Autoroll</h3>
+            <div id="autorollSettings" class="autoroll-settings-panel" style="display:flex;">
+                <label>Autoaccept above rng:
+                    <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
+                        oninput="gameState.autoAcceptMinRng = Number(this.value) || 0">
+                </label>
+                <div>
+                    <div style="margin-bottom:4px;">Autoaccept secrets:</div>
+                    <div id="autoAcceptSecretsContainer" class="autoaccept-enchants-grid"></div>
+                </div>
+                <div>
+                    <div style="margin-bottom:4px;">Autoaccept enchants <span style="opacity:0.5;font-size:0.85em;">(collects enchant only, not rank)</span>:</div>
+                    <div id="autoAcceptEnchantsContainer" class="autoaccept-enchants-grid"></div>
+                </div>
+                <hr style="border-color:rgba(255,255,255,0.1);margin:4px 0;width:100%;">
+                <label>Cooldown trigger rng ≥:
+                    <input type="number" id="cooldownMinRng" min="0" value="0" placeholder="0 = off"
+                        oninput="gameState.cooldownMinRng = Number(this.value) || 0">
+                </label>
+                <label style="gap:6px;">Cooldown time:
+                    <input type="range" id="cooldownTimeRange" min="0.5" max="5" step="0.5" value="2"
+                        oninput="gameState.cooldownTime = Number(this.value); document.getElementById('cooldownTimeLabel').textContent = this.value + 's';"
+                        style="width:90px;">
+                    <span id="cooldownTimeLabel">2s</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-block">
+            <h3>🎨 Display</h3>
+            <label class="settings-toggle-row">
+                <input type="checkbox" id="disableBrightFxCheckbox" onchange="toggleBrightFx(this.checked)">
+                Disable bright colors / effects
+                <span class="settings-toggle-desc">Flattens rarity glows, animations, and event color filters.</span>
+            </label>
+            <label class="settings-toggle-row">
+                <input type="checkbox" id="fpsBoosterCheckbox" onchange="toggleFpsBooster(this.checked)">
+                FPS Booster legit working 2026 in EVERY LANGUAGE!!!
+                <span class="settings-toggle-desc">Strips animations, blur, and shadows; shrinks oversized elements for lighter rendering.</span>
+            </label>
+        </div>
+
+        <div class="settings-block">
+            <h3>🍀 Stat Overrides</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Set a stat to any value from 1 up to your current natural value. Leave blank to use your natural stat.</p>
+            <label class="settings-stat-row">
+                Set Luck:
+                <input type="number" id="setLuckInput" min="1" step="any" placeholder="natural" oninput="applyStatOverride('luck', this.value)">
+                <span id="setLuckMax" class="settings-toggle-desc"></span>
+            </label>
+            <label class="settings-stat-row">
+                <input type="checkbox" id="setSecretLuckEnabled" onchange="toggleStatOverrideEnabled('secretLuck', this.checked)">
+                Set Secret Luck:
+                <input type="number" id="setSecretLuckInput" min="1" step="any" placeholder="natural" oninput="applyStatOverride('secretLuck', this.value)" disabled>
+                <span id="setSecretLuckMax" class="settings-toggle-desc"></span>
+            </label>
+            <label class="settings-stat-row">
+                <input type="checkbox" id="setEnchantLuckEnabled" onchange="toggleStatOverrideEnabled('enchantLuck', this.checked)">
+                Set Enchant Luck:
+                <input type="number" id="setEnchantLuckInput" min="1" step="any" placeholder="natural" oninput="applyStatOverride('enchantLuck', this.value)" disabled>
+                <span id="setEnchantLuckMax" class="settings-toggle-desc"></span>
+            </label>
+        </div>
+
+        <div class="settings-block">
+            <h3>📘 Tutorial</h3>
+            <button class="sort-btn" onclick="startTutorial(true)">Replay Tutorial</button>
+            <span class="settings-toggle-desc" id="tutorialRewardNote"></span>
+        </div>
+    </div>
+    </div><!-- /page-settings -->
 </div><!-- /container -->
+
+<!-- Bottom-left corner quarter-sphere navigation -->
+<div class="nav-sphere-wrap" id="navSphereWrap">
+    <div class="nav-sphere" id="navSphere">
+        <div class="nav-sphere-sheen"></div>
+        <div class="nav-sphere-items" id="navSphereItems"></div>
+    </div>
+</div>
+
+<!-- Tutorial overlay -->
+<div class="tutorial-overlay" id="tutorialOverlay" style="display:none;">
+    <div class="tutorial-spotlight" id="tutorialSpotlight"></div>
+    <div class="tutorial-dialog" id="tutorialDialog">
+        <div class="tutorial-dialog-text" id="tutorialDialogText"></div>
+        <div class="tutorial-dialog-buttons" id="tutorialDialogButtons"></div>
+    </div>
+</div>
 
 <div class="modal" id="deleteModal">
     <div class="modal-content" draggable="false" style="user-select:none;">
@@ -1522,6 +1950,8 @@ let gameState = {
     mergeSelection: [],
     mergeModeActive: false,
     unmergeModeActive: false,
+    activeEvent: null,
+    activeAppPage: 'rolling',
     unlockModeActive: false,
     bulkDeleteMode: false,
     bulkDeleteEnchantMode: false,
@@ -1621,6 +2051,11 @@ const ENCHANTS = {
         effects: { luck: 1.5, secretLuck: 75, cloner: 100, speed: -0.5, lighter: -1000 },
         display: 'Gl', color: 'linear-gradient(135deg,#92400e 0%,#c2410c 100%)', textColor: '#fed7aa'
     },
+    despair: {
+        name: 'Despair', type: 'curse', tier: 8, rarity: 1/681111000,
+        effects: { luck: 6666, secretLuck: -50, lighter: -50, speed: -66.66 },
+        display: 'D', color: 'linear-gradient(135deg,#000000 0%,#1a0033 100%)', textColor: '#7c3aed'
+    },
     heresy: {
         name: 'Heresy', type: 'curse', tier: 6, rarity: 1/2189017.3728,
         effects: { luck: -10000000, cloner: 15, speed: -3, lighter: 15 },
@@ -1666,6 +2101,12 @@ const ENCHANTS = {
         display: '', color: '#ffd700', textColor: '#ffd700',
         jokeOnly: true
     },
+    ultraAir: {
+        name: 'Ultra Air', type: 'joke', tier: 4, rarity: 1/500000000,
+        effects: {}, // handled via getUltraAirMultiplier — a true x10 on luck/secretLuck/enchantLuck/bulk
+        display: '💨', color: 'linear-gradient(135deg,#fef9c3 0%,#fde047 100%)', textColor: '#78350f',
+        jokeOnly: true
+    },
     bomber: {
         name: 'Bomber', type: 'joke', tier: 2, rarity: 1/6942069420,
         effects: { luck: 5000, speed: -99.99, lighter: -100 },
@@ -1695,7 +2136,25 @@ const ENCHANTS = {
     alpha: {
         name: 'Alpha', type: 'special', tier: 1, rarity: 1/75000,
         effects: { luck: 1, speed: 0.5, secretLuck: 0.25, lighter: 0.125 },
-        color: '#808080', specialDesign: 'alpha'
+        color: '#808080', specialDesign: 'alpha', isAlphaCategory: true, display: 'α'
+    },
+    beta: {
+        name: 'Beta', type: 'special', tier: 2, rarity: 1/925000,
+        effects: {},
+        color: '#57606f', specialDesign: 'alpha', isAlphaCategory: true,
+        display: 'β'
+    },
+    delta: {
+        name: 'Delta', type: 'special', tier: 3, rarity: 1/78000000,
+        effects: {},
+        color: '#2f3542', specialDesign: 'alpha', isAlphaCategory: true,
+        display: 'δ'
+    },
+    epsilon: {
+        name: 'Epsilon', type: 'special', tier: 4, rarity: 1/2500000000,
+        effects: {},
+        color: '#1e272e', specialDesign: 'alpha', isAlphaCategory: true,
+        display: 'ε'
     },
     blessing: {
         name: '✦ Blessing', type: 'special', tier: 2, rarity: 1/750000,
@@ -1716,6 +2175,16 @@ const ENCHANTS = {
         name: 'Mooncrystal', type: 'special', tier: 5, rarity: 1/5000,
         effects: {}, // nothing until 100 merged → super
         color: 'linear-gradient(135deg, #c8e6ff, #89cff0)', display: '🌙'
+    },
+    clock: {
+        name: 'Clock', type: 'special', tier: 4, rarity: 1/24000000,
+        effects: {}, // handled hardcoded — scales with the real-world hour of day
+        color: 'linear-gradient(135deg, #fbbf24 0%, #92400e 100%)', display: '🕐'
+    },
+    plant: {
+        name: 'Plant', type: 'special', tier: 3, rarity: 1/425000,
+        effects: {}, // handled hardcoded — base values scale x1.5/hr equipped, capped at 24h (see getPlantGrowthMultiplier)
+        color: 'linear-gradient(135deg, #16a34a 0%, #166534 100%)', display: '🌱'
     },
 
     // --- Weird Enchants ---
@@ -1762,7 +2231,8 @@ const SECRET_NUMBERS_RAW = [
     { logValue: -9.99, rarity: 1/2.5e7, display: '-9.99'},
     { logValue: -0.08, rarity: 1/725000000, display: '∞'},
     { logValue: -696969, rarity: 1/1e9, display: 'poly'},
-    { logValue: -666,   rarity: 0,          display: '-666', isDemonicSecret: true }
+    { logValue: -666,   rarity: 0,          display: '-666', isDemonicSecret: true },
+    { logValue: -86.91, rarity: 0,          display: '-86.91', isSandwichSecret: true }
 ];
 const SECRET_NUMBERS = [...SECRET_NUMBERS_RAW].sort((a, b) => a.rarity - b.rarity);
 
@@ -1824,19 +2294,156 @@ function getEquippedBrickCount() {
 
 function getBlessingBonuses() {
     let bulk = 0, luck = 0, speed = 0, secretLuck = 0, enchantLuck = 0;
-    if (!gameState.equippedOrb) return { bulk, luck, speed, secretLuck, enchantLuck };
-    const hasBlessing = Object.values(gameState.equippedOrb.enchants).some(e => e.name === '✦ Blessing');
-    if (!hasBlessing) return { bulk, luck, speed, secretLuck, enchantLuck };
+    if (!gameState.equippedOrb) return { bulk, luck, speed, secretLuck, enchantLuck, count: 0 };
+    const blessingCount = Object.values(gameState.equippedOrb.enchants).filter(e => e.name === '✦ Blessing').length;
+    if (blessingCount === 0) return { bulk, luck, speed, secretLuck, enchantLuck, count: 0 };
     const rolls = gameState.stats.totalRolls;
-    bulk = Math.min(19, Math.floor(rolls * 0.001));
-    luck = Math.min(750, rolls * 0.01);
-    speed = Math.min(12.5, rolls * 0.05);
-    secretLuck = Math.min(15, rolls * 0.0025);
-    enchantLuck = Math.min(5, rolls * 0.001);
-    return { bulk, luck, speed, secretLuck, enchantLuck };
+    // Each stacked Blessing accrues and caps independently, then sums together.
+    bulk = Math.min(19 * blessingCount, Math.floor(rolls * 0.001) * blessingCount);
+    luck = Math.min(750 * blessingCount, rolls * 0.01 * blessingCount);
+    speed = Math.min(12.5 * blessingCount, rolls * 0.05 * blessingCount);
+    secretLuck = Math.min(15 * blessingCount, rolls * 0.0025 * blessingCount);
+    enchantLuck = Math.min(5 * blessingCount, rolls * 0.001 * blessingCount);
+    return { bulk, luck, speed, secretLuck, enchantLuck, count: blessingCount };
 }
 
-function getLuckMultiplier() {
+// ============================================================
+// EVENTS SYSTEM
+// ============================================================
+const GAME_EVENTS = [
+    { key: 'luckBoost',     name: 'Luck Boost',            chance: 1/7,     duration: 7,   desc: 'x1.77 luck' },
+    { key: 'secretBoost',   name: 'Secret Boost',          chance: 1/10,    duration: 25,  desc: 'x5 secret luck' },
+    { key: 'fastBoost',     name: 'Fast Boost',            chance: 1/15,    duration: 5,   desc: 'Rolls are near-instant (0.01s)' },
+    { key: 'takeback',      name: 'Takeback',              chance: 1/25,    duration: 60,  desc: 'Luck and Secret Luck are swapped' },
+    { key: 'bogo',          name: 'Buy 1 Get 1 Free',      chance: 1/50,    duration: 25,  desc: 'x2 bulk rolls' },
+    { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 10,  desc: 'x1.5 enchant luck' },
+    { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 120, desc: 'x1.5 luck, secret luck, and enchant luck' },
+    { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 20,  desc: 'x5 luck & secret luck, instant rolls' },
+    { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 40,  desc: 'Negative chance boosted to 1/12.5, colors inverted' },
+    { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 20,  desc: 'Imaginary chance boosted to 1/25, colors hue-shifted' }
+];
+
+function isEventActive(key) {
+    return !!(gameState.activeEvent && gameState.activeEvent.key === key && Date.now() < gameState.activeEvent.endsAt);
+}
+
+function hasActiveEvent() {
+    return !!(gameState.activeEvent && Date.now() < gameState.activeEvent.endsAt);
+}
+
+function getEventStatMultiplier(stat) {
+    if (!hasActiveEvent()) return 1;
+    const key = gameState.activeEvent.key;
+    if (key === 'luckBoost' && stat === 'luck') return 1.77;
+    if (key === 'secretBoost' && stat === 'secretLuck') return 5;
+    if (key === 'bogo' && stat === 'bulk') return 2;
+    if (key === 'magicalPowers' && stat === 'enchantLuck') return 1.5;
+    if (key === 'goodDay' && (stat === 'luck' || stat === 'secretLuck' || stat === 'enchantLuck')) return 1.5;
+    if (key === 'holidays' && (stat === 'luck' || stat === 'secretLuck')) return 5;
+    return 1;
+}
+
+function tryTriggerEvent() {
+    if (hasActiveEvent()) return;
+    for (const ev of GAME_EVENTS) {
+        if (Math.random() < ev.chance) {
+            startEvent(ev);
+            return;
+        }
+    }
+}
+
+function startEvent(ev) {
+    gameState.activeEvent = { key: ev.key, name: ev.name, desc: ev.desc, endsAt: Date.now() + ev.duration * 1000 };
+    document.body.classList.remove('event-reversal', 'event-weird-world');
+    if (ev.key === 'reversal') document.body.classList.add('event-reversal');
+    if (ev.key === 'weirdWorld') document.body.classList.add('event-weird-world');
+    renderEventBanner();
+    saveGame();
+}
+
+function endActiveEvent() {
+    gameState.activeEvent = null;
+    document.body.classList.remove('event-reversal', 'event-weird-world');
+    renderEventBanner();
+    saveGame();
+}
+
+function renderEventBanner() {
+    const banner = document.getElementById('eventBanner');
+    if (!banner) return;
+    if (!hasActiveEvent()) {
+        banner.style.display = 'none';
+        return;
+    }
+    const remaining = Math.max(0, Math.ceil((gameState.activeEvent.endsAt - Date.now()) / 1000));
+    banner.style.display = 'flex';
+    banner.innerHTML = `<span class="event-banner-name">🎉 ${gameState.activeEvent.name}</span><span class="event-banner-desc">${gameState.activeEvent.desc}</span><span class="event-banner-timer">${remaining}s</span>`;
+}
+
+setInterval(tryTriggerEvent, 10000);
+setInterval(() => {
+    if (gameState.activeEvent && Date.now() >= gameState.activeEvent.endsAt) {
+        endActiveEvent();
+    } else {
+        renderEventBanner();
+    }
+}, 1000);
+
+// Alpha category: Beta amplifies Alpha's own bonuses, Delta amplifies Beta's amplification,
+// Epsilon amplifies Delta's amplification. Each letter stacks (multiple copies) up to its own cap.
+function getAlphaCategoryMultiplier() {
+    if (!gameState.equippedOrb) return 1;
+    const enchants = Object.values(gameState.equippedOrb.enchants);
+    const betaCount = enchants.filter(e => e.name === 'Beta').length;
+    const deltaCount = enchants.filter(e => e.name === 'Delta').length;
+    const epsilonCount = enchants.filter(e => e.name === 'Epsilon').length;
+
+    const epsilonBonus = Math.min(1.5, 0.25 * epsilonCount);
+    const deltaBonusBase = Math.min(4.0, 1.0 * deltaCount);
+    const deltaBonusEffective = deltaBonusBase * (1 + epsilonBonus);
+
+    const betaBonusBase = Math.min(4.0, 0.1 * betaCount);
+    const betaBonusEffective = betaBonusBase * (1 + deltaBonusEffective);
+
+    return 1 + betaBonusEffective;
+}
+
+// Plant: base stats permanently grow x1.5 for every real-world hour continuously equipped, capped at 24h.
+// plantAccumulatedMs banks time from past equip sessions; plantEquippedSince tracks the live session.
+function startPlantTimers(orb) {
+    if (!orb) return;
+    Object.values(orb.enchants).forEach(e => {
+        if (e.name === 'Plant') e.plantEquippedSince = Date.now();
+    });
+}
+function bankPlantTimers(orb) {
+    if (!orb) return;
+    Object.values(orb.enchants).forEach(e => {
+        if (e.name === 'Plant' && e.plantEquippedSince) {
+            const elapsed = Date.now() - e.plantEquippedSince;
+            e.plantAccumulatedMs = Math.min(24 * 3600000, (e.plantAccumulatedMs || 0) + elapsed);
+            e.plantEquippedSince = null;
+        }
+    });
+}
+function getPlantAccumulatedMs(enchant) {
+    let ms = enchant.plantAccumulatedMs || 0;
+    if (enchant.plantEquippedSince) ms += Date.now() - enchant.plantEquippedSince;
+    return Math.min(24 * 3600000, ms);
+}
+function getPlantGrowthMultiplier(enchant) {
+    const hours = Math.floor(getPlantAccumulatedMs(enchant) / 3600000);
+    return Math.pow(1.5, Math.min(24, hours));
+}
+
+function getUltraAirMultiplier() {
+    if (!gameState.equippedOrb) return 1;
+    const hasUltraAir = Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Ultra Air');
+    return hasUltraAir ? 10 : 1;
+}
+
+function getRawLuckMultiplier() {
     let luck = 1;
     const bricks = getEquippedBrickCount();
     const blessing = getBlessingBonuses();
@@ -1851,11 +2458,15 @@ function getLuckMultiplier() {
         } else if (e.type === 'joke' && e.effects && e.effects.luck != null && e.name !== 'Brick') {
             luck += e.effects.luck;
         } else if (e.type === 'special' && e.name === 'Alpha') {
-            luck += 1;
+            luck += 1 * getAlphaCategoryMultiplier();
         } else if (e.type === 'special' && e.name === 'Demonic') {
             luck += 6.66;
         } else if (e.type === 'special' && e.name === 'MYTHICAL') {
             luck += gameState.mythicalLuck;
+        } else if (e.type === 'special' && e.name === 'Clock') {
+            luck += 2.4 * (new Date().getHours() * 2.4);
+        } else if (e.type === 'special' && e.name === 'Plant') {
+            luck += 1 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.luck != null) {
             luck += e.effects.luck;
         }
@@ -1864,7 +2475,16 @@ function getLuckMultiplier() {
     return Math.max(1, luck);
 }
 
-function getEnchantLuckMultiplier() {
+function getNaturalLuckMultiplier() {
+    const base = isEventActive('takeback') ? getRawSecretLuckMultiplier() : getRawLuckMultiplier();
+    return Math.max(1, base) * getEventStatMultiplier('luck') * getUltraAirMultiplier() * getTutorialLuckBoostMultiplier();
+}
+
+function getLuckMultiplier() {
+    return getOverriddenValue('luck', getNaturalLuckMultiplier());
+}
+
+function getNaturalEnchantLuckMultiplier() {
     let mult = 1;
     const bricks = getEquippedBrickCount();
     const blessing = getBlessingBonuses();
@@ -1879,19 +2499,25 @@ function getEnchantLuckMultiplier() {
         } else if (e.type === 'joke' && e.effects && e.effects.lighter != null && e.name !== 'Brick') {
             mult += e.effects.lighter;
         } else if (e.type === 'special' && e.name === 'Alpha') {
-            mult += 0.125;
+            mult += 0.125 * getAlphaCategoryMultiplier();
+        } else if (e.type === 'special' && e.name === 'Plant') {
+            mult += 0.2 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.lighter != null) {
             mult += e.effects.lighter;
         }
     });
     mult += bricks * 1.5 + blessing.enchantLuck;
-    return mult;
+    return mult * getEventStatMultiplier('enchantLuck') * getUltraAirMultiplier();
+}
+
+function getEnchantLuckMultiplier() {
+    return getOverriddenValue('enchantLuck', getNaturalEnchantLuckMultiplier());
 }
 
 function getBulkRolls() {
     let total = 1;
     const blessing = getBlessingBonuses();
-    if (!gameState.equippedOrb) return Math.max(1, total + blessing.bulk);
+    if (!gameState.equippedOrb) return Math.max(1, Math.round((total + blessing.bulk) * getEventStatMultiplier('bulk')));
     Object.values(gameState.equippedOrb.enchants).forEach(e => {
         if (e.type === 'cloner') {
             total += e.effect;
@@ -1908,6 +2534,7 @@ function getBulkRolls() {
         }
     });
     total += blessing.bulk;
+    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier();
     return Math.max(1, Math.round(total)); // ensure at least 1
 }
 
@@ -1916,13 +2543,13 @@ function getSpeedConfig() {
     let isInstant = false;
     const bricks = getEquippedBrickCount();
     const blessing = getBlessingBonuses();
-    const hasBlessing = gameState.equippedOrb && 
-                        Object.values(gameState.equippedOrb.enchants).some(e => e.name === '✦ Blessing');
+    const hasBlessing = blessing.count > 0;
 
     if (!gameState.equippedOrb) {
         savedSeconds += bricks * 1;
         // No Blessing → no penalty
         savedSeconds += blessing.speed;
+        if (isEventActive('holidays')) isInstant = true;
         return { savedSeconds, isInstant };
     }
 
@@ -1938,27 +2565,33 @@ function getSpeedConfig() {
         } else if (e.type === 'joke' && e.effects && e.effects.speed != null && e.name !== 'Brick') {
             savedSeconds += e.effects.speed;
         } else if (e.type === 'special' && e.name === 'Alpha') {
-            savedSeconds += 0.5;
+            savedSeconds += 0.5 * getAlphaCategoryMultiplier();
+        } else if (e.type === 'special' && e.name === 'Plant') {
+            savedSeconds += 0.1 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.speed != null) {
             savedSeconds += e.effects.speed;
         }
     });
 
-    // Envy's roll-time penalty is inescapable — it overrides even Kugelblitz/MULTITUDE's instant-roll bypass.
+    // Holidays grants instant rolls, same tier as Kugelblitz.
+    if (isEventActive('holidays')) isInstant = true;
+
+    // Envy's roll-time penalty is inescapable — it overrides even Kugelblitz/Holidays' instant-roll bypass.
     const hasEnvy = Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Envy');
-    if (hasEnvy) isInstant = false;
+    const hasDespair = Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Despair');
+    if (hasEnvy || hasDespair) isInstant = false;
 
     savedSeconds += bricks * 1;
 
     if (hasBlessing) {
-        savedSeconds -= 12.5;           // Blessing's starting penalty
+        savedSeconds -= 12.5 * blessing.count;  // Blessing's starting penalty, one per stack
     }
     savedSeconds += blessing.speed;      // positive scaling from rolls
 
     return { savedSeconds, isInstant };
 }
 
-function getSecretLuckMultiplier() {
+function getRawSecretLuckMultiplier() {
     let mult = 1;
     const blessing = getBlessingBonuses();
     if (!gameState.equippedOrb) return mult + blessing.secretLuck;
@@ -1968,11 +2601,15 @@ function getSecretLuckMultiplier() {
         } else if (e.type === 'weird') {
             mult += e.effect;
         } else if (e.type === 'special' && e.name === 'Alpha') {
-            mult += 0.25;
+            mult += 0.25 * getAlphaCategoryMultiplier();
         } else if (e.type === 'special' && e.name === 'Demonic') {
             mult += 33.33;
         } else if (e.type === 'special' && e.name === 'MYTHICAL') {
             mult += gameState.mythicalSecretLuck;
+        } else if (e.type === 'special' && e.name === 'Clock') {
+            mult += 2.4 * (new Date().getHours() * 2.4);
+        } else if (e.type === 'special' && e.name === 'Plant') {
+            mult += 2.5 * getPlantGrowthMultiplier(e);
         } else if (e.type === 'allinone' && e.effects && e.effects.secretLuck != null) {
             mult += e.effects.secretLuck;
         } else if (e.isSuperMooncrystal && e.effects && e.effects.secretLuck != null) {
@@ -1983,6 +2620,15 @@ function getSecretLuckMultiplier() {
     return Math.max(0.1, mult);
 }
 
+function getNaturalSecretLuckMultiplier() {
+    const base = isEventActive('takeback') ? getRawLuckMultiplier() : getRawSecretLuckMultiplier();
+    return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getUltraAirMultiplier();
+}
+
+function getSecretLuckMultiplier() {
+    return getOverriddenValue('secretLuck', getNaturalSecretLuckMultiplier());
+}
+
 function getSecretLuckButtonBoost() {
     if (gameState.secretLuckButtonClicks <= 0) return 1;
     return 1 + Math.pow(Math.log10(gameState.secretLuckButtonClicks), 0.8);
@@ -1991,7 +2637,9 @@ function getSecretLuckButtonBoost() {
 function getRollDuration() {
     const { savedSeconds, isInstant } = getSpeedConfig();
     if (isInstant) return 0;
-    return Math.max(MIN_ROLL_DURATION, BASE_ROLL_DURATION - Math.round(savedSeconds * 1000));
+    let duration = Math.max(MIN_ROLL_DURATION, BASE_ROLL_DURATION - Math.round(savedSeconds * 1000));
+    if (isEventActive('fastBoost')) duration = Math.min(duration, 10); // "near-instant" = 0.01s
+    return duration;
 }
 
 // ============================================================
@@ -2087,8 +2735,10 @@ function generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, prevSlots) {
     }
 
     let imaginary = false, negative = false;
-    if (Math.random() < 1/85) imaginary = true;
-    if (Math.random() < 1/25) negative = true;
+    const imaginaryChance = isEventActive('weirdWorld') ? 1/25 : 1/85;
+    const negativeChance = isEventActive('reversal') ? 1/12.5 : 1/25;
+    if (Math.random() < imaginaryChance) imaginary = true;
+    if (Math.random() < negativeChance) negative = true;
 
     let displayValue = logValue;
     if (negative) displayValue = -displayValue;
@@ -2156,6 +2806,15 @@ function rollEnchants(enchantLuckMult, rawFloor, minRawFloor) {
 // ============================================================
 function getRarityClass(v) {
     if (v < 0)  return 'rarity-neg';
+    if (v >= 21) return 'rarity-21';
+    if (v >= 20) return 'rarity-20';
+    if (v >= 19) return 'rarity-19';
+    if (v >= 18) return 'rarity-18';
+    if (v >= 17) return 'rarity-17';
+    if (v >= 16) return 'rarity-16';
+    if (v >= 15) return 'rarity-15';
+    if (v >= 14) return 'rarity-14';
+    if (v >= 13) return 'rarity-13';
     if (v >= 12) return 'rarity-12';
     if (v >= 11) return 'rarity-11';
     if (v >= 10) return 'rarity-10';
@@ -2192,8 +2851,10 @@ function enchantOrbHTML(enchant, size, extraClass = '', titleAttr = '') {
     }
 
     if (enchant.specialDesign === 'alpha') {
-        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#808080;display:flex;align-items:center;justify-content:center;position:relative;" title="${titleAttr || enchant.name}">
-            <span style="position:relative; z-index:2; color:black; font-size:${size*0.6}px; text-shadow:0 0 2px white;">α</span>
+        const bg = enchant.color || '#808080';
+        const letter = enchant.display || 'α';
+        return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;position:relative;" title="${titleAttr || enchant.name}">
+            <span style="position:relative; z-index:2; color:white; font-size:${size*0.6}px; text-shadow:0 0 2px black;">${letter}</span>
             <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(1.2); color:gold; font-size:${size*0.7}px; opacity:0.6;">✦</span>
         </div>`;
     }
@@ -2279,9 +2940,11 @@ function orbEnchantsHTML(orb) {
     });
 
     let html = '<div class="orb-enchants-display">';
+    const groupCount = groupOrder.length;
+    const iconSize = groupCount <= 4 ? 35 : groupCount <= 8 ? 26 : groupCount <= 14 ? 20 : groupCount <= 22 ? 16 : 12;
     groupOrder.forEach(baseKey => {
         const { enchant, count } = groups[baseKey];
-        const orbHtml = enchantOrbHTML(enchant, 35, '', enchant.name);
+        const orbHtml = enchantOrbHTML(enchant, iconSize, '', enchant.name);
         if (count > 1) {
             html += `<div style="position:relative;display:inline-block;">
                 ${orbHtml}
@@ -2373,9 +3036,12 @@ function addEnchantToOrb(orb, enchant) {
 function toggleEquipOrb(index) {
     const orb = gameState.enchantOrbs[index];
     if (gameState.equippedOrb && gameState.equippedOrb.id === orb.id) {
+        bankPlantTimers(gameState.equippedOrb);
         gameState.equippedOrb = null;
     } else {
+        if (gameState.equippedOrb) bankPlantTimers(gameState.equippedOrb);
         gameState.equippedOrb = orb;
+        startPlantTimers(orb);
     }
     saveGame();
     renderEnchantInventory();
@@ -2383,6 +3049,7 @@ function toggleEquipOrb(index) {
 }
 
 function unequipOrb() {
+    bankPlantTimers(gameState.equippedOrb);
     gameState.equippedOrb = null;
     saveGame();
     renderEnchantInventory();
@@ -2483,6 +3150,12 @@ function performRoll() {
     for (let i = 0; i < totalSlots; i++) {
         const isAcceptableSlot = (i >= acceptStart && i <= acceptEnd);
         slots.push(generateSlot(luckMult, enchantLuckMult, isAcceptableSlot, slots));
+    }
+
+    // Tutorial hook: force the center-acceptable slot to carry an Air enchant for the demo step.
+    if (gameState.tutorialForceAirEnchant) {
+        slots[centerAcceptable].enchants = [{ ...ENCHANTS.air }];
+        gameState.tutorialForceAirEnchant = false;
     }
 
     gameState.pendingRolls = [];
@@ -2644,7 +3317,7 @@ function toggleAutorollSettings() {
 function buildAutoAcceptSecretsUI() {
     const container = document.getElementById('autoAcceptSecretsContainer');
     container.innerHTML = '';
-    SECRET_NUMBERS_RAW.filter(s => !s.isDemonicSecret).forEach(s => {
+    SECRET_NUMBERS_RAW.forEach(s => {
         const lbl = document.createElement('label');
         const cb = document.createElement('input');
         cb.type = 'checkbox';
@@ -3015,7 +3688,7 @@ function renderEnchantInventory() {
                 slot.innerHTML = '';
                 slot.appendChild(cb);
                 const contentDiv = document.createElement('div');
-                contentDiv.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>`;
+                contentDiv.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" title="Delete orb" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">✕</button>`;
                 slot.appendChild(contentDiv);
                 slot.onclick = (e) => {
                     if (e.target !== cb && !e.target.classList.contains('delete-orb-btn')) {
@@ -3024,7 +3697,7 @@ function renderEnchantInventory() {
                     }
                 };
             } else {
-                slot.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">Delete</button>`;
+                slot.innerHTML = `${equippedBadge}${lockedBadge}${mergeBadge}<div style="font-weight:bold;margin-bottom:5px;font-size:0.9em;">Enchant Orb</div>${enchantsHTML}<button class="delete-orb-btn" title="Delete orb" onclick="event.stopPropagation();openDeleteEnchantModal(${actualIndex})">✕</button>`;
                 if (gameState.mergeModeActive) {
                     if (!isLocked) {
                         slot.onclick = () => { event.stopPropagation(); selectForMerge(orb.id); };
@@ -3254,6 +3927,14 @@ function loadGame() {
             gameState.cooldownMinRng = d.cooldownMinRng || 0;
             gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
             gameState.sfxVolumes = d.sfxVolumes || {};
+
+            gameState.activeEvent = d.activeEvent || null;
+            if (gameState.activeEvent && Date.now() >= gameState.activeEvent.endsAt) {
+                gameState.activeEvent = null;
+            } else if (gameState.activeEvent) {
+                if (gameState.activeEvent.key === 'reversal') document.body.classList.add('event-reversal');
+                if (gameState.activeEvent.key === 'weirdWorld') document.body.classList.add('event-weird-world');
+            }
 
             // Migration: older saves never persisted isSecret/secretDisplay/isBrogo/isHl3 on inventory
             // items, which broke both their display (fell back to raw signed number) and every stat
@@ -3602,10 +4283,8 @@ function performMerge() {
     if (!item) return;
 
     const horseKey = 'e_h_o_r_s_e';
-    const alphaKey = 'e_alpha';
     const mooncrystalKey = 'e_mooncrystal';
     let hasHorseBoth = true;
-    let hasAlphaBoth = true;
     let hasMooncrystalBoth = true;
     const orb1 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[0]);
     const orb2 = gameState.enchantOrbs.find(o => o.id === gameState.mergeSelection[1]);
@@ -3613,19 +4292,21 @@ function performMerge() {
     if (!orb1.enchants[horseKey] || !orb2.enchants[horseKey]) {
         hasHorseBoth = false;
     }
-    if (!orb1.enchants[alphaKey] || !orb2.enchants[alphaKey]) {
-        hasAlphaBoth = false;
-    }
     if (!orb1.enchants[mooncrystalKey] || !orb2.enchants[mooncrystalKey]) {
         hasMooncrystalBoth = false;
     }
+    // Alpha category (Alpha, Beta, Delta, Epsilon): merging skips the lock if BOTH orbs have
+    // any member of the category — doesn't need to be the same letter on each side.
+    const orb1HasAlphaCategory = Object.values(orb1.enchants).some(e => e.isAlphaCategory);
+    const orb2HasAlphaCategory = Object.values(orb2.enchants).some(e => e.isAlphaCategory);
+    const hasAlphaCategoryBoth = orb1HasAlphaCategory && orb2HasAlphaCategory;
 
     const mergedEnchants = buildMergedEnchants();
     const newOrb = {
         id: Date.now() + Math.random(),
         enchants: mergedEnchants,
         timestamp: Date.now(),
-        locked: !(hasHorseBoth || hasAlphaBoth || hasMooncrystalBoth)
+        locked: !(hasHorseBoth || hasAlphaCategoryBoth || hasMooncrystalBoth)
     };
 
     const removedIds = [...gameState.mergeSelection];
@@ -3747,7 +4428,445 @@ function deleteSelectedEnchants() {
 // ============================================================
 document.getElementById('rollBtn').addEventListener('click', performRoll);
 
+// ============================================================
+// APP PAGE SYSTEM (Rolling / Inventory / Index / Events / Settings)
+// ============================================================
+const APP_PAGES = ['rolling', 'inventory', 'index', 'events', 'settings'];
+const PAGE_ICONS = { rolling: '🎲', inventory: '🎒', index: '📖', events: '⚡', settings: '⚙️' };
+const PAGE_LABELS = { rolling: 'Rolling', inventory: 'Inventory', index: 'Index', events: 'Events', settings: 'Settings' };
+
+function switchPage(pageName) {
+    if (!APP_PAGES.includes(pageName)) return;
+    APP_PAGES.forEach(p => {
+        const el = document.getElementById('page-' + p);
+        if (el) el.style.display = (p === pageName) ? '' : 'none';
+    });
+    gameState.activeAppPage = pageName;
+    updateNavSphereDisplay();
+    if (pageName === 'events') renderEventsIndexPage();
+    if (pageName === 'settings') renderSettingsStatCaps();
+    saveGame();
+}
+
+function buildNavSphere() {
+    const container = document.getElementById('navSphereItems');
+    if (!container) return;
+    container.innerHTML = APP_PAGES.map(p =>
+        `<div class="nav-sphere-item" data-page="${p}" title="${PAGE_LABELS[p]}">${PAGE_ICONS[p]}</div>`
+    ).join('') + `<div class="nav-sphere-label"></div>`;
+    updateNavSphereDisplay();
+}
+
+function updateNavSphereDisplay() {
+    const current = gameState.activeAppPage || 'rolling';
+    const idx = Math.max(0, APP_PAGES.indexOf(current));
+    document.querySelectorAll('.nav-sphere-item').forEach(el => {
+        el.classList.toggle('current', el.dataset.page === current);
+    });
+    const container = document.getElementById('navSphereItems');
+    if (container) {
+        const firstItem = container.querySelector('.nav-sphere-item');
+        let itemStep = 60;
+        if (firstItem) {
+            const itemHeight = firstItem.getBoundingClientRect().height;
+            const gap = parseFloat(getComputedStyle(container).gap) || 0;
+            itemStep = itemHeight + gap;
+        }
+        container.style.transform = `translate(-50%, calc(-50% - ${idx * itemStep}px))`;
+    }
+    const label = document.querySelector('.nav-sphere-label');
+    if (label) label.textContent = PAGE_LABELS[current];
+}
+
+let navLabelTimeout;
+function flashNavLabel() {
+    const wrap = document.getElementById('navSphereWrap');
+    if (!wrap) return;
+    wrap.classList.add('show-label');
+    clearTimeout(navLabelTimeout);
+    navLabelTimeout = setTimeout(() => wrap.classList.remove('show-label'), 1400);
+}
+
+function cycleNavSphere(direction) {
+    const current = gameState.activeAppPage || 'rolling';
+    let idx = APP_PAGES.indexOf(current);
+    idx = (idx + direction + APP_PAGES.length) % APP_PAGES.length;
+    switchPage(APP_PAGES[idx]);
+    flashNavLabel();
+}
+
+function initNavSphereInteraction() {
+    const sphere = document.getElementById('navSphere');
+    const items = document.getElementById('navSphereItems');
+    if (!sphere) return;
+
+    sphere.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        cycleNavSphere(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
+    items.addEventListener('click', (e) => {
+        const item = e.target.closest('.nav-sphere-item');
+        if (item && item.dataset.page) switchPage(item.dataset.page);
+    });
+
+    let dragging = false, startY = 0, dragAccum = 0;
+    sphere.addEventListener('pointerdown', (e) => {
+        dragging = true; startY = e.clientY; dragAccum = 0;
+        sphere.style.cursor = 'grabbing';
+        try { sphere.setPointerCapture(e.pointerId); } catch(err) {}
+    });
+    sphere.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const delta = e.clientY - startY;
+        if (Math.abs(delta) > 45) {
+            cycleNavSphere(delta > 0 ? -1 : 1);
+            startY = e.clientY;
+        }
+    });
+    const endDrag = () => { dragging = false; sphere.style.cursor = 'grab'; };
+    sphere.addEventListener('pointerup', endDrag);
+    sphere.addEventListener('pointerleave', endDrag);
+}
+
+// ============================================================
+// SETTINGS: BRIGHT FX / FPS BOOSTER
+// ============================================================
+function toggleBrightFx(enabled) {
+    gameState.disableBrightFx = enabled;
+    document.body.classList.toggle('low-fx', enabled);
+    saveGame();
+}
+
+function toggleFpsBooster(enabled) {
+    gameState.fpsBooster = enabled;
+    document.body.classList.toggle('fps-booster', enabled);
+    saveGame();
+}
+
+// ============================================================
+// SETTINGS: STAT OVERRIDES (Set Luck / Secret Luck / Enchant Luck)
+// ============================================================
+function hasMythicalEquipped() {
+    return !!(gameState.equippedOrb && Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'MYTHICAL'));
+}
+
+function getOverriddenValue(stat, natural) {
+    gameState.statOverrides = gameState.statOverrides || {};
+    const ov = gameState.statOverrides;
+    if (stat === 'luck') {
+        if (hasMythicalEquipped()) return natural;
+        const val = ov.luck;
+        if (val === undefined || val === null || val === '' || isNaN(val)) return natural;
+        return Math.min(natural, Math.max(1, Number(val)));
+    }
+    if (stat === 'secretLuck' || stat === 'enchantLuck') {
+        if (!ov[stat + 'Enabled']) return natural;
+        const val = ov[stat];
+        if (val === undefined || val === null || val === '' || isNaN(val)) return natural;
+        return Math.min(natural, Math.max(1, Number(val)));
+    }
+    return natural;
+}
+
+function applyStatOverride(stat, value) {
+    gameState.statOverrides = gameState.statOverrides || {};
+    gameState.statOverrides[stat] = (value === '' || value === null) ? null : Number(value);
+    saveGame();
+    updateActiveEffectsBar();
+}
+
+function toggleStatOverrideEnabled(stat, enabled) {
+    gameState.statOverrides = gameState.statOverrides || {};
+    gameState.statOverrides[stat + 'Enabled'] = enabled;
+    const inputId = 'set' + stat.charAt(0).toUpperCase() + stat.slice(1) + 'Input';
+    const input = document.getElementById(inputId);
+    if (input) input.disabled = !enabled;
+    saveGame();
+    updateActiveEffectsBar();
+}
+
+function renderSettingsStatCaps() {
+    const mythical = hasMythicalEquipped();
+    const luckNatural = getNaturalLuckMultiplier();
+    const secretNatural = getNaturalSecretLuckMultiplier();
+    const enchantNatural = getNaturalEnchantLuckMultiplier();
+
+    const luckInput = document.getElementById('setLuckInput');
+    const luckMaxLabel = document.getElementById('setLuckMax');
+    if (luckInput) {
+        luckInput.max = luckNatural;
+        luckInput.disabled = mythical;
+    }
+    if (luckMaxLabel) luckMaxLabel.textContent = mythical ? '(disabled — MYTHICAL equipped)' : `max: ${luckNatural.toFixed(2)}`;
+
+    const secretMaxLabel = document.getElementById('setSecretLuckMax');
+    if (secretMaxLabel) secretMaxLabel.textContent = `max: ${secretNatural.toFixed(2)}`;
+
+    const enchantMaxLabel = document.getElementById('setEnchantLuckMax');
+    if (enchantMaxLabel) enchantMaxLabel.textContent = `max: ${enchantNatural.toFixed(2)}`;
+}
+
+// ============================================================
+// EVENTS REFERENCE PAGE
+// ============================================================
+function renderEventsIndexPage() {
+    const container = document.getElementById('eventsIndexList');
+    if (!container) return;
+    container.innerHTML = GAME_EVENTS.map(ev => {
+        const isActive = isEventActive(ev.key);
+        const odds = `1/${Math.round(1/ev.chance).toLocaleString()}`;
+        return `<div class="event-index-item${isActive ? ' active-now' : ''}">
+            <div class="event-index-name">${isActive ? '🔥 ' : ''}${ev.name}</div>
+            <div class="event-index-desc">${ev.desc}</div>
+            <div class="event-index-odds">${odds} chance / 10s check · ${ev.duration}s duration</div>
+        </div>`;
+    }).join('');
+}
+
+// ============================================================
+// TUTORIAL LUCK BOOST (x2 luck for 5 min on completion)
+// ============================================================
+function getTutorialLuckBoostMultiplier() {
+    if (gameState.tutorialLuckBoostEndsAt && Date.now() < gameState.tutorialLuckBoostEndsAt) return 2;
+    return 1;
+}
+
+// ============================================================
+// TUTORIAL
+// ============================================================
+const TUTORIAL_STEPS = [
+    { text: "hey! welcome to.. the game name is right there.", spotlight: () => document.querySelector('h1') },
+    {
+        text: 'click the SHINY roll button!',
+        spotlight: () => document.getElementById('rollBtn'),
+        waitFor: { parent: () => document.getElementById('rollBtn'), match: () => true }
+    },
+    {
+        text: 'you clicked it! now.. click the "rank" to accept!',
+        spotlight: () => document.querySelector('.roll-square.center-acceptable'),
+        waitFor: { parent: () => document.getElementById('rollTrack'), match: (el) => el.closest('.roll-square.center-acceptable') }
+    },
+    {
+        text: 'click roll again.',
+        onEnter: () => { gameState.tutorialForceAirEnchant = true; },
+        spotlight: () => document.getElementById('rollBtn'),
+        waitFor: { parent: () => document.getElementById('rollBtn'), match: () => true }
+    },
+    { text: 'oh cool! you got an enchant!', spotlight: () => document.querySelector('.roll-square.center-acceptable') },
+    {
+        text: 'accept the rank; the enchant will be too!',
+        spotlight: () => document.querySelector('.roll-square.center-acceptable'),
+        waitFor: { parent: () => document.getElementById('rollTrack'), match: (el) => el.closest('.roll-square.center-acceptable') },
+        onAdvance: () => setTimeout(tutorialSwapAirForLuck1, 50)
+    },
+    { text: '... its air. its... yeah. fine... have a luck 1!' },
+    {
+        text: 'now look in the index!',
+        spotlight: () => document.querySelector('.nav-sphere-item[data-page="index"]'),
+        waitFor: { parent: () => document.getElementById('navSphereItems'), match: (el) => el.closest('.nav-sphere-item[data-page="index"]') }
+    },
+    { text: '... thats. overwhelming.', onAdvance: () => switchPage('rolling') },
+    { text: 'go back to rolling!', onEnter: () => { const ev = GAME_EVENTS.find(e => e.key === 'goodDay'); if (ev) startEvent(ev); } },
+    {
+        text: 'wow! an EVENT? there are many events that boost your stats or similar! click.. this!',
+        spotlight: () => document.querySelector('.nav-sphere-item[data-page="events"]'),
+        waitFor: { parent: () => document.getElementById('navSphereItems'), match: (el) => el.closest('.nav-sphere-item[data-page="events"]') }
+    },
+    { text: '... take a look!' },
+    { text: 'aight, have fun!!' },
+    { text: 'WAIT. logrng and NORMAL rng?' },
+    { text: 'logrng is the result of... you guessed it, your RNG!!!' },
+    { text: 'your logrng is affected by the RNG you get. (log₁₀(rng))' },
+    { text: 'and your RNG is affected by your LUCK stat!!' },
+    { text: 'ok bye im sorry this took long now actually have your extra x2 luck for 5 mins', isFinal: true }
+];
+
+let tutorialStepIndex = 0;
+let tutorialDelegatedHandler = null;
+let tutorialDelegatedParent = null;
+
+function startTutorial(isReplay) {
+    gameState.tutorialInProgress = true;
+    tutorialStepIndex = 0;
+    document.getElementById('tutorialOverlay').style.display = 'block';
+    switchPage('rolling');
+    renderTutorialStep();
+}
+
+function cleanupTutorialListener() {
+    if (tutorialDelegatedParent && tutorialDelegatedHandler) {
+        tutorialDelegatedParent.removeEventListener('click', tutorialDelegatedHandler, true);
+    }
+    tutorialDelegatedParent = null;
+    tutorialDelegatedHandler = null;
+}
+
+function endTutorial(grantReward) {
+    gameState.tutorialInProgress = false;
+    document.getElementById('tutorialOverlay').style.display = 'none';
+    document.getElementById('tutorialSpotlight').style.display = 'none';
+    cleanupTutorialListener();
+    gameState.tutorialCompleted = true;
+    if (grantReward && !gameState.tutorialRewardClaimed) {
+        gameState.tutorialRewardClaimed = true;
+        gameState.tutorialLuckBoostEndsAt = Date.now() + 5 * 60 * 1000;
+    }
+    saveGame();
+    updateActiveEffectsBar();
+    renderTutorialSettingsNote();
+}
+
+function renderTutorialStep() {
+    cleanupTutorialListener();
+    const step = TUTORIAL_STEPS[tutorialStepIndex];
+    if (!step) { endTutorial(true); return; }
+    if (step.onEnter) step.onEnter();
+
+    document.getElementById('tutorialDialogText').textContent = step.text;
+
+    const spotlightEl = document.getElementById('tutorialSpotlight');
+    const target = step.spotlight ? step.spotlight() : null;
+    if (target) {
+        const rect = target.getBoundingClientRect();
+        spotlightEl.style.display = 'block';
+        spotlightEl.style.top = (rect.top - 8) + 'px';
+        spotlightEl.style.left = (rect.left - 8) + 'px';
+        spotlightEl.style.width = (rect.width + 16) + 'px';
+        spotlightEl.style.height = (rect.height + 16) + 'px';
+    } else {
+        spotlightEl.style.display = 'none';
+    }
+
+    const buttonsEl = document.getElementById('tutorialDialogButtons');
+    buttonsEl.innerHTML = '';
+
+    if (step.waitFor) {
+        const parent = step.waitFor.parent();
+        if (parent) {
+            tutorialDelegatedParent = parent;
+            tutorialDelegatedHandler = (e) => { if (step.waitFor.match(e.target)) advanceTutorial(step); };
+            parent.addEventListener('click', tutorialDelegatedHandler, true);
+        }
+        if (tutorialStepIndex === 1) {
+            const skipBtn = document.createElement('button');
+            skipBtn.className = 'sort-btn';
+            skipBtn.textContent = 'Skip tutorial';
+            skipBtn.onclick = () => endTutorial(false);
+            buttonsEl.appendChild(skipBtn);
+        }
+    } else {
+        const btn = document.createElement('button');
+        btn.className = 'accept-btn';
+        btn.textContent = step.isFinal ? 'Finish!' : 'Next';
+        btn.onclick = () => advanceTutorial(step);
+        buttonsEl.appendChild(btn);
+    }
+}
+
+function advanceTutorial(step) {
+    cleanupTutorialListener();
+    if (step && step.onAdvance) step.onAdvance();
+    if (step && step.isFinal) { endTutorial(true); return; }
+    tutorialStepIndex++;
+    setTimeout(renderTutorialStep, 60);
+}
+
+function tutorialSwapAirForLuck1() {
+    const orb = gameState.enchantOrbs[gameState.enchantOrbs.length - 1];
+    if (!orb) return;
+    const isAirOrb = Object.values(orb.enchants).some(e => e.name === 'Air');
+    if (!isAirOrb) return;
+    orb.enchants = {};
+    addEnchantToOrb(orb, { ...ENCHANTS.luck1 });
+    renderEnchantInventory();
+    saveGame();
+}
+
+function renderTutorialSettingsNote() {
+    const el = document.getElementById('tutorialRewardNote');
+    if (!el) return;
+    el.textContent = gameState.tutorialRewardClaimed
+        ? '(reward already claimed — replaying gives no extra luck)'
+        : '(finishing gives x2 luck for 5 minutes)';
+}
+
+function promptFirstTimeTutorial() {
+    if (gameState.tutorialCompleted || gameState.tutorialDeclinedOnce) return;
+    const overlay = document.getElementById('tutorialOverlay');
+    const spotlightEl = document.getElementById('tutorialSpotlight');
+    spotlightEl.style.display = 'none';
+    overlay.style.display = 'block';
+    document.getElementById('tutorialDialogText').textContent = 'First time here? Want a quick tutorial? Finishing it gives x2 luck for 5 minutes.';
+    const buttonsEl = document.getElementById('tutorialDialogButtons');
+    buttonsEl.innerHTML = '';
+    const yesBtn = document.createElement('button');
+    yesBtn.className = 'accept-btn';
+    yesBtn.textContent = 'Sure!';
+    yesBtn.onclick = () => startTutorial(false);
+    const noBtn = document.createElement('button');
+    noBtn.className = 'sort-btn';
+    noBtn.textContent = 'No thanks';
+    noBtn.onclick = () => {
+        gameState.tutorialDeclinedOnce = true;
+        overlay.style.display = 'none';
+        saveGame();
+    };
+    buttonsEl.appendChild(yesBtn);
+    buttonsEl.appendChild(noBtn);
+}
+
 loadGame();
+buildAutoAcceptSecretsUI();
+buildAutoAcceptEnchantUI();
+buildNavSphere();
+initNavSphereInteraction();
+switchPage(gameState.activeAppPage || 'rolling');
+
+// Restore settings UI to match saved state
+document.body.classList.toggle('low-fx', !!gameState.disableBrightFx);
+document.body.classList.toggle('fps-booster', !!gameState.fpsBooster);
+const brightFxCb = document.getElementById('disableBrightFxCheckbox');
+if (brightFxCb) brightFxCb.checked = !!gameState.disableBrightFx;
+const fpsCb = document.getElementById('fpsBoosterCheckbox');
+if (fpsCb) fpsCb.checked = !!gameState.fpsBooster;
+
+gameState.statOverrides = gameState.statOverrides || {};
+const setLuckInput = document.getElementById('setLuckInput');
+if (setLuckInput && gameState.statOverrides.luck != null) setLuckInput.value = gameState.statOverrides.luck;
+const setSecretInput = document.getElementById('setSecretLuckInput');
+const setSecretCb = document.getElementById('setSecretLuckEnabled');
+if (setSecretCb) setSecretCb.checked = !!gameState.statOverrides.secretLuckEnabled;
+if (setSecretInput) {
+    setSecretInput.disabled = !gameState.statOverrides.secretLuckEnabled;
+    if (gameState.statOverrides.secretLuck != null) setSecretInput.value = gameState.statOverrides.secretLuck;
+}
+const setEnchantInput = document.getElementById('setEnchantLuckInput');
+const setEnchantCb = document.getElementById('setEnchantLuckEnabled');
+if (setEnchantCb) setEnchantCb.checked = !!gameState.statOverrides.enchantLuckEnabled;
+if (setEnchantInput) {
+    setEnchantInput.disabled = !gameState.statOverrides.enchantLuckEnabled;
+    if (gameState.statOverrides.enchantLuck != null) setEnchantInput.value = gameState.statOverrides.enchantLuck;
+}
+
+renderTutorialSettingsNote();
+renderEventBanner();
+
+// Periodic refresh for anything time-sensitive shown on the currently open page
+setInterval(() => {
+    if (gameState.activeAppPage === 'events') renderEventsIndexPage();
+    if (gameState.activeAppPage === 'settings') renderSettingsStatCaps();
+}, 1000);
+
+if (!gameState.tutorialInProgress) {
+    setTimeout(promptFirstTimeTutorial, 400);
+} else {
+    // Page was reloaded mid-tutorial — just drop them back into normal play rather than
+    // resuming a half-finished scripted sequence with stale DOM references.
+    gameState.tutorialInProgress = false;
+}
+
+window.addEventListener('resize', () => updateNavSphereDisplay());
 </script>
 
 </body>

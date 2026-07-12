@@ -20,6 +20,7 @@
             color: #eee;
             min-height: 100vh;
             padding: 20px;
+            padding-bottom: 84px;
         }
 
         .container { max-width: 1200px; margin: 0 auto; }
@@ -630,56 +631,45 @@
         .event-index-odds { font-size: 0.8em; opacity: 0.6; white-space: nowrap; }
 
         /* ============ NAV SPHERE ============ */
+        /* ============ BOTTOM NAV BAR ============ */
         .nav-sphere-wrap {
-            position: fixed; bottom: 0; left: 0; width: 120px; height: 130px;
-            z-index: 500; pointer-events: none;
+            position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: 64px;
+            z-index: 500; display: flex; justify-content: center;
+            pointer-events: none;
         }
         .nav-sphere {
-            position: absolute; bottom: -170px; left: -170px; width: 340px; height: 340px;
-            border-radius: 50%; pointer-events: auto; cursor: grab;
-            background: radial-gradient(circle at 68% 32%, #8fd3ff 0%, #3a7bd5 28%, #22336b 62%, #10152e 100%);
-            /* Fixed glow: use filter drop-shadow so glow follows the circle boundary exactly */
-            filter: drop-shadow(0 0 22px rgba(0,150,255,0.55));
-            transition: filter 0.3s ease;
-            overflow: hidden;
+            position: relative; width: 100%; max-width: 600px; height: 100%;
+            pointer-events: auto; cursor: default;
+            background: linear-gradient(180deg, rgba(20,25,50,0.85) 0%, rgba(12,16,32,0.97) 100%);
+            border-top: 1px solid rgba(0,212,255,0.35);
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.45), 0 0 20px rgba(0,150,255,0.15);
+            backdrop-filter: blur(8px);
         }
-        .nav-sphere:hover { filter: drop-shadow(0 0 32px rgba(0,180,255,0.8)); }
-        /* Inner shading stays as inset box-shadow on a pseudo-element to not conflict with filter */
-        .nav-sphere::before {
-            content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-            box-shadow: inset -10px -10px 30px rgba(0,0,0,0.4), inset 10px 10px 25px rgba(255,255,255,0.25);
-        }
-        .nav-sphere-sheen {
-            position: absolute; top: 22%; left: 58%; width: 34%; height: 20%;
-            background: radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%);
-            border-radius: 50%; transform: rotate(-25deg); pointer-events: none;
-        }
+        .nav-sphere-sheen { display: none; }
         .nav-sphere-items {
-            /* Shifted to the visible corner of the sphere (top-right quadrant visible at 0,0) */
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(20%, -50%);
-            display: flex; flex-direction: column; align-items: center; gap: 18px;
-            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            position: static; transform: none !important;
+            display: flex; flex-direction: row; align-items: stretch; justify-content: space-around;
+            gap: 0; height: 100%; transition: none;
         }
         .nav-sphere-item {
-            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 1.3em; opacity: 0.35; transform: scale(0.75);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            flex: 1 1 0; width: auto; height: 100%; border-radius: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+            font-size: 1.5em; opacity: 0.55; transform: none;
+            transition: opacity 0.2s ease, background 0.2s ease;
             cursor: pointer; user-select: none;
         }
+        .nav-sphere-item::after {
+            content: attr(title);
+            font-size: 0.32em; font-weight: 600; letter-spacing: 0.02em;
+            opacity: 0.9;
+        }
         .nav-sphere-item.current {
-            opacity: 1; transform: scale(1.15);
-            background: rgba(255,255,255,0.18);
-            box-shadow: 0 0 16px rgba(255,255,255,0.5);
+            opacity: 1; transform: none;
+            background: rgba(0,212,255,0.12);
+            box-shadow: inset 0 3px 0 0 #00d4ff;
         }
-        .nav-sphere-label {
-            position: absolute; bottom: 6px; left: 100px;
-            background: rgba(10,15,30,0.85); border: 1px solid rgba(0,212,255,0.4);
-            padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold;
-            pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
-            white-space: nowrap;
-        }
-        .nav-sphere-wrap.show-label .nav-sphere-label { opacity: 1; }
+        .nav-sphere-label { display: none; }
+        .nav-sphere-wrap.show-label .nav-sphere-label { display: none; }
 
         /* ============ TUTORIAL ============ */
         .tutorial-overlay {
@@ -736,7 +726,52 @@
         body.scheme-compact button::after { display: none; }
         body.scheme-compact .roll-square { border-radius: 2px !important; }
         body.scheme-compact .inventory-slot, body.scheme-compact .enchant-slot { border-radius: 2px !important; }
-        body.scheme-compact .nav-sphere { box-shadow: 0 0 15px rgba(0,150,255,0.3) !important; }
+        body.scheme-compact .nav-sphere { box-shadow: none !important; border-top: 1px solid rgba(0,150,255,0.5) !important; backdrop-filter: none !important; }
+
+        /* ============ NO-CAS MODE (no CSS, plain buttons/text) ============ */
+        body.no-cas-mode {
+            all: unset; display: block; background: #fff !important; color: #000 !important;
+            font-family: -apple-system, Arial, sans-serif !important; font-size: 14px !important;
+            padding: 8px !important; min-height: 100vh;
+        }
+        body.no-cas-mode * {
+            all: revert !important;
+            font-family: inherit !important;
+        }
+        body.no-cas-mode button {
+            all: revert !important; display: inline-block !important; margin: 2px !important;
+            padding: 4px 8px !important; border: 1px solid #000 !important; background: #eee !important;
+            color: #000 !important; cursor: pointer !important; border-radius: 0 !important;
+            box-shadow: none !important; font-size: 13px !important;
+        }
+        body.no-cas-mode button:hover { background: #ddd !important; }
+        body.no-cas-mode input, body.no-cas-mode select {
+            all: revert !important; border: 1px solid #000 !important; padding: 2px 4px !important;
+        }
+        body.no-cas-mode .game-section {
+            all: revert !important; display: block !important; border: 1px solid #000 !important;
+            margin: 6px 0 !important; padding: 6px !important; background: #fff !important;
+        }
+        body.no-cas-mode .roll-square, body.no-cas-mode .inventory-slot, body.no-cas-mode .enchant-slot {
+            all: revert !important; display: inline-block !important; border: 1px solid #000 !important;
+            width: auto !important; height: auto !important; padding: 4px !important; margin: 2px !important;
+            background: #fff !important; color: #000 !important; box-shadow: none !important;
+            font-size: 12px !important; text-align: left !important;
+        }
+        body.no-cas-mode .enchant-orb {
+            all: revert !important; display: inline !important; background: none !important;
+            width: auto !important; height: auto !important; border-radius: 0 !important;
+        }
+        body.no-cas-mode .nav-sphere-wrap { all: revert !important; position: static !important; display: block !important; }
+        body.no-cas-mode .nav-sphere { all: revert !important; display: none !important; }
+        body.no-cas-mode .nav-sphere-items, body.no-cas-mode .nav-sphere-item, body.no-cas-mode .nav-sphere-sheen { display: none !important; }
+        body.no-cas-mode h1, body.no-cas-mode h2, body.no-cas-mode h3, body.no-cas-mode h4 {
+            all: revert !important; font-weight: bold !important; margin: 6px 0 2px !important;
+        }
+        body.no-cas-mode .app-page { all: revert !important; display: block !important; }
+        body.no-cas-mode .container { all: revert !important; display: block !important; max-width: none !important; }
+        body.no-cas-mode img { max-width: 40px !important; }
+        body.no-cas-mode .pending-panel { all: revert !important; display: block !important; border: 1px dashed #000 !important; padding: 4px !important; margin: 4px 0 !important; }
 
         /* ============ ACCESSIBILITY / PERFORMANCE TOGGLES ============ */
         body.low-fx * { animation: none !important; text-shadow: none !important; }
@@ -755,86 +790,86 @@
         }
         body.fps-booster .game-section { padding: 14px; border-radius: 6px; }
         body.fps-booster .roll-square, body.fps-booster .inventory-slot, body.fps-booster .enchant-slot { transform: none !important; }
-        body.fps-booster .nav-sphere { background: #22336b !important; filter: none !important; }
+        body.fps-booster .nav-sphere { background: #14192f !important; box-shadow: none !important; backdrop-filter: none !important; }
         body.fps-booster .nav-sphere-sheen { display: none; }
 
         /* ============================================================
            MOBILE / RESPONSIVE
            ============================================================ */
         @media (max-width: 768px) {
-            body { padding: 10px; padding-bottom: 90px; }
-            h1 { font-size: 1.7em; margin-bottom: 18px; }
-            .game-section { padding: 14px; border-radius: 12px; }
+            body { padding: 10px; padding-bottom: 100px; font-size: 1.05em; }
+            h1 { font-size: 1.9em; margin-bottom: 18px; }
+            .game-section { padding: 16px; border-radius: 12px; }
 
-            button { padding: 10px 18px; font-size: 0.95em; }
-            .roll-btn, .accept-btn { padding: 12px 22px; }
+            button { padding: 13px 20px; font-size: 1.05em; min-height: 44px; }
+            .roll-btn, .accept-btn { padding: 15px 24px; font-size: 1.1em; }
 
-            .roll-square { width: 92px; padding: 6px; }
+            .roll-square { width: 110px; padding: 8px; font-size: 1em; }
             .roll-display { padding: 12px; }
 
-            .inventory-grid { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+            .inventory-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+            .inventory-slot { font-size: 0.9em; min-height: 48px; }
 
-            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-            .stat-box { padding: 10px; }
-            .stat-value { font-size: 1.3em; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+            .stat-box { padding: 12px; }
+            .stat-value { font-size: 1.5em; }
 
-            .inventory-controls, .events-controls { gap: 6px; }
-            .sort-btn, .page-btn { padding: 7px 12px; font-size: 0.82em; }
+            .inventory-controls, .events-controls { gap: 8px; }
+            .sort-btn, .page-btn { padding: 10px 16px; font-size: 0.95em; min-height: 40px; }
             .pagination { margin-left: 0; width: 100%; justify-content: center; margin-top: 6px; }
 
             .enchant-item { flex-wrap: wrap; }
-            .enchant-item .enchant-orb { width: 34px; height: 34px; }
-            .enchant-item-effect { font-size: 0.8em; }
+            .enchant-item .enchant-orb { width: 44px; height: 44px; }
+            .enchant-item-name { font-size: 1.05em; }
+            .enchant-item-effect { font-size: 0.9em; }
 
-            .settings-block { padding: 12px 14px; }
-            .settings-stat-row, .settings-toggle-row { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .settings-stat-row input[type="number"] { width: 100%; }
+            .settings-block { padding: 16px 16px; }
+            .settings-block h3 { font-size: 1.1em; }
+            .settings-stat-row, .settings-toggle-row { flex-direction: column; align-items: flex-start; gap: 8px; font-size: 1.02em; }
+            .settings-stat-row input[type="number"] { width: 100%; min-height: 42px; font-size: 1.05em; }
             .settings-toggle-desc { margin-left: 0; }
+            .settings-toggle-row input[type="checkbox"], .settings-toggle-row input[type="radio"] { width: 20px; height: 20px; }
 
-            .autoroll-settings-panel label { width: 100%; justify-content: space-between; }
+            .autoroll-settings-panel label { width: 100%; justify-content: space-between; min-height: 40px; }
 
             .event-index-item { flex-direction: column; align-items: flex-start; gap: 4px; }
             .event-index-name { min-width: 0; }
 
-            .modal-content { padding: 20px; max-width: 92vw; }
-            .tutorial-dialog { padding: 14px 16px; bottom: 18px; }
-            .tutorial-dialog-text { font-size: 0.95em; }
+            .modal-content { padding: 22px; max-width: 94vw; }
+            .tutorial-dialog { padding: 16px 18px; bottom: 18px; }
+            .tutorial-dialog-text { font-size: 1.05em; }
 
-            .nav-sphere-wrap { width: 64px; height: 64px; }
-            .nav-sphere { width: 190px; height: 190px; bottom: -124px; left: -124px; }
-            .nav-sphere-item { width: 34px; height: 34px; font-size: 1.1em; }
-            .nav-sphere-items { gap: 14px; transform: translate(22%, -50%); }
-            .nav-sphere-label { left: 74px; font-size: 0.75em; padding: 3px 10px; }
+            .nav-sphere-wrap { height: 68px; }
+            .nav-sphere-item { font-size: 1.6em; }
+            .nav-sphere-item::after { font-size: 0.34em; }
 
-            .event-banner { flex-direction: column; gap: 4px; text-align: center; padding: 8px 12px; }
+            .event-banner { flex-direction: column; gap: 4px; text-align: center; padding: 10px 14px; }
             .event-banner-desc { text-align: center; }
         }
 
         @media (max-width: 480px) {
-            body { padding: 6px; padding-bottom: 80px; }
-            h1 { font-size: 1.35em; }
-            .game-section { padding: 10px; }
+            body { padding: 8px; padding-bottom: 96px; font-size: 1em; }
+            h1 { font-size: 1.55em; }
+            .game-section { padding: 12px; }
 
-            .roll-square { width: 74px; font-size: 0.85em; }
+            .roll-square { width: 90px; font-size: 0.95em; padding: 6px; }
             .roll-display { padding: 8px; }
 
-            .inventory-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
-            .inventory-slot { font-size: clamp(0.45rem, 3vw, 0.8rem); }
+            .inventory-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            .inventory-slot { font-size: clamp(0.65rem, 3.5vw, 0.9rem); min-height: 46px; }
 
-            button { padding: 9px 14px; font-size: 0.88em; }
-            .controls { gap: 8px; }
+            button { padding: 12px 16px; font-size: 1em; min-height: 44px; }
+            .controls { gap: 10px; }
 
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-value { font-size: 1.3em; }
 
-            .nav-sphere-wrap { width: 52px; height: 52px; }
-            .nav-sphere { width: 150px; height: 150px; bottom: -98px; left: -98px; }
-            .nav-sphere-item { width: 28px; height: 28px; font-size: 0.95em; }
-            .nav-sphere-items { gap: 11px; transform: translate(22%, -50%); }
-            .nav-sphere-label { left: 58px; font-size: 0.7em; padding: 2px 8px; }
+            .nav-sphere-wrap { height: 60px; }
+            .nav-sphere-item { font-size: 1.35em; }
+            .nav-sphere-item::after { font-size: 0.3em; }
         }
 
         @media (hover: none) and (pointer: coarse) {
-            .nav-sphere-wrap.show-label .nav-sphere-label { opacity: 1; }
             button::after { display: none; } /* skip the hover-sweep shine on touch devices */
         }
     </style>
@@ -1899,6 +1934,30 @@
         </div>
 
         <div class="settings-block">
+            <h3>🧱 noCAS Mode</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Strips almost all CSS styling — plain buttons and text only. Fastest, ugliest, most accessible option.</p>
+            <label class="settings-toggle-row" style="cursor:pointer;">
+                <input type="checkbox" id="noCASToggle" onchange="applyNoCASMode(this.checked)" style="accent-color:#00d4ff;"> Enable noCAS mode
+            </label>
+        </div>
+
+        <div class="settings-block">
+            <h3>🎞️ Excess Roll Slots</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">The roller normally pads the track with extra non-acceptable slots for the scroll animation. Turning this off only generates the acceptable slots, skipping the padding.</p>
+            <label class="settings-toggle-row" style="cursor:pointer;">
+                <input type="checkbox" id="hideExcessSlotsToggle" onchange="applyHideExcessSlots(this.checked)" style="accent-color:#00d4ff;"> Don't show excess slots
+            </label>
+        </div>
+
+        <div class="settings-block">
+            <h3>💠 Pending Enchants Panel</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Hides the panel that lists pending enchants waiting to be accepted.</p>
+            <label class="settings-toggle-row" style="cursor:pointer;">
+                <input type="checkbox" id="hidePendingPanelToggle" onchange="applyHidePendingPanel(this.checked)" style="accent-color:#00d4ff;"> Don't show pending enchants
+            </label>
+        </div>
+
+        <div class="settings-block">
             <h3>📘 Tutorial</h3>
             <button class="sort-btn" onclick="startTutorial(true)">Replay Tutorial</button>
             <span class="settings-toggle-desc" id="tutorialRewardNote"></span>
@@ -2075,6 +2134,9 @@ let gameState = {
     sfxVolumes: {},
     bulkRollCap: 0, // 0 = no cap/disabled
     uiScheme: 'current',
+    noCASMode: false,
+    hideExcessSlots: false,
+    hidePendingPanel: false,
     stats: {
         totalRolls: 0,
         acceptedRanks: 0,
@@ -3340,9 +3402,16 @@ function performRoll() {
     document.getElementById('luckBoostDisplay').textContent = '';
     document.getElementById('secretLuckBoostDisplay').textContent = '';
 
-    const totalSlots = Math.max(20, Math.floor(bulkRolls * 12.5));
-    const acceptStart = Math.floor((totalSlots - bulkRolls) / 2);
-    const acceptEnd = acceptStart + bulkRolls - 1;
+    const totalSlotsFull = Math.max(20, Math.floor(bulkRolls * 12.5));
+    const acceptStartFull = Math.floor((totalSlotsFull - bulkRolls) / 2);
+    const acceptEndFull = acceptStartFull + bulkRolls - 1;
+
+    // When "don't show excess slots" is on, only generate the acceptable window —
+    // skip the surrounding padding slots used for the scroll animation.
+    const hideExcess = gameState.hideExcessSlots;
+    const totalSlots = hideExcess ? bulkRolls : totalSlotsFull;
+    const acceptStart = hideExcess ? 0 : acceptStartFull;
+    const acceptEnd = hideExcess ? (bulkRolls - 1) : acceptEndFull;
     const centerAcceptable = Math.floor((acceptStart + acceptEnd) / 2);
 
     const slots = [];
@@ -3417,7 +3486,7 @@ function performRoll() {
     rollTrack.offsetHeight;
     rollDisplay.scrollLeft = 0;
 
-    const rollDuration = getRollDuration();
+    const rollDuration = hideExcess ? 0 : getRollDuration();
     if (rollDuration === 0) {
         rollTrack.querySelectorAll('.secret-slot').forEach(square => {
             if (square.dataset.realContent) {
@@ -3658,6 +3727,13 @@ function doAutoAccept() {
 // ============================================================
 function renderPendingPanel() {
     const orbsDiv = document.getElementById('pendingPanelOrbs');
+    const panel = document.getElementById('pendingPanel');
+
+    if (gameState.hidePendingPanel) {
+        if (panel) panel.style.display = 'none';
+        return;
+    }
+    if (panel) panel.style.display = '';
 
     const pendingEnchants = (gameState.pendingRolls || []).flatMap(r => r.enchants || []);
 
@@ -4135,6 +4211,9 @@ function loadGame() {
             gameState.sfxVolumes = d.sfxVolumes || {};
             gameState.bulkRollCap = d.bulkRollCap || 0;
             gameState.uiScheme = d.uiScheme || 'current';
+            gameState.noCASMode = d.noCASMode || false;
+            gameState.hideExcessSlots = d.hideExcessSlots || false;
+            gameState.hidePendingPanel = d.hidePendingPanel || false;
             gameState.pizzaSlicesCollected = d.pizzaSlicesCollected || 0;
             gameState.pizzasCompleted = d.pizzasCompleted || 0;
 
@@ -4664,38 +4743,15 @@ function buildNavSphere() {
     if (!container) return;
     container.innerHTML = APP_PAGES.map(p =>
         `<div class="nav-sphere-item" data-page="${p}" title="${PAGE_LABELS[p]}">${PAGE_ICONS[p]}</div>`
-    ).join('') + `<div class="nav-sphere-label"></div>`;
+    ).join('');
     updateNavSphereDisplay();
 }
 
 function updateNavSphereDisplay() {
     const current = gameState.activeAppPage || 'rolling';
-    const idx = Math.max(0, APP_PAGES.indexOf(current));
     document.querySelectorAll('.nav-sphere-item').forEach(el => {
         el.classList.toggle('current', el.dataset.page === current);
     });
-    const container = document.getElementById('navSphereItems');
-    if (container) {
-        const firstItem = container.querySelector('.nav-sphere-item');
-        let itemStep = 60;
-        if (firstItem) {
-            const itemHeight = firstItem.getBoundingClientRect().height;
-            const gap = parseFloat(getComputedStyle(container).gap) || 0;
-            itemStep = itemHeight + gap;
-        }
-        container.style.transform = `translate(20%, calc(-50% - ${idx * itemStep}px))`;
-    }
-    const label = document.querySelector('.nav-sphere-label');
-    if (label) label.textContent = PAGE_LABELS[current];
-}
-
-let navLabelTimeout;
-function flashNavLabel() {
-    const wrap = document.getElementById('navSphereWrap');
-    if (!wrap) return;
-    wrap.classList.add('show-label');
-    clearTimeout(navLabelTimeout);
-    navLabelTimeout = setTimeout(() => wrap.classList.remove('show-label'), 1400);
 }
 
 function cycleNavSphere(direction) {
@@ -4703,41 +4759,16 @@ function cycleNavSphere(direction) {
     let idx = APP_PAGES.indexOf(current);
     idx = (idx + direction + APP_PAGES.length) % APP_PAGES.length;
     switchPage(APP_PAGES[idx]);
-    flashNavLabel();
 }
 
 function initNavSphereInteraction() {
-    const sphere = document.getElementById('navSphere');
     const items = document.getElementById('navSphereItems');
-    if (!sphere) return;
-
-    sphere.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        cycleNavSphere(e.deltaY > 0 ? 1 : -1);
-    }, { passive: false });
+    if (!items) return;
 
     items.addEventListener('click', (e) => {
         const item = e.target.closest('.nav-sphere-item');
         if (item && item.dataset.page) switchPage(item.dataset.page);
     });
-
-    let dragging = false, startY = 0, dragAccum = 0;
-    sphere.addEventListener('pointerdown', (e) => {
-        dragging = true; startY = e.clientY; dragAccum = 0;
-        sphere.style.cursor = 'grabbing';
-        try { sphere.setPointerCapture(e.pointerId); } catch(err) {}
-    });
-    sphere.addEventListener('pointermove', (e) => {
-        if (!dragging) return;
-        const delta = e.clientY - startY;
-        if (Math.abs(delta) > 45) {
-            cycleNavSphere(delta > 0 ? -1 : 1);
-            startY = e.clientY;
-        }
-    });
-    const endDrag = () => { dragging = false; sphere.style.cursor = 'grab'; };
-    sphere.addEventListener('pointerup', endDrag);
-    sphere.addEventListener('pointerleave', endDrag);
 }
 
 // ============================================================
@@ -4834,6 +4865,31 @@ function getBulkRollsUncapped() {
     total += blessing.bulk;
     total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
     return Math.max(1, Math.round(total));
+}
+
+function applyNoCASMode(enabled) {
+    gameState.noCASMode = enabled;
+    document.body.classList.toggle('no-cas-mode', enabled);
+    const toggle = document.getElementById('noCASToggle');
+    if (toggle) toggle.checked = enabled;
+    saveGame();
+}
+
+function applyHideExcessSlots(enabled) {
+    gameState.hideExcessSlots = enabled;
+    const toggle = document.getElementById('hideExcessSlotsToggle');
+    if (toggle) toggle.checked = enabled;
+    saveGame();
+}
+
+function applyHidePendingPanel(enabled) {
+    gameState.hidePendingPanel = enabled;
+    const toggle = document.getElementById('hidePendingPanelToggle');
+    if (toggle) toggle.checked = enabled;
+    const panel = document.getElementById('pendingPanel');
+    if (panel) panel.style.display = enabled ? 'none' : '';
+    renderPendingPanel();
+    saveGame();
 }
 
 // UI Scheme — applies CSS class to body and saves preference
@@ -5122,6 +5178,11 @@ if (bulkCapInput && gameState.bulkRollCap) bulkCapInput.value = gameState.bulkRo
 
 // Restore UI scheme
 applyUIScheme(gameState.uiScheme || 'current');
+
+// Restore noCAS / hide excess / hide pending panel toggles
+applyNoCASMode(gameState.noCASMode || false);
+applyHideExcessSlots(gameState.hideExcessSlots || false);
+applyHidePendingPanel(gameState.hidePendingPanel || false);
 
 // Periodic refresh for anything time-sensitive shown on the currently open page
 setInterval(() => {

@@ -1841,6 +1841,10 @@
                     <input type="number" id="autoAcceptMinRng" min="0" value="0" placeholder="0 = off"
                         oninput="gameState.autoAcceptMinRng = Number(this.value) || 0">
                 </label>
+                <label>Autoaccept imaginary above magnitude:
+                    <input type="number" id="autoAcceptMinImaginary" min="0" value="0" placeholder="0 = off"
+                        oninput="gameState.autoAcceptMinImaginary = Number(this.value) || 0">
+                </label>
                 <div>
                     <div style="margin-bottom:4px;">Autoaccept secrets:</div>
                     <div id="autoAcceptSecretsContainer" class="autoaccept-enchants-grid"></div>
@@ -2154,6 +2158,7 @@ let gameState = {
     luckButtonBoostAccum: 0,
     autoRollEnabled: false,
     autoAcceptMinRng: 0,
+    autoAcceptMinImaginary: 0,
     autoAcceptSecretKeys: [],
     autoAcceptEnchants: [],
     cooldownMinRng: 0,
@@ -3660,6 +3665,7 @@ function scheduleAutoRoll() {
 function doAutoAccept() {
     if (!gameState.pendingRolls || gameState.pendingRolls.length === 0) return;
     const minRng = gameState.autoAcceptMinRng || 0;
+    const minImaginary = gameState.autoAcceptMinImaginary || 0;
     const secretKeys = gameState.autoAcceptSecretKeys || [];
     const enchantKeys = gameState.autoAcceptEnchants || [];
 
@@ -3672,6 +3678,10 @@ function doAutoAccept() {
 
     for (const slot of [...gameState.pendingRolls]) {
         if (minRng > 0 && slot.rawFloor >= minRng) {
+            toFullAccept.push(slot);
+            continue;
+        }
+        if (minImaginary > 0 && slot.imaginary && slot.value >= minImaginary) {
             toFullAccept.push(slot);
             continue;
         }
@@ -4211,6 +4221,7 @@ function loadGame() {
             gameState.luckButtonBoostAccum = 0;
             gameState.secretLuckButtonClicks = 0;
             gameState.autoAcceptMinRng = d.autoAcceptMinRng || 0;
+            gameState.autoAcceptMinImaginary = d.autoAcceptMinImaginary || 0;
             gameState.autoAcceptSecretKeys = d.autoAcceptSecretKeys || [];
             gameState.autoAcceptEnchants = d.autoAcceptEnchants || [];
             gameState.cooldownMinRng = d.cooldownMinRng || 0;
@@ -4280,6 +4291,8 @@ function loadGame() {
 
     const arMinEl = document.getElementById('autoAcceptMinRng');
     if (arMinEl) arMinEl.value = gameState.autoAcceptMinRng;
+    const arMinImgEl = document.getElementById('autoAcceptMinImaginary');
+    if (arMinImgEl) arMinImgEl.value = gameState.autoAcceptMinImaginary;
     const cdMinEl = document.getElementById('cooldownMinRng');
     if (cdMinEl) cdMinEl.value = gameState.cooldownMinRng;
     const cdRangeEl = document.getElementById('cooldownTimeRange');

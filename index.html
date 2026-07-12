@@ -626,6 +626,7 @@
             transition: border-color 0.25s ease;
         }
         .event-index-item.active-now { border-color: #ffd700; box-shadow: 0 0 16px rgba(255,215,0,0.35); }
+        .event-index-item.event-disabled { opacity: 0.45; border-color: rgba(248,113,113,0.4); filter: grayscale(0.6); }
         .event-index-name { font-weight: bold; min-width: 160px; }
         .event-index-desc { flex: 1; opacity: 0.85; font-size: 0.9em; }
         .event-index-odds { font-size: 0.8em; opacity: 0.6; white-space: nowrap; }
@@ -1345,14 +1346,6 @@
                         </div>
                     </div>
                     <div class="enchant-item">
-                        <div class="enchant-orb" style="background:linear-gradient(135deg,#fef9c3 0%,#fde047 100%);color:#78350f;">💨</div>
-                        <div class="enchant-item-info">
-                            <div class="enchant-item-name">Ultra Air</div>
-                            <div class="enchant-item-effect">Turns out Air was hiding something. x10 luck, secret luck, enchant luck, and bulk. Is it 1% more air or FART?</div>
-                            <div class="enchant-item-rarity">Rarity: 1/500,000,000,000 (2e-12%) — requires joke enchants ON</div>
-                        </div>
-                    </div>
-                    <div class="enchant-item">
                         <div class="enchant-orb" style="background:linear-gradient(135deg,#9e9e9e 0%,#000000 100%);">💥</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Bomber</div>
@@ -1532,6 +1525,42 @@
                             <div class="enchant-item-name">Pizza</div>
                             <div class="enchant-item-effect">x3 all stats, multiplicative, per Pizza held. Cannot be rolled directly — only obtained by combining 8 Pizza Slices on the same orb.</div>
                             <div class="enchant-item-rarity">Rarity: Unrollable (combine-only)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endgame Enchants -->
+            <div class="enchant-type-section">
+                <div class="enchant-type-header" onclick="toggleEnchantType('endgame')">
+                    <h3>🏆 Endgame Enchants</h3><span id="endgame-toggle">▼</span>
+                </div>
+                <div class="enchant-type-content" id="endgame-content">
+                    <p style="font-size:0.85em;opacity:0.7;margin-bottom:10px;">
+                        Endgame enchants can only roll once you have a log RNG greater than 15 somewhere in your inventory.
+                    </p>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:transparent;border:1px dashed rgba(255,255,255,0.3);">👁️</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Gluttonous Beast</div>
+                            <div class="enchant-item-effect">While equipped, deleting any normal (non-secret, non-negative, non-imaginary) log RNG grants +(logRNG / 125)x stats permanently. Capped at x100 total.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/1,070,000,000,000 (9.3e-11%) — Endgame</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#e0f2fe,#38bdf8);color:#0c4a6e;">🌕</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">True Awakened Mooncrystal</div>
+                            <div class="enchant-item-effect">Same as a regular Mooncrystal, but its stats (+50 luck, +75 secret luck, +25 bulk, +0.01s speed, +10 enchant luck) are already active — no need to merge 100. Stack 50 True Awakened Mooncrystals on the same orb for an additional x25 all stats.</div>
+                            <div class="enchant-item-rarity">Rarity: 1/15,000,000,000,000 (6.7e-12%) — Endgame</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#fef9c3 0%,#fde047 100%);color:#78350f;">💨</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Intense</div>
+                            <div class="enchant-item-effect">Turns out Air was hiding something. Stacks — for every 5 Intense held on the same orb, x2.5 luck, secret luck, enchant luck, and bulk (multiplicative per stack of 5).</div>
+                            <div class="enchant-item-rarity">Rarity: 1/750,000,000,000 (1.3e-10%) — Endgame</div>
                         </div>
                     </div>
                 </div>
@@ -2155,6 +2184,8 @@ let gameState = {
     sfxVolumes: {},
     bulkRollCap: 0, // 0 = no cap/disabled
     disableWrathEnchant: false,
+    disabledEvents: [],
+    gluttonousBeastAccum: 0,
     uiScheme: 'current',
     noCASMode: false,
     hideExcessSlots: false,
@@ -2304,10 +2335,9 @@ const ENCHANTS = {
         jokeOnly: true
     },
     ultraAir: {
-        name: 'Ultra Air', type: 'joke', tier: 4, rarity: 1/500000000000,
-        effects: {}, // handled via getUltraAirMultiplier — a true x10 on luck/secretLuck/enchantLuck/bulk
-        display: '💨', color: 'linear-gradient(135deg,#fef9c3 0%,#fde047 100%)', textColor: '#78350f',
-        jokeOnly: true
+        name: 'Intense', type: 'endgame', tier: 4, rarity: 1/750000000000,
+        effects: {}, // handled via getUltraAirMultiplier — x2.5 stats per 5 Intense stacked in one orb (key kept as ultraAir for save compat)
+        display: '💨', color: 'linear-gradient(135deg,#fef9c3 0%,#fde047 100%)', textColor: '#78350f'
     },
     bomber: {
         name: 'Bomber', type: 'joke', tier: 2, rarity: 1/6942069420,
@@ -2407,6 +2437,20 @@ const ENCHANTS = {
         effects: {}, // multiplicative: x3 per pizza, applied via getPizzaMultiplier()
         display: '🍕', color: 'linear-gradient(135deg, #fbbf24 0%, #b45309 100%)', textColor: '#fff',
         isPizza: true, forceGranted: false
+    },
+
+    // --- Endgame Enchants (require a log RNG > 15 in inventory to roll) ---
+    gluttonousBeast: {
+        name: 'Gluttonous Beast', type: 'endgame', tier: 10, rarity: 1/1070000000000,
+        effects: {}, // handled via getGluttonousBeastMultiplier — scales from deletions while equipped
+        display: '👁️', color: 'transparent', textColor: '#fecaca',
+        isGluttonousBeast: true
+    },
+    trueAwakenedMooncrystal: {
+        name: 'True Awakened Mooncrystal', type: 'endgame', tier: 10, rarity: 1/15000000000000,
+        effects: { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 }, // stats already active, unlike regular Mooncrystal
+        display: '🌕', color: 'linear-gradient(135deg, #e0f2fe 0%, #38bdf8 100%)', textColor: '#0c4a6e',
+        isTrueAwakenedMooncrystal: true
     },
 
     // --- Weird Enchants ---
@@ -2534,15 +2578,15 @@ function getBlessingBonuses() {
 // ============================================================
 const GAME_EVENTS = [
     { key: 'luckBoost',     name: 'Luck Boost',            chance: 1/7,     duration: 12.39, desc: 'x1.77 luck' },
-    { key: 'secretBoost',   name: 'Secret Boost',          chance: 1/10,    duration: 44.25,  desc: 'x5 secret luck' },
+    { key: 'secretBoost',   name: 'Secret Boost',          chance: 1/10,    duration: 7.5,   desc: 'x5 secret luck' },
     { key: 'fastBoost',     name: 'Fast Boost',            chance: 1/15,    duration: 5,   desc: 'Rolls are near-instant (0.01s)' },
     { key: 'billionLuckRel',name: '1 Billion Lukc Rel',    chance: 1/7777,  duration: 7.77, desc: 'x177 luck' },
     { key: 'bogo',          name: 'Buy 1 Get 1 Free',      chance: 1/50,    duration: 25,  desc: 'x2 bulk rolls' },
-    { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 17.7,  desc: 'x1.5 enchant luck' },
-    { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 212.4, desc: 'x1.5 luck, secret luck, and enchant luck' },
-    { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 35.4, desc: 'x5 luck & secret luck, instant rolls' },
-    { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 40,  desc: 'Negative chance boosted to 1/12.5' },
-    { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 20,  desc: 'Imaginary chance boosted to 1/25' }
+    { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 26.55,  desc: 'x1.5 enchant luck' },
+    { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 318.6, desc: 'x1.5 luck, secret luck, and enchant luck' },
+    { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 53.1, desc: 'x5 luck, secret luck & enchant luck, instant rolls' },
+    { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 60,  desc: 'Negative chance boosted to 1/12.5' },
+    { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 30,  desc: 'Imaginary chance boosted to 1/25' }
 ];
 
 function isEventActive(key) {
@@ -2562,13 +2606,15 @@ function getEventStatMultiplier(stat) {
     if (key === 'bogo' && stat === 'bulk') return 2;
     if (key === 'magicalPowers' && stat === 'enchantLuck') return 1.5;
     if (key === 'goodDay' && (stat === 'luck' || stat === 'secretLuck' || stat === 'enchantLuck')) return 1.5;
-    if (key === 'holidays' && (stat === 'luck' || stat === 'secretLuck')) return 5;
+    if (key === 'holidays' && (stat === 'luck' || stat === 'secretLuck' || stat === 'enchantLuck')) return 5;
     return 1;
 }
 
 function tryTriggerEvent() {
     if (hasActiveEvent()) return;
+    const disabled = gameState.disabledEvents || [];
     for (const ev of GAME_EVENTS) {
+        if (disabled.includes(ev.key)) continue;
         if (Math.random() < ev.chance) {
             startEvent(ev);
             return;
@@ -2670,8 +2716,42 @@ function getPlantGrowthMultiplier(enchant) {
 
 function getUltraAirMultiplier() {
     if (!gameState.equippedOrb) return 1;
-    const hasUltraAir = Object.values(gameState.equippedOrb.enchants).some(e => e.name === 'Ultra Air');
-    return hasUltraAir ? 10 : 1;
+    const intenseEntry = gameState.equippedOrb.enchants['e_intense'];
+    if (!intenseEntry) return 1;
+    const count = intenseEntry.count || 1;
+    const stacks = Math.floor(count / 5); // every 5 Intense = x2.5
+    return Math.pow(2.5, stacks);
+}
+
+function getTrueAwakenedMooncrystalMultiplier() {
+    if (!gameState.equippedOrb) return 1;
+    const entry = gameState.equippedOrb.enchants['e_true_awakened_mooncrystal'];
+    if (!entry) return 1;
+    const count = entry.count || 1;
+    return count >= 50 ? 25 : 1; // x25 all stats once 50 are stacked in the same orb
+}
+
+function getGluttonousBeastMultiplier() {
+    if (!gameState.equippedOrb) return 1;
+    const entry = gameState.equippedOrb.enchants['e_gluttonous_beast'];
+    if (!entry) return 1;
+    const raw = gameState.gluttonousBeastAccum || 0;
+    return Math.min(100, Math.max(1, 1 + raw)); // capped at x100
+}
+
+// Call this whenever a normal (non-secret/non-negative/non-imaginary) inventory item is deleted
+// while Gluttonous Beast is equipped: gain +(logRNG / 125) stats, permanently, capped at x100 total.
+function registerGluttonousBeastDeletion(item) {
+    if (!gameState.equippedOrb) return;
+    const entry = gameState.equippedOrb.enchants['e_gluttonous_beast'];
+    if (!entry) return;
+    if (!item || item.isSecret || item.negative || item.imaginary || item.isEpilepsy) return;
+    const gain = (item.value || 0) / 125;
+    gameState.gluttonousBeastAccum = Math.min(99, (gameState.gluttonousBeastAccum || 0) + gain);
+}
+
+function getEndgameStatMultiplier() {
+    return getUltraAirMultiplier() * getTrueAwakenedMooncrystalMultiplier() * getGluttonousBeastMultiplier();
 }
 
 function getBestLogRngInInventory() {
@@ -2746,7 +2826,7 @@ function getRawLuckMultiplier() {
 
 function getNaturalLuckMultiplier() {
     const base = getRawLuckMultiplier();
-    return Math.max(1, base) * getEventStatMultiplier('luck') * getUltraAirMultiplier() * getTutorialLuckBoostMultiplier() * getPizzaMultiplier();
+    return Math.max(1, base) * getEventStatMultiplier('luck') * getEndgameStatMultiplier() * getTutorialLuckBoostMultiplier() * getPizzaMultiplier();
 }
 
 function getLuckMultiplier() {
@@ -2777,7 +2857,7 @@ function getNaturalEnchantLuckMultiplier() {
     });
     mult += bricks * 1.5 + blessing.enchantLuck;
     mult += getGolfballEnchantLuckBonus();
-    return mult * getEventStatMultiplier('enchantLuck') * getUltraAirMultiplier() * getPizzaMultiplier();
+    return mult * getEventStatMultiplier('enchantLuck') * getEndgameStatMultiplier() * getPizzaMultiplier();
 }
 
 function getEnchantLuckMultiplier() {
@@ -2804,7 +2884,7 @@ function getBulkRolls() {
         }
     });
     total += blessing.bulk;
-    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
+    total *= getEventStatMultiplier('bulk') * getEndgameStatMultiplier() * getPizzaMultiplier();
     let result = Math.max(1, Math.round(total));
     // Apply bulk roll cap from settings (0 = disabled)
     const cap = gameState.bulkRollCap || 0;
@@ -2896,7 +2976,7 @@ function getRawSecretLuckMultiplier() {
 
 function getNaturalSecretLuckMultiplier() {
     const base = getRawSecretLuckMultiplier();
-    return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getUltraAirMultiplier() * getPizzaMultiplier();
+    return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getEndgameStatMultiplier() * getPizzaMultiplier();
 }
 
 function getSecretLuckMultiplier() {
@@ -3043,12 +3123,14 @@ function checkSecretNumber() {
 function rollEnchant(enchantLuckMult, excludeTypes = new Set()) {
     if (enchantLuckMult <= 0) return null;
     const roll = Math.random();
+    const hasEndgameUnlock = getBestLogRngInInventory() > 15;
     const eligible = Object.entries(ENCHANTS)
         .filter(([key, e]) => {
             if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
             if (excludeTypes.has(e.type)) return false;
             if (key === 'wrath' && gameState.disableWrathEnchant) return false;
             if (key === 'pizza' && !e.forceGranted) return false; // Pizza is never naturally rollable
+            if (e.type === 'endgame' && !hasEndgameUnlock) return false; // requires a log RNG > 15 in inventory
             return true;
         })
         .map(([key, e]) => ({ key, ...e }))
@@ -3300,6 +3382,36 @@ function addEnchantToOrb(orb, enchant) {
         } else {
             orb.enchants[key].count = (orb.enchants[key].count || 1) + 1;
         }
+        return true;
+    }
+
+    if (enchant.name === 'Intense' || enchant.key === 'ultraAir') {
+        const key = 'e_intense';
+        if (!orb.enchants[key]) {
+            orb.enchants[key] = { ...enchant, count: 1 };
+        } else {
+            orb.enchants[key].count = (orb.enchants[key].count || 1) + 1;
+        }
+        return true;
+    }
+
+    if (enchant.name === 'Gluttonous Beast' || enchant.isGluttonousBeast) {
+        // Single-slot: only one Gluttonous Beast is meaningful per orb (it's a passive while-equipped effect)
+        if (!orb.enchants.e_gluttonous_beast) {
+            orb.enchants.e_gluttonous_beast = { ...enchant };
+            return true;
+        }
+        return false;
+    }
+
+    if (enchant.name === 'True Awakened Mooncrystal' || enchant.isTrueAwakenedMooncrystal) {
+        const key = 'e_true_awakened_mooncrystal';
+        if (!orb.enchants[key]) {
+            orb.enchants[key] = { ...enchant, count: 1 };
+        } else {
+            orb.enchants[key].count = (orb.enchants[key].count || 1) + 1;
+        }
+        if (orb.enchants[key].count >= 50) orb.enchants[key].isMaxedTrueAwakened = true;
         return true;
     }
 
@@ -4189,6 +4301,8 @@ function confirmDelete() {
         updateActiveEffectsBar();
         saveGame();
     } else if (gameState.deleteIndex !== null) {
+        const deletedItem = gameState.inventory[gameState.deleteIndex];
+        registerGluttonousBeastDeletion(deletedItem);
         gameState.inventory.splice(gameState.deleteIndex, 1);
         gameState.stats.acceptedRanks = gameState.inventory.length;
         gameState.stats.totalValue = gameState.inventory.filter(i => !i.isEpilepsy && !i.isSecret).reduce((s, it) => s + it.value, 0);
@@ -4277,6 +4391,8 @@ function loadGame() {
             gameState.sfxVolumes = d.sfxVolumes || {};
             gameState.bulkRollCap = d.bulkRollCap || 0;
             gameState.disableWrathEnchant = !!d.disableWrathEnchant;
+            gameState.disabledEvents = d.disabledEvents || [];
+            gameState.gluttonousBeastAccum = d.gluttonousBeastAccum || 0;
             gameState.uiScheme = d.uiScheme || 'current';
             gameState.noCASMode = d.noCASMode || false;
             gameState.hideExcessSlots = d.hideExcessSlots || false;
@@ -4623,6 +4739,20 @@ function buildMergedEnchants() {
                         merged['e_mooncrystal'].isSuperMooncrystal = true;
                         merged['e_mooncrystal'].effects = { luck: 50, secretLuck: 75, cloner: 25, speed: 0.01, lighter: 10 };
                     }
+                } else if (baseKey === 'e_true_awakened_mooncrystal') {
+                    merged[baseKey].count = (merged[baseKey].count || 1) + (enchant.count || 1);
+                    if (merged[baseKey].count >= 50) merged[baseKey].isMaxedTrueAwakened = true;
+                } else if (baseKey === 'e_pizza_slice') {
+                    // Fix: pizza slices from both orbs must combine into ONE counted stack,
+                    // never spin off into e_pizza_slice_2 sub-keys — otherwise slices split
+                    // across merges never reach 8 and the pizza conversion silently fails.
+                    merged[baseKey].count = (merged[baseKey].count || 1) + (enchant.count || 1);
+                } else if (baseKey === 'e_pizza') {
+                    merged[baseKey].count = (merged[baseKey].count || 1) + (enchant.count || 1);
+                } else if (baseKey === 'e_intense') {
+                    merged[baseKey].count = (merged[baseKey].count || 1) + (enchant.count || 1);
+                } else if (baseKey === 'e_gluttonous_beast') {
+                    // Single-slot passive — keep just one, don't stack duplicates
                 } else {
                     let n = 2;
                     let dupKey = baseKey + '_' + n;
@@ -4653,6 +4783,8 @@ function performMerge() {
     if (!orb1.enchants[mooncrystalKey] || !orb2.enchants[mooncrystalKey]) {
         hasMooncrystalBoth = false;
     }
+    const trueAwakenedKey = 'e_true_awakened_mooncrystal';
+    const hasTrueAwakenedBoth = !!(orb1.enchants[trueAwakenedKey] && orb2.enchants[trueAwakenedKey]);
     // Alpha category (Alpha, Beta, Delta, Epsilon): merging skips the lock if BOTH orbs have
     // any member of the category — doesn't need to be the same letter on each side.
     // The merged result also preserves isAlphaCategory so further merges remain unlocked.
@@ -4665,7 +4797,7 @@ function performMerge() {
         id: Date.now() + Math.random(),
         enchants: mergedEnchants,
         timestamp: Date.now(),
-        locked: !(hasHorseBoth || hasAlphaCategoryBoth || hasMooncrystalBoth)
+        locked: !(hasHorseBoth || hasAlphaCategoryBoth || hasMooncrystalBoth || hasTrueAwakenedBoth)
     };
 
     const removedIds = [...gameState.mergeSelection];
@@ -4728,6 +4860,7 @@ function deleteSelectedInventory() {
     if (gameState.selectedInventoryIndices.length === 0) return;
     const toDelete = [...gameState.selectedInventoryIndices].sort((a,b) => b - a);
     for (let idx of toDelete) {
+        registerGluttonousBeastDeletion(gameState.inventory[idx]);
         gameState.inventory.splice(idx, 1);
     }
     gameState.selectedInventoryIndices = [];
@@ -4932,7 +5065,7 @@ function getBulkRollsUncapped() {
         else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) total += e.effects.cloner;
     });
     total += blessing.bulk;
-    total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
+    total *= getEventStatMultiplier('bulk') * getEndgameStatMultiplier() * getPizzaMultiplier();
     return Math.max(1, Math.round(total));
 }
 
@@ -5002,15 +5135,26 @@ function renderSettingsStatCaps() {
 function renderEventsIndexPage() {
     const container = document.getElementById('eventsIndexList');
     if (!container) return;
+    if (!gameState.disabledEvents) gameState.disabledEvents = [];
     container.innerHTML = GAME_EVENTS.map(ev => {
         const isActive = isEventActive(ev.key);
+        const isDisabled = gameState.disabledEvents.includes(ev.key);
         const odds = `1/${Math.round(1/ev.chance).toLocaleString()}`;
-        return `<div class="event-index-item${isActive ? ' active-now' : ''}">
-            <div class="event-index-name">${isActive ? '🔥 ' : ''}${ev.name}</div>
+        return `<div class="event-index-item${isActive ? ' active-now' : ''}${isDisabled ? ' event-disabled' : ''}" onclick="toggleEventDisabled('${ev.key}')" style="cursor:pointer;" title="Click to ${isDisabled ? 'enable' : 'disable'} this event">
+            <div class="event-index-name">${isActive ? '🔥 ' : ''}${isDisabled ? '🚫 ' : ''}${ev.name}</div>
             <div class="event-index-desc">${ev.desc}</div>
-            <div class="event-index-odds">${odds} chance / 10s check · ${ev.duration}s duration</div>
+            <div class="event-index-odds">${odds} chance / 10s check · ${ev.duration}s duration${isDisabled ? ' · <span style="color:#f87171;">DISABLED</span>' : ''}</div>
         </div>`;
     }).join('');
+}
+
+function toggleEventDisabled(key) {
+    if (!gameState.disabledEvents) gameState.disabledEvents = [];
+    const idx = gameState.disabledEvents.indexOf(key);
+    if (idx === -1) gameState.disabledEvents.push(key);
+    else gameState.disabledEvents.splice(idx, 1);
+    saveGame();
+    renderEventsIndexPage();
 }
 
 // ============================================================

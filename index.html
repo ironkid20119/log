@@ -2533,14 +2533,14 @@ function getBlessingBonuses() {
 // EVENTS SYSTEM
 // ============================================================
 const GAME_EVENTS = [
-    { key: 'luckBoost',     name: 'Luck Boost',            chance: 1/7,     duration: 7,   desc: 'x1.77 luck' },
-    { key: 'secretBoost',   name: 'Secret Boost',          chance: 1/10,    duration: 25,  desc: 'x5 secret luck' },
+    { key: 'luckBoost',     name: 'Luck Boost',            chance: 1/7,     duration: 12.39, desc: 'x1.77 luck' },
+    { key: 'secretBoost',   name: 'Secret Boost',          chance: 1/10,    duration: 44.25,  desc: 'x5 secret luck' },
     { key: 'fastBoost',     name: 'Fast Boost',            chance: 1/15,    duration: 5,   desc: 'Rolls are near-instant (0.01s)' },
-    { key: 'takeback',      name: 'Takeback',              chance: 1/25,    duration: 60,  desc: 'Luck and Secret Luck are swapped' },
+    { key: 'billionLuckRel',name: '1 Billion Lukc Rel',    chance: 1/7777,  duration: 7.77, desc: 'x177 luck' },
     { key: 'bogo',          name: 'Buy 1 Get 1 Free',      chance: 1/50,    duration: 25,  desc: 'x2 bulk rolls' },
-    { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 10,  desc: 'x1.5 enchant luck' },
-    { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 120, desc: 'x1.5 luck, secret luck, and enchant luck' },
-    { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 20,  desc: 'x5 luck & secret luck, instant rolls' },
+    { key: 'magicalPowers', name: 'Magical Powers!!',      chance: 1/75,    duration: 17.7,  desc: 'x1.5 enchant luck' },
+    { key: 'goodDay',       name: 'A Good Day',            chance: 1/100,   duration: 212.4, desc: 'x1.5 luck, secret luck, and enchant luck' },
+    { key: 'holidays',      name: 'Holidays',              chance: 1/500,   duration: 35.4, desc: 'x5 luck & secret luck, instant rolls' },
     { key: 'reversal',      name: 'The Reversal',          chance: 1/10000, duration: 40,  desc: 'Negative chance boosted to 1/12.5' },
     { key: 'weirdWorld',    name: 'A Weird World',         chance: 1/25000, duration: 20,  desc: 'Imaginary chance boosted to 1/25' }
 ];
@@ -2558,6 +2558,7 @@ function getEventStatMultiplier(stat) {
     const key = gameState.activeEvent.key;
     if (key === 'luckBoost' && stat === 'luck') return 1.77;
     if (key === 'secretBoost' && stat === 'secretLuck') return 5;
+    if (key === 'billionLuckRel' && stat === 'luck') return 177;
     if (key === 'bogo' && stat === 'bulk') return 2;
     if (key === 'magicalPowers' && stat === 'enchantLuck') return 1.5;
     if (key === 'goodDay' && (stat === 'luck' || stat === 'secretLuck' || stat === 'enchantLuck')) return 1.5;
@@ -2744,7 +2745,7 @@ function getRawLuckMultiplier() {
 }
 
 function getNaturalLuckMultiplier() {
-    const base = isEventActive('takeback') ? getRawSecretLuckMultiplier() : getRawLuckMultiplier();
+    const base = getRawLuckMultiplier();
     return Math.max(1, base) * getEventStatMultiplier('luck') * getUltraAirMultiplier() * getTutorialLuckBoostMultiplier() * getPizzaMultiplier();
 }
 
@@ -2894,7 +2895,7 @@ function getRawSecretLuckMultiplier() {
 }
 
 function getNaturalSecretLuckMultiplier() {
-    const base = isEventActive('takeback') ? getRawLuckMultiplier() : getRawSecretLuckMultiplier();
+    const base = getRawSecretLuckMultiplier();
     return Math.max(0.1, base) * getEventStatMultiplier('secretLuck') * getUltraAirMultiplier() * getPizzaMultiplier();
 }
 

@@ -1522,8 +1522,16 @@
                         <div class="enchant-orb" style="background:linear-gradient(135deg,#f59e0b,#d97706);">🍕</div>
                         <div class="enchant-item-info">
                             <div class="enchant-item-name">Pizza Slice</div>
-                            <div class="enchant-item-effect">+1.7x all stats (luck, secret luck, enchant luck, bulk). Collect 8 slices to form a full pizza — one pizza grants +17x all stats instead.</div>
+                            <div class="enchant-item-effect">x1.05 all stats (luck, secret luck, enchant luck, bulk) per slice held, multiplicative. Collect 8 slices on the same orb and they auto-combine into 1 Pizza enchant.</div>
                             <div class="enchant-item-rarity">Rarity: 1/1,700,000,000 (5.9e-8%)</div>
+                        </div>
+                    </div>
+                    <div class="enchant-item">
+                        <div class="enchant-orb" style="background:linear-gradient(135deg,#fbbf24,#b45309);">🍕</div>
+                        <div class="enchant-item-info">
+                            <div class="enchant-item-name">Pizza</div>
+                            <div class="enchant-item-effect">x3 all stats, multiplicative, per Pizza held. Cannot be rolled directly — only obtained by combining 8 Pizza Slices on the same orb.</div>
+                            <div class="enchant-item-rarity">Rarity: Unrollable (combine-only)</div>
                         </div>
                     </div>
                 </div>
@@ -1904,6 +1912,15 @@
         </div>
 
         <div class="settings-block">
+            <h3>🚫 Disable Wrath Enchant</h3>
+            <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">When enabled, the Wrath curse can never roll — it's removed from the enchant pool entirely.</p>
+            <label class="settings-toggle-row" style="cursor:pointer;">
+                <input type="checkbox" id="disableWrathToggle" onchange="gameState.disableWrathEnchant = this.checked; saveGame();" style="accent-color:#00d4ff;">
+                Disable Wrath Enchant
+            </label>
+        </div>
+
+        <div class="settings-block">
             <h3>📦 Bulk Roll Cap</h3>
             <p style="opacity:0.6;font-size:0.82em;margin-bottom:8px;">Limit how many bulk rolls activate per roll. Must be between 1 and your current max bulk. Set to 0 to disable (no cap).</p>
             <label class="settings-stat-row">
@@ -2137,6 +2154,7 @@ let gameState = {
     selectedEnchantIndices: [],
     sfxVolumes: {},
     bulkRollCap: 0, // 0 = no cap/disabled
+    disableWrathEnchant: false,
     uiScheme: 'current',
     noCASMode: false,
     hideExcessSlots: false,
@@ -2380,9 +2398,15 @@ const ENCHANTS = {
     },
     pizzaslice: {
         name: 'Pizza Slice', type: 'collectible', tier: 2, rarity: 1/1700000000,
-        effects: { luck: 1.7, secretLuck: 1.7, cloner: 1.7, lighter: 1.7 }, // +1.7x all stats
+        effects: {}, // multiplicative: x1.05 per slice held, applied via getPizzaMultiplier()
         display: '🍕', color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', textColor: '#fff',
         isPizzaSlice: true
+    },
+    pizza: {
+        name: 'Pizza', type: 'collectible', tier: 3, rarity: 0, // effectively unrollable; only force-granted
+        effects: {}, // multiplicative: x3 per pizza, applied via getPizzaMultiplier()
+        display: '🍕', color: 'linear-gradient(135deg, #fbbf24 0%, #b45309 100%)', textColor: '#fff',
+        isPizza: true, forceGranted: false
     },
 
     // --- Weird Enchants ---
@@ -2668,13 +2692,14 @@ function getGolfballEnchantLuckBonus() {
 }
 
 function getPizzaMultiplier() {
-    // Each full pizza: +17x all stats. Each incomplete slice: +1.7x.
-    const pizzas = gameState.pizzasCompleted || 0;
-    const slices = (gameState.pizzaSlicesCollected || 0) % 8; // leftover slices after full pizzas
-    // We treat pizzas as multiplicative bonus to all stats
-    const pizzaMult = Math.pow(17, pizzas);
-    const sliceMult = Math.pow(1.7, slices);
-    return pizzaMult * sliceMult;
+    // Multiplicative: x1.05 per Pizza Slice held on the equipped orb, x3 per Pizza held.
+    if (!gameState.equippedOrb) return 1;
+    let slices = 0, pizzas = 0;
+    Object.values(gameState.equippedOrb.enchants).forEach(e => {
+        if (e.isPizzaSlice || e.name === 'Pizza Slice') slices += (e.count || 1);
+        if (e.isPizza || e.name === 'Pizza') pizzas += (e.count || 1);
+    });
+    return Math.pow(1.05, slices) * Math.pow(3, pizzas);
 }
 
 function getPizzaSliceCountOnEquippedOrb() {
@@ -2712,8 +2737,6 @@ function getRawLuckMultiplier() {
             luck += 1 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.luck != null) {
             luck += e.effects.luck;
-        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.luck != null) {
-            luck += e.effects.luck * (e.count || 1);
         }
     });
     luck += bricks * 5 + blessing.luck;
@@ -2749,8 +2772,6 @@ function getNaturalEnchantLuckMultiplier() {
             mult += 0.2 * getPlantGrowthMultiplier(e);
         } else if (e.isSuperMooncrystal && e.effects && e.effects.lighter != null) {
             mult += e.effects.lighter;
-        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.lighter != null) {
-            mult += e.effects.lighter * (e.count || 1);
         }
     });
     mult += bricks * 1.5 + blessing.enchantLuck;
@@ -2779,8 +2800,6 @@ function getBulkRolls() {
             total += gameState.mythicalBulk;
         } else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) {
             total += e.effects.cloner;
-        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.cloner != null) {
-            total += e.effects.cloner * (e.count || 1);
         }
     });
     total += blessing.bulk;
@@ -2868,8 +2887,6 @@ function getRawSecretLuckMultiplier() {
             mult += e.effects.secretLuck;
         } else if (e.isSuperMooncrystal && e.effects && e.effects.secretLuck != null) {
             mult += e.effects.secretLuck;
-        } else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.secretLuck != null) {
-            mult += e.effects.secretLuck * (e.count || 1);
         }
     });
     mult += blessing.secretLuck;
@@ -3029,6 +3046,8 @@ function rollEnchant(enchantLuckMult, excludeTypes = new Set()) {
         .filter(([key, e]) => {
             if (e.jokeOnly && !gameState.jokeEnchantsEnabled) return false;
             if (excludeTypes.has(e.type)) return false;
+            if (key === 'wrath' && gameState.disableWrathEnchant) return false;
+            if (key === 'pizza' && !e.forceGranted) return false; // Pizza is never naturally rollable
             return true;
         })
         .map(([key, e]) => ({ key, ...e }))
@@ -3265,6 +3284,16 @@ function addEnchantToOrb(orb, enchant) {
 
     if (enchant.name === 'Pizza Slice' || enchant.isPizzaSlice) {
         const key = 'e_pizza_slice';
+        if (!orb.enchants[key]) {
+            orb.enchants[key] = { ...enchant, count: 1 };
+        } else {
+            orb.enchants[key].count = (orb.enchants[key].count || 1) + 1;
+        }
+        return true;
+    }
+
+    if (enchant.name === 'Pizza' || enchant.isPizza) {
+        const key = 'e_pizza';
         if (!orb.enchants[key]) {
             orb.enchants[key] = { ...enchant, count: 1 };
         } else {
@@ -3739,6 +3768,30 @@ function doAutoAccept() {
     }
 }
 
+function checkPizzaSliceConversion(orb) {
+    if (!orb || !orb.enchants) return;
+    const sliceKey = 'e_pizza_slice';
+    const sliceEntry = orb.enchants[sliceKey];
+    if (!sliceEntry) return;
+    const sliceCount = sliceEntry.count || 1;
+    const pizzasToMake = Math.floor(sliceCount / 8);
+    if (pizzasToMake <= 0) return;
+
+    // Consume 8 slices per pizza made
+    sliceEntry.count -= pizzasToMake * 8;
+    if (sliceEntry.count <= 0) delete orb.enchants[sliceKey];
+
+    const pizzaKey = 'e_pizza';
+    const pizzaDef = ENCHANTS.pizza;
+    if (!orb.enchants[pizzaKey]) {
+        orb.enchants[pizzaKey] = { key: 'pizza', ...pizzaDef, count: pizzasToMake };
+    } else {
+        orb.enchants[pizzaKey].count = (orb.enchants[pizzaKey].count || 1) + pizzasToMake;
+    }
+
+    setTimeout(() => alert(`🍕 8 Pizza Slices combined into ${pizzasToMake} Pizza${pizzasToMake > 1 ? 's' : ''}! (x3 all stats each)`), 100);
+}
+
 // ============================================================
 // PENDING PANEL (unchanged)
 // ============================================================
@@ -3819,16 +3872,10 @@ function acceptRollSlot(slot) {
                 document.getElementById('brickStatBox').style.display = '';
                 document.getElementById('brickCount').textContent = gameState.brickCount;
             }
-            if (enchant.isPizzaSlice || enchant.name === 'Pizza Slice') {
-                gameState.pizzaSlicesCollected = (gameState.pizzaSlicesCollected || 0) + 1;
-                if (gameState.pizzaSlicesCollected % 8 === 0) {
-                    gameState.pizzasCompleted = (gameState.pizzasCompleted || 0) + 1;
-                    setTimeout(() => alert(`🍕 PIZZA COMPLETE! You now have ${gameState.pizzasCompleted} pizza${gameState.pizzasCompleted>1?'s':''}! (+17x all stats)`), 100);
-                }
-            }
             addEnchantToOrb(newOrb, enchant);
         }
         gameState.enchantOrbs.push(newOrb);
+        checkPizzaSliceConversion(newOrb);
     }
 
     renderPendingPanel();
@@ -4228,6 +4275,7 @@ function loadGame() {
             gameState.cooldownTime = d.cooldownTime !== undefined ? d.cooldownTime : 2;
             gameState.sfxVolumes = d.sfxVolumes || {};
             gameState.bulkRollCap = d.bulkRollCap || 0;
+            gameState.disableWrathEnchant = !!d.disableWrathEnchant;
             gameState.uiScheme = d.uiScheme || 'current';
             gameState.noCASMode = d.noCASMode || false;
             gameState.hideExcessSlots = d.hideExcessSlots || false;
@@ -4628,6 +4676,7 @@ function performMerge() {
 
     if (gameState.enchantOrbs.length < MAX_ENCHANTS) {
         gameState.enchantOrbs.push(newOrb);
+        checkPizzaSliceConversion(newOrb);
     }
 
     gameState.inventory.splice(index, 1);
@@ -4880,7 +4929,6 @@ function getBulkRollsUncapped() {
         else if (e.type === 'joke' && e.effects && e.effects.cloner != null) total += e.effects.cloner;
         else if (e.type === 'special' && e.name === 'MYTHICAL') total += gameState.mythicalBulk;
         else if (e.isSuperMooncrystal && e.effects && e.effects.cloner != null) total += e.effects.cloner;
-        else if ((e.isPizzaSlice || e.name === 'Pizza Slice') && e.effects && e.effects.cloner != null) total += e.effects.cloner * (e.count || 1);
     });
     total += blessing.bulk;
     total *= getEventStatMultiplier('bulk') * getUltraAirMultiplier() * getPizzaMultiplier();
@@ -5195,6 +5243,9 @@ renderEventBanner();
 // Restore bulk roll cap UI
 const bulkCapInput = document.getElementById('bulkRollCapInput');
 if (bulkCapInput && gameState.bulkRollCap) bulkCapInput.value = gameState.bulkRollCap;
+
+const wrathToggle = document.getElementById('disableWrathToggle');
+if (wrathToggle) wrathToggle.checked = !!gameState.disableWrathEnchant;
 
 // Restore UI scheme
 applyUIScheme(gameState.uiScheme || 'current');

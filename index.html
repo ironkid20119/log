@@ -3687,7 +3687,14 @@ function doAutoAccept() {
         }
     }
 
-    toFullAccept.forEach(slot => acceptRollSlot(slot));
+    toFullAccept.forEach(slot => {
+        // A roll qualifying via number/secret threshold should NOT drag along
+        // enchants that aren't individually checked in the auto-accept enchant list.
+        if (slot.enchants && slot.enchants.length > 0) {
+            slot.enchants = slot.enchants.filter(e => enchantKeys.includes(e.key));
+        }
+        acceptRollSlot(slot);
+    });
     toEnchantOnly.forEach(slot => {
         if (!gameState.pendingRolls.includes(slot)) return;
         const idx = gameState.pendingRolls.indexOf(slot);
